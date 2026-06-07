@@ -34,7 +34,7 @@ async function handleGoogleSignIn() {
   <button
     type="button"
     :disabled="loading"
-    class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-300 transition shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+    class="flex h-11 w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
     @click="handleGoogleSignIn"
   >
     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

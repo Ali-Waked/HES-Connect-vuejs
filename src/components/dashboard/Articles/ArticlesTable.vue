@@ -111,10 +111,10 @@ const handleDelete = () => {
         <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input type="text" v-model="searchQuery" class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition" placeholder="Search articles..."/>
+        <input type="text" v-model="searchQuery" class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none transition" placeholder="Search articles..."/>
       </div>
       <div class="flex gap-2">
-        <select v-model="statusFilter" class="min-w-[140px] p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:border-brand-primary cursor-pointer transition">
+        <select v-model="statusFilter" class="min-w-[140px] p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none cursor-pointer transition">
           <option value="all">All Status</option>
           <option value="published">Published</option>
           <option value="pending_review">Pending Review</option>
@@ -122,7 +122,7 @@ const handleDelete = () => {
           <option value="archived">Archived</option>
           <option value="rejected">Rejected</option>
         </select>
-        <select v-model="categoryFilter" class="min-w-[140px] p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:border-brand-primary cursor-pointer transition">
+        <select v-model="categoryFilter" class="min-w-[140px] p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none cursor-pointer transition">
           <option value="all">All Categories</option>
           <option v-for="cat in categories.filter(c => c !== 'all')" :key="cat" :value="cat">{{ cat }}</option>
         </select>
@@ -190,6 +190,22 @@ const handleDelete = () => {
               <!-- Category -->
               <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                 {{ article.category }}
+              </td>
+
+              <!-- Tags -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-wrap gap-1 max-w-[200px]">
+                  <span 
+                    v-for="tagId in article.tags?.slice(0, 2)" 
+                    :key="tagId"
+                    class="px-1.5 py-0.5 bg-slate-50 text-[10px] font-bold text-slate-500 border border-slate-100 rounded uppercase tracking-tighter"
+                  >
+                    #{{ getTagName(tagId) }}
+                  </span>
+                  <span v-if="article.tags?.length > 2" class="text-[10px] font-black text-slate-400">
+                    +{{ article.tags.length - 2 }}
+                  </span>
+                </div>
               </td>
 
               <!-- Status -->

@@ -33,7 +33,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   ];
 
   const defaultStaff = [
-    { id: 1, name: 'Dr. Ahmed Hassan', email: 'ahmed.hassan@health.ps', specialization: 'Emergency Medicine', experience: 12, fee: 50, provider: 'Local', lastSeen: 'about 5 hours ago', status: 'Online' },
+    { id: 1, name: 'Dr. Ahmed Hassan', email: 'ahmed.hassan@health.ps', specialization: 'Emergency Medicine', experience: 12, fee: 50, provider: 'Local', lastSeen: 'about 5 hours ago', status: 'Online', role_id: 3, profile: { phone: '+970 59-123-4567', gender: 'Male', birthDate: '1985-05-15', address: 'Remal District, Gaza City', coverImage: null } },
     { id: 2, name: 'Dr. Fatima Al-Zahroa', email: 'fatima.zahroa@gmail.com', specialization: 'Pediatrics', experience: 8, fee: 40, provider: 'Google', lastSeen: 'about 12 hours ago', status: 'Online' },
     { id: 3, name: 'Dr. Omar Khalil', email: 'omar.khalil@health.ps', specialization: 'General Surgery', experience: 15, fee: 60, provider: 'Local', lastSeen: '2 days ago', status: 'Offline' },
     { id: 4, name: 'Dr. Youssef Nasser', email: 'youssef.nasser@health.ps', specialization: 'Internal Medicine', experience: 10, fee: 45, provider: 'Local', lastSeen: '3 days ago', status: 'Offline' },
@@ -56,11 +56,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
   ];
 
   const defaultArticles = [
-    { id: 1, author: 'Dr. Ahmed Hassan', title: 'Managing Emergency Scenarios in Crisis Zones', content: 'In crisis zones, emergency medical management requires a unique set of skills and rapid decision-making...', category: 'Medical', status: 'published', views: 1240, publish_date: 'Jun 1, 2026' },
-    { id: 2, author: 'Dr. Fatima Al-Zahroa', title: 'Pediatric Care During Displacement', content: 'Displacement presents significant challenges for pediatric healthcare, including lack of nutrition and clean water...', category: 'Pediatrics', status: 'published', views: 850, publish_date: 'Jun 3, 2026' },
-    { id: 3, author: 'Dr. Omar Khalil', title: 'Advanced Surgical Techniques for Trauma', content: 'Trauma surgery in resource-limited settings demands innovation and strict adherence to core principles...', category: 'Surgery', status: 'pending_review', views: 0, publish_date: null },
-    { id: 4, author: 'Staff Writer', title: 'Building Resilient Health Systems', content: 'Resilience in health systems is built through community engagement and robust infrastructure...', category: 'Health Policy', status: 'draft', views: 0, publish_date: null },
-    { id: 5, author: 'Dr. Samira Hamed', title: 'Maternal Health in Conflict Zones', content: 'Conflict zones significantly impact maternal health outcomes. This article explores strategies for improvement...', category: 'Obstetrics', status: 'archived', views: 520, publish_date: 'May 15, 2026' }
+    { id: 1, author: 'Dr. Ahmed Hassan', title: 'Managing Emergency Scenarios in Crisis Zones', content: 'In crisis zones, emergency medical management requires a unique set of skills and rapid decision-making...', category: 'Medical', status: 'published', views: 1240, publish_date: 'Jun 1, 2026', tags: [1, 4] },
+    { id: 2, author: 'Dr. Fatima Al-Zahroa', title: 'Pediatric Care During Displacement', content: 'Displacement presents significant challenges for pediatric healthcare, including lack of nutrition and clean water...', category: 'Pediatrics', status: 'published', views: 850, publish_date: 'Jun 3, 2026', tags: [3, 4] },
+    { id: 3, author: 'Dr. Omar Khalil', title: 'Advanced Surgical Techniques for Trauma', content: 'Trauma surgery in resource-limited settings demands innovation and strict adherence to core principles...', category: 'Surgery', status: 'pending_review', views: 0, publish_date: null, tags: [1, 6] },
+    { id: 4, author: 'Staff Writer', title: 'Building Resilient Health Systems', content: 'Resilience in health systems is built through community engagement and robust infrastructure...', category: 'Health Policy', status: 'draft', views: 0, publish_date: null, tags: [4, 5] },
+    { id: 5, author: 'Dr. Samira Hamed', title: 'Maternal Health in Conflict Zones', content: 'Conflict zones significantly impact maternal health outcomes. This article explores strategies for improvement...', category: 'Obstetrics', status: 'archived', views: 520, publish_date: 'May 15, 2026', tags: [4, 6] }
   ];
 
   const defaultJobs = [
@@ -520,6 +520,17 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
+  function updateUserRole(userId, type, roleId) {
+    const targetArray = type === 'staff' ? staff : patients;
+    const user = targetArray.value.find(u => u.id === userId);
+    if (user) {
+      user.role_id = roleId;
+      if (type === 'staff') saveStaff();
+      else savePatients();
+      addToast('User role updated successfully', 'success');
+    }
+  }
+
   return {
     organizations,
     facilities,
@@ -568,6 +579,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     addJob,
     updateJob,
     updateJobStatus,
-    deleteJob
+    deleteJob,
+    updateUserRole
   };
 });

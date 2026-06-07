@@ -2,13 +2,20 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
+import { useTagsStore } from '../../../stores/tags';
 
 const route = useRoute();
 const router = useRouter();
 const store = useDashboardStore();
+const tagsStore = useTagsStore();
 
 const articleId = computed(() => parseInt(route.params.id));
 const article = computed(() => store.articles.find(a => a.id === articleId.value));
+
+const articleTags = computed(() => {
+  if (!article.value || !article.value.tags) return [];
+  return article.value.tags.map(id => tagsStore.tags.find(t => t.id === id)).filter(Boolean);
+});
 
 const goBack = () => router.push('/admin/articles');
 

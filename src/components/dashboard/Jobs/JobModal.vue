@@ -78,13 +78,13 @@ const handleSubmit = () => {
           <!-- Title -->
           <div class="sm:col-span-2 space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Job Title</label>
-            <input v-model="formData.title" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition" placeholder="e.g. Senior Nurse"/>
+            <input v-model="formData.title" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition" placeholder="e.g. Senior Nurse"/>
           </div>
 
           <!-- Facility -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Facility</label>
-            <select v-model="formData.facility" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary transition cursor-pointer">
+            <select v-model="formData.facility" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition cursor-pointer">
               <option v-for="f in facilities" :key="f" :value="f">{{ f }}</option>
             </select>
           </div>
@@ -92,19 +92,19 @@ const handleSubmit = () => {
           <!-- Author -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Posted By</label>
-            <input v-model="formData.author" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition" placeholder="Your name"/>
+            <input v-model="formData.author" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition" placeholder="Your name"/>
           </div>
 
           <!-- End Date -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Application Deadline</label>
-            <input v-model="formData.end_date" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary transition" placeholder="e.g. Jul 15, 2026"/>
+            <input v-model="formData.end_date" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition" placeholder="e.g. Jul 15, 2026"/>
           </div>
 
           <!-- Status -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
-            <select v-model="formData.status" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary transition cursor-pointer">
+            <select v-model="formData.status" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition cursor-pointer">
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
             </select>
@@ -113,7 +113,7 @@ const handleSubmit = () => {
           <!-- Apply Method -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Apply via</label>
-            <select v-model="formData.apply_method" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary transition cursor-pointer">
+            <select v-model="formData.apply_method" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition cursor-pointer">
               <option value="email">Email Address</option>
               <option value="link">External Link</option>
             </select>
@@ -122,14 +122,14 @@ const handleSubmit = () => {
           <!-- Apply Value -->
           <div class="space-y-1.5">
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Apply Detail</label>
-            <input v-model="formData.apply_value" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition" :placeholder="formData.apply_method === 'email' ? 'hr@example.com' : 'https://...'"/>
+            <input v-model="formData.apply_value" type="text" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition" :placeholder="formData.apply_method === 'email' ? 'hr@example.com' : 'https://...'"/>
           </div>
         </div>
 
         <!-- Description -->
         <div class="space-y-1.5">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Job Description</label>
-          <textarea v-model="formData.description" required rows="4" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition resize-none" placeholder="Describe the role..."></textarea>
+          <textarea v-model="formData.description" required rows="4" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition resize-none" placeholder="Describe the role..."></textarea>
         </div>
 
         <!-- Footer -->

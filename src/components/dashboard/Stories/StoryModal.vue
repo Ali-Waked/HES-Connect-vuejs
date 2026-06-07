@@ -101,17 +101,17 @@ const submitForm = () => {
           <!-- Title -->
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600" for="sTitle">Story Title *</label>
-            <input id="sTitle" v-model="title" type="text" required placeholder="e.g. Road to Recovery After Surgery" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"/>
+            <input id="sTitle" v-model="title" type="text" required placeholder="e.g. Road to Recovery After Surgery" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none transition"/>
           </div>
           <!-- Patient -->
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600" for="sPatient">Patient Name *</label>
-            <input id="sPatient" v-model="patient" type="text" required placeholder="e.g. Khalid Abu Amr" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"/>
+            <input id="sPatient" v-model="patient" type="text" required placeholder="e.g. Khalid Abu Amr" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none transition"/>
           </div>
           <!-- Status -->
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600" for="sStatus">Status *</label>
-            <select id="sStatus" v-model="status" required class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary cursor-pointer transition">
+            <select id="sStatus" v-model="status" required class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none cursor-pointer transition">
               <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
               <option value="Rejected">Rejected</option>
@@ -125,7 +125,7 @@ const submitForm = () => {
           <!-- Goal amount -->
           <div v-if="fundraising" class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600" for="sGoal">Fundraising Goal (USD)</label>
-            <input id="sGoal" v-model.number="goal" type="number" min="0" placeholder="e.g. 5000" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"/>
+            <input id="sGoal" v-model.number="goal" type="number" min="0" placeholder="e.g. 5000" class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none transition"/>
           </div>
         </div>
         <div class="p-4 px-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">

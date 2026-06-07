@@ -68,7 +68,7 @@ const handleDelete = () => {
         v-model="searchQuery"
         type="text"
         placeholder="Search patients..."
-        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"
+        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none transition"
       />
     </div>
 
@@ -156,6 +156,13 @@ const handleDelete = () => {
       confirm-text="Delete"
       @confirm="handleDelete"
       @close="showDeleteModal = false"
+    />
+
+    <UserDetailDialog 
+      :show="showDetailModal"
+      :user="selectedPatient"
+      type="patient"
+      @close="showDetailModal = false"
     />
   </div>
 </template>

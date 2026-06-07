@@ -6,33 +6,28 @@ defineProps({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 flex items-center justify-center px-4 py-10 relative">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-1/4 -left-24 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-1/4 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-    </div>
-
-    <div class="relative z-10 w-full max-w-md">
-      <router-link to="/" class="flex items-center justify-center gap-3 mb-8 group">
-        <div class="w-11 h-11 bg-teal-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-teal-500/30 group-hover:bg-teal-400 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+  <main class="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+    <div class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col justify-center">
+      <router-link to="/" class="mb-8 inline-flex items-center gap-3 self-center">
+        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary text-white shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
           </svg>
-        </div>
-        <div class="text-left">
-          <p class="text-white font-bold text-lg tracking-tight">Health Ecosystem</p>
-          <p class="text-teal-400 text-[10px] font-bold tracking-widest uppercase">Gaza Strip</p>
-        </div>
+        </span>
+        <span class="text-left">
+          <span class="block text-sm font-semibold tracking-tight text-slate-950">Health Ecosystem</span>
+          <span class="block text-xs font-medium text-slate-500">Management System</span>
+        </span>
       </router-link>
 
-      <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl shadow-black/20 p-8">
-        <div class="text-center mb-7">
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">{{ title }}</h1>
-          <p v-if="subtitle" class="text-slate-500 text-sm mt-1.5">{{ subtitle }}</p>
-        </div>
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header class="mb-7">
+          <h1 class="text-2xl font-semibold tracking-tight text-slate-950">{{ title }}</h1>
+          <p v-if="subtitle" class="mt-2 text-sm leading-6 text-slate-500">{{ subtitle }}</p>
+        </header>
 
         <slot />
-      </div>
+      </section>
     </div>
-  </div>
+  </main>
 </template>

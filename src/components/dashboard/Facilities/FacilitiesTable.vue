@@ -95,13 +95,13 @@ const handleDelete = () => {
         </svg>
         <input
           type="text"
-          class="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"
+          class="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none transition"
           placeholder="Search facilities..."
           v-model="searchQuery"
         />
       </div>
       <select
-        class="min-w-[150px] p-2.5 pr-9 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:border-brand-primary cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px] transition"
+        class="min-w-[150px] p-2.5 pr-9 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px] transition"
         style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
         v-model="selectedType"
       >

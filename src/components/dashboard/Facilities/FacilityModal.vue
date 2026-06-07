@@ -172,7 +172,7 @@ const transitionToEdit = () => {
             <input 
               id="facName" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
               required 
               placeholder="e.g. Nasser Medical Point"
               v-model="name"
@@ -183,7 +183,7 @@ const transitionToEdit = () => {
             <label class="text-xs font-semibold text-slate-600" for="facType">Type *</label>
             <select 
               id="facType" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
               required 
               v-model="type"
             >
@@ -199,7 +199,7 @@ const transitionToEdit = () => {
             <label class="text-xs font-semibold text-slate-600" for="facOrg">Organization *</label>
             <select 
               id="facOrg" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
               required 
               v-model="organization"
             >
@@ -214,7 +214,7 @@ const transitionToEdit = () => {
             <label class="text-xs font-semibold text-slate-600" for="facParent">Parent Facility</label>
             <select 
               id="facParent" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
               v-model="parent"
             >
               <option value="">None</option>
@@ -229,7 +229,7 @@ const transitionToEdit = () => {
             <input 
               id="facLoc" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
               placeholder="e.g. 31.3478, 34.3012"
               v-model="location"
             />

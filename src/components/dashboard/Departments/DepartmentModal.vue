@@ -81,7 +81,7 @@ const submit = () => {
               type="text"
               required
               placeholder="e.g. Internal Medicine"
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none transition"
             />
           </div>
 
@@ -92,7 +92,7 @@ const submit = () => {
               id="dFacility"
               v-model="facility"
               required
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary cursor-pointer transition bg-white"
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none cursor-pointer transition bg-white"
             >
               <option value="" disabled>Select a facility</option>
               <option v-for="f in facilityOptions" :key="f" :value="f">{{ f }}</option>
@@ -108,7 +108,7 @@ const submit = () => {
               type="text"
               required
               placeholder="e.g. Dr. Youssef Nasser"
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition"
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none transition"
             />
           </div>
         </div>

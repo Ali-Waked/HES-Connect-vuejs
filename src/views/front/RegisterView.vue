@@ -51,11 +51,11 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthLayout title="Create account" subtitle="Join the Health Ecosystem platform">
+  <AuthLayout title="Create account" subtitle="Set up access to the healthcare management workspace.">
     <form class="space-y-5" @submit.prevent="handleSubmit">
       <div
         v-if="error"
-        class="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm"
+        class="flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700"
       >
         <svg class="w-4 h-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
@@ -67,37 +67,37 @@ async function handleSubmit() {
 
       <div class="relative flex items-center py-1">
         <div class="grow border-t border-slate-200"></div>
-        <span class="shrink-0 px-4 text-xs font-medium text-slate-400 uppercase tracking-wider">or</span>
+        <span class="shrink-0 px-4 text-xs font-semibold uppercase text-slate-400">or</span>
         <div class="grow border-t border-slate-200"></div>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label for="name" class="block text-sm font-semibold text-slate-700 mb-1.5">Full name</label>
+          <label for="name" class="mb-1.5 block text-sm font-semibold text-slate-700">Full name</label>
           <input
             id="name"
             v-model="name"
             type="text"
             autocomplete="name"
-            placeholder="John Doe"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
+            placeholder="Full name"
+            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
           />
         </div>
 
         <div>
-          <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">Email address</label>
+          <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700">Email address</label>
           <input
             id="email"
             v-model="email"
             type="email"
             autocomplete="email"
             placeholder="you@example.com"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
+            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
           />
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+          <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">Password</label>
           <div class="relative">
             <input
               id="password"
@@ -105,11 +105,11 @@ async function handleSubmit() {
               :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password"
               placeholder="At least 6 characters"
-              class="w-full px-4 py-3 pr-11 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
+              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
             />
             <button
               type="button"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
               :title="showPassword ? 'Hide password' : 'Show password'"
               @click="showPassword = !showPassword"
             >
@@ -125,14 +125,14 @@ async function handleSubmit() {
         </div>
 
         <div>
-          <label for="confirmPassword" class="block text-sm font-semibold text-slate-700 mb-1.5">Confirm password</label>
+          <label for="confirmPassword" class="mb-1.5 block text-sm font-semibold text-slate-700">Confirm password</label>
           <input
             id="confirmPassword"
             v-model="confirmPassword"
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
             placeholder="Repeat your password"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
+            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
           />
         </div>
       </div>
@@ -140,15 +140,15 @@ async function handleSubmit() {
       <button
         type="submit"
         :disabled="loading"
-        class="w-full py-3.5 bg-teal-500 hover:bg-teal-400 disabled:bg-teal-500/60 text-white font-bold text-sm rounded-xl shadow-lg shadow-teal-500/25 transition cursor-pointer disabled:cursor-not-allowed"
+        class="flex h-11 w-full items-center justify-center rounded-lg bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {{ loading ? 'Creating account...' : 'Create account' }}
       </button>
     </form>
 
-    <p class="text-center text-sm text-slate-500 mt-6">
+    <p class="mt-6 text-center text-sm text-slate-500">
       Already have an account?
-      <router-link to="/login" class="text-teal-600 font-semibold hover:text-teal-500 transition">
+      <router-link to="/login" class="font-semibold text-brand-primary transition hover:text-brand-primary-hover">
         Sign in
       </router-link>
     </p>

@@ -6,6 +6,11 @@ const emit = defineEmits(['close']);
 const router = useRouter();
 const authStore = useAuthStore();
 
+const goToProfile = () => {
+  emit('close');
+  router.push('/profile');
+};
+
 const goToSettings = () => {
   emit('close');
   router.push('/admin/settings');
@@ -28,6 +33,14 @@ const handleLogout = () => {
     </div>
 
     <div class="py-1.5">
+      <button
+        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+        @click="goToProfile"
+      >
+        <span class="material-symbols-outlined text-[18px] text-slate-400">account_circle</span>
+        My Profile
+      </button>
+
       <button
         class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
         @click="goToSettings"

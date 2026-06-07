@@ -76,7 +76,7 @@ const submitForm = () => {
             <input 
               id="orgName" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
               required 
               placeholder="e.g. Al-Awda Hospital Foundation"
               v-model="name"
@@ -87,7 +87,7 @@ const submitForm = () => {
             <label class="text-xs font-semibold text-slate-600" for="orgDesc">Description *</label>
             <textarea 
               id="orgDesc" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary focus:ring-3 focus:ring-brand-primary/10 min-h-[90px] resize-y transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none min-h-[90px] resize-y transition" 
               required 
               placeholder="Provide a brief description of the organization..."
               v-model="description"
@@ -98,7 +98,7 @@ const submitForm = () => {
             <label class="text-xs font-semibold text-slate-600" for="orgType">Type *</label>
             <select 
               id="orgType" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none focus:border-brand-primary transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
               required 
               v-model="type"
             >
