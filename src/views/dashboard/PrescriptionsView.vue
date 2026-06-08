@@ -27,8 +27,8 @@ const formatDate = (dateString) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Prescriptions</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">History of all digital prescriptions issued across clinical departments</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Prescriptions</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">History of all digital prescriptions issued across clinical departments</p>
       </div>
     </div>
 
@@ -43,7 +43,7 @@ const formatDate = (dateString) => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="store.prescriptions">
       <template #cell(id)="{ item }">
-        <span class="text-sm font-black text-slate-900">{{ item.id }}</span>
+        <span class="text-sm font-black text-slate-900 dark:text-slate-100">{{ item.id }}</span>
       </template>
 
       <template #cell(medicines)="{ item }">
@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
           <span 
             v-for="(med, idx) in item.medicines" 
             :key="idx"
-            class="px-1.5 py-0.5 bg-slate-50 text-[10px] font-bold text-slate-600 border border-slate-100 rounded uppercase tracking-tighter"
+            class="px-1.5 py-0.5 bg-slate-50 dark:bg-slate-700 text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 rounded uppercase tracking-tighter"
           >
             {{ med.name }} ({{ med.dose }})
           </span>
@@ -59,11 +59,11 @@ const formatDate = (dateString) => {
       </template>
 
       <template #cell(created_at)="{ item }">
-        <span class="text-xs text-slate-500 font-medium">{{ formatDate(item.created_at) }}</span>
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">{{ formatDate(item.created_at) }}</span>
       </template>
 
       <template #cell(actions)>
-        <button class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition">
+        <button class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </button>
       </template>

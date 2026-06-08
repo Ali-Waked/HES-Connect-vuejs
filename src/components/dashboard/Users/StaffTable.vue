@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
@@ -58,7 +58,7 @@ const handleDelete = () => {
     <div class="flex justify-between items-start">
       <div class="flex items-start gap-3">
         <button
-          class="mt-1 p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+          class="mt-1 p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
           title="Back to Users"
           @click="router.push('/admin/users')"
         >
@@ -67,8 +67,8 @@ const handleDelete = () => {
           </svg>
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Staff Management</h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Staff Management</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {{ filtered.length }} registered staff {{ filtered.length === 1 ? 'member' : 'members' }}
           </p>
         </div>
@@ -86,31 +86,31 @@ const handleDelete = () => {
 
     <!-- Search -->
     <div class="relative">
-      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Search staff..."
-        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none transition"
+        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition"
       />
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
       <div class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Staff Member</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specialization</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Experience</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fee</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Provider</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Last Seen</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+            <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Staff Member</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Specialization</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Experience</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Fee</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Provider</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Last Seen</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -123,18 +123,18 @@ const handleDelete = () => {
                     {{ initial(member.name) }}
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-slate-900">{{ member.name }}</p>
-                    <p class="text-xs text-slate-400">{{ member.email }}</p>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ member.name }}</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ member.email }}</p>
                   </div>
                 </div>
               </td>
 
               <!-- Specialization -->
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{{ member.specialization }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{{ member.specialization }}</td>
 
               <!-- Experience -->
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700">
+                <span class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <svg class="w-3.5 h-3.5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005z" clip-rule="evenodd"/>
                   </svg>
@@ -143,26 +143,26 @@ const handleDelete = () => {
               </td>
 
               <!-- Fee -->
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800">${{ member.fee }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800 dark:text-slate-200">${{ member.fee }}</td>
 
               <!-- Provider -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
-                  :class="member.provider === 'Google' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                  :class="member.provider === 'Google' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'"
                 >
                   {{ member.provider }}
                 </span>
               </td>
 
               <!-- Last Seen -->
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ member.lastSeen }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{{ member.lastSeen }}</td>
 
               <!-- Status -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="inline-flex items-center gap-1.5 text-sm font-semibold"
-                  :class="member.status === 'Online' ? 'text-emerald-600' : 'text-slate-400'"
+                  :class="member.status === 'Online' ? 'text-emerald-600' : 'text-slate-400 dark:text-slate-500'"
                 >
                   <svg v-if="member.status === 'Online'" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
@@ -178,7 +178,7 @@ const handleDelete = () => {
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex justify-end gap-1.5">
                   <button
-                    class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition cursor-pointer"
+                    class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 p-1.5 rounded-lg transition cursor-pointer"
                     title="Edit"
                     @click="openEditModal(member)"
                   >
@@ -187,7 +187,7 @@ const handleDelete = () => {
                     </svg>
                   </button>
                   <button
-                    class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer"
+                    class="text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer"
                     title="Delete"
                     @click="confirmDel(member)"
                   >

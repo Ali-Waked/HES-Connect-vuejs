@@ -6,6 +6,10 @@ import HomeView from '../views/front/HomeView.vue';
 import LoginView from '../views/front/LoginView.vue';
 import RegisterView from '../views/front/RegisterView.vue';
 import FacilitiesBrowseView from '../views/front/FacilitiesBrowseView.vue';
+import AboutView from '../views/front/AboutView.vue';
+import ContactView from '../views/front/ContactView.vue';
+import DoctorBrowseView from '../views/front/DoctorBrowseView.vue';
+import StoriesView from '../views/front/StoriesView.vue';
 import DashboardLayout from '../views/dashboard/DashboardLayout.vue';
 import ProfileView from '../views/ProfileView.vue';
 
@@ -31,6 +35,44 @@ const routes = [
     path: '/facilities',
     name: 'facilities-browse',
     component: FacilitiesBrowseView
+  },
+  {
+    path: '/doctors',
+    name: 'public-doctors',
+    component: DoctorBrowseView
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('../views/front/AboutView.vue')
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('../views/front/ContactView.vue')
+  },
+  {
+    path: '/stories',
+    name: 'public-stories',
+    component: () => import('../views/front/StoriesView.vue')
+  },
+  {
+    path: '/facilities/:id',
+    name: 'public-facility-detail',
+    component: () => import('../views/front/FacilityDetailView.vue'),
+    props: true
+  },
+  {
+    path: '/doctors/:id',
+    name: 'public-doctor-detail',
+    component: () => import('../views/front/DoctorDetailView.vue'),
+    props: true
+  },
+  {
+    path: '/stories/:id',
+    name: 'story-detail',
+    component: () => import('../views/StoryDetail.vue'),
+    props: true
   },
   {
     path: '/profile',
@@ -116,7 +158,7 @@ const routes = [
       },
       {
         path: 'stories',
-        name: 'stories',
+        name: 'admin-stories',
         component: () => import('../views/dashboard/StoriesView.vue')
       },
       {
@@ -205,6 +247,28 @@ const routes = [
         name: 'medicines',
         component: () => import('../views/dashboard/MedicinesView.vue')
       }
+    ]
+  },
+  {
+    path: '/staff',
+    component: () => import('../views/staff/StaffLayout.vue'),
+    redirect: '/staff/dashboard',
+    meta: { requiresAuth: true },
+    children: [
+      { path: 'dashboard', name: 'staff-dashboard', component: () => import('../views/staff/StaffDashboard.vue') },
+      { path: 'appointments', name: 'staff-appointments', component: () => import('../views/staff/StaffAppointments.vue') },
+      { path: 'patients', name: 'staff-patients', component: () => import('../views/staff/StaffPatients.vue') },
+      { path: 'prescriptions', name: 'staff-prescriptions', component: () => import('../views/staff/StaffPrescriptions.vue') },
+      { path: 'schedule', name: 'staff-schedule', component: () => import('../views/staff/StaffSchedule.vue') },
+      { path: 'reviews', name: 'staff-reviews', component: () => import('../views/staff/StaffReviews.vue') },
+      { path: 'inventory', name: 'pharmacist-inventory', component: () => import('../views/staff/PharmacistInventory.vue') },
+      { path: 'medication-requests', name: 'medication-requests-staff', component: () => import('../views/staff/MedicationRequests.vue') },
+      { path: 'departments', name: 'manager-departments', component: () => import('../views/staff/ManagerDepartments.vue') },
+      { path: 'job-posts', name: 'manager-job-posts', component: () => import('../views/staff/ManagerJobPosts.vue') },
+      { path: 'documents', name: 'manager-documents', component: () => import('../views/staff/ManagerDocuments.vue') },
+      { path: 'reports', name: 'manager-reports', component: () => import('../views/staff/ManagerReports.vue') },
+      { path: 'messages', name: 'staff-messages', component: () => import('../views/staff/StaffMessages.vue') },
+      { path: 'profile', name: 'staff-profile', component: () => import('../views/staff/StaffProfile.vue') }
     ]
   },
   {

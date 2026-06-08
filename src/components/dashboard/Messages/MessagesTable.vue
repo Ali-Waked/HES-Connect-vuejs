@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useMessagesStore } from '../../../stores/messages';
 import BaseTable from '../global/BaseTable.vue';
@@ -79,7 +79,7 @@ const handleDelete = () => {
       <BaseSearch v-model="searchQuery" placeholder="Search by name or email..." />
       <select 
         v-model="statusFilter"
-        class="min-w-[160px] p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none cursor-pointer transition"
+        class="min-w-[160px] p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer transition"
       >
         <option value="all">All Status</option>
         <option value="new">New</option>
@@ -90,7 +90,7 @@ const handleDelete = () => {
 
     <BaseTable :columns="columns" :items="filteredMessages">
       <template #cell(message)="{ item }">
-        <span class="text-sm text-slate-500">{{ truncate(item.message) }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ truncate(item.message) }}</span>
       </template>
       
       <template #cell(status)="{ item }">
@@ -100,14 +100,14 @@ const handleDelete = () => {
       </template>
 
       <template #cell(created_at)="{ item }">
-        <span class="text-xs text-slate-500">{{ formatDate(item.created_at) }}</span>
+        <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(item.created_at) }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="viewMessage(item)"
-            class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
             title="View Details"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
             title="Delete Message"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

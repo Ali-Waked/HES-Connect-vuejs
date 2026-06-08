@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import Header from '../components/dashboard/global/Header.vue';
+import AppNavbar from '../components/global/AppNavbar.vue';
 import ToastContainer from '../components/dashboard/global/ToastContainer.vue';
 import ProfileHeader from '../components/profile/ProfileHeader.vue';
 import ProfileTabs from '../components/profile/ProfileTabs.vue';
@@ -91,13 +91,13 @@ async function uploadCover(file) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
-    <Header />
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 antialiased">
+    <AppNavbar variant="dashboard" />
 
     <main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
       <div class="mb-5">
         <p class="text-sm font-semibold text-brand-primary">My Profile</p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">Super Admin Profile</h1>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-slate-100">Super Admin Profile</h1>
       </div>
 
       <ProfileHeader
@@ -110,7 +110,7 @@ async function uploadCover(file) {
         @upload-cover="uploadCover"
       />
 
-      <section class="mt-6 rounded-2xl border border-slate-200 bg-white px-5 shadow-sm sm:px-6">
+      <section class="mt-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 shadow-sm sm:px-6">
         <ProfileTabs v-model="activeTab" />
       </section>
 
@@ -120,15 +120,15 @@ async function uploadCover(file) {
             <article
               v-for="card in summaryCards"
               :key="card.label"
-              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm"
             >
               <div class="flex items-center justify-between gap-4">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl ring-1" :class="card.accent">
                   <span class="material-symbols-outlined text-[20px]">{{ card.icon }}</span>
                 </span>
               </div>
-              <p class="mt-5 text-sm font-medium text-slate-500">{{ card.label }}</p>
-              <p class="mt-2 text-xl font-semibold text-slate-950">{{ card.value }}</p>
+              <p class="mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">{{ card.label }}</p>
+              <p class="mt-2 text-xl font-semibold text-slate-950 dark:text-slate-100">{{ card.value }}</p>
             </article>
           </div>
 

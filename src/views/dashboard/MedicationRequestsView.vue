@@ -37,8 +37,8 @@ const formatDate = (dateString) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Medication Requests</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">Verify and approve pharmaceutical dispense requests</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Medication Requests</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Verify and approve pharmaceutical dispense requests</p>
       </div>
     </div>
 
@@ -52,7 +52,7 @@ const formatDate = (dateString) => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="store.medicationRequests">
       <template #cell(patient)="{ item }">
-        <span class="text-sm font-bold text-slate-900">{{ item.patient }}</span>
+        <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.patient }}</span>
       </template>
 
       <template #cell(prescription)="{ item }">
@@ -67,7 +67,7 @@ const formatDate = (dateString) => {
         <div v-if="item.status === 'Pending'" class="flex justify-end gap-2">
           <button 
             @click="store.rejectRequest(item.id)"
-            class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition"
           >
             Reject
           </button>
@@ -79,7 +79,7 @@ const formatDate = (dateString) => {
           </button>
         </div>
         <div v-else class="text-right">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Processed</span>
+          <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">Processed</span>
         </div>
       </template>
 

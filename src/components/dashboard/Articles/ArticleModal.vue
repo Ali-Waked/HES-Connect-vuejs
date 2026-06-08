@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, watch } from 'vue';
 import { useDashboardStore } from '../../../stores/dashboard';
 import { useTagsStore } from '../../../stores/tags';
@@ -56,16 +56,16 @@ const handleSubmit = () => {
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="$emit('close')"></div>
 
     <!-- Modal -->
-    <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-modal-in">
+    <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-modal-in">
 
       <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-        <h3 class="text-lg font-bold text-slate-900">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           {{ mode === 'edit' ? 'Edit Article' : 'New Article' }}
         </h3>
         <button
           @click="$emit('close')"
-          class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition cursor-pointer"
+          class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition cursor-pointer"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -79,34 +79,34 @@ const handleSubmit = () => {
 
           <!-- Title -->
           <div class="sm:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Title</label>
+            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Title</label>
             <input
               v-model="formData.title"
               type="text"
               required
               placeholder="Article title"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition"
+              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition"
             />
           </div>
 
           <!-- Author -->
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Author</label>
+            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Author</label>
             <input
               v-model="formData.author"
               type="text"
               required
               placeholder="Author name"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition"
+              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition"
             />
           </div>
 
           <!-- Category -->
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Category</label>
+            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</label>
             <select
               v-model="formData.category"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition cursor-pointer"
+              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition cursor-pointer"
             >
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
@@ -114,10 +114,10 @@ const handleSubmit = () => {
 
           <!-- Status -->
           <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
             <select
               v-model="formData.status"
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition cursor-pointer"
+              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition cursor-pointer"
             >
               <option value="draft">Draft</option>
               <option value="pending_review">Pending Review</option>
@@ -139,13 +139,13 @@ const handleSubmit = () => {
 
         <!-- Content -->
         <div class="space-y-1.5">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Content</label>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Content</label>
           <textarea
             v-model="formData.content"
             required
             rows="6"
             placeholder="Write your article content here..."
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none transition resize-none"
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition resize-none"
           ></textarea>
         </div>
 
@@ -154,7 +154,7 @@ const handleSubmit = () => {
           <button
             type="button"
             @click="$emit('close')"
-            class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+            class="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
           >
             Cancel
           </button>

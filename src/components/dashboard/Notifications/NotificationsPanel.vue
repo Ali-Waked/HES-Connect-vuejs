@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useNotificationsStore } from '../../../stores/notifications';
 
@@ -17,13 +17,13 @@ const handleMarkRead = (n) => {
 <template>
   <div class="space-y-6 animate-fade-in">
 
-    <!-- ── Page Header ────────────────────────────────────────────── -->
+    <!-- â”€â”€ Page Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Notifications</h1>
-        <p class="text-sm text-slate-500 mt-1">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Notifications</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {{ store.unreadCount > 0 ? `${store.unreadCount} unread` : 'All caught up' }}
-          · {{ store.notifications.length }} total
+          آ· {{ store.notifications.length }} total
         </p>
       </div>
 
@@ -34,7 +34,7 @@ const handleMarkRead = (n) => {
           class="inline-flex items-center gap-2 py-2 px-3.5 rounded-lg border text-sm font-semibold transition cursor-pointer"
           :class="unreadOnly
             ? 'bg-brand-primary text-white border-brand-primary shadow-md shadow-brand-primary/15'
-            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'"
           @click="unreadOnly = !unreadOnly"
         >
           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -47,7 +47,7 @@ const handleMarkRead = (n) => {
         <!-- Mark all read -->
         <button
           v-if="store.hasUnread"
-          class="inline-flex items-center gap-2 py-2 px-3.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+          class="inline-flex items-center gap-2 py-2 px-3.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
           @click="store.markAllRead()"
         >
           <svg class="w-4 h-4 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -58,13 +58,13 @@ const handleMarkRead = (n) => {
       </div>
     </div>
 
-    <!-- ── Notifications List ─────────────────────────────────────── -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+    <!-- â”€â”€ Notifications List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
 
       <!-- Empty state -->
       <div v-if="displayed.length === 0" class="flex flex-col items-center justify-center py-20 gap-3">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-2xl">🔔</div>
-        <p class="text-sm font-semibold text-slate-600">
+        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-2xl">ًں””</div>
+        <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">
           {{ unreadOnly ? 'No unread notifications' : "You're all caught up!" }}
         </p>
         <button
@@ -80,7 +80,7 @@ const handleMarkRead = (n) => {
           v-for="n in displayed"
           :key="n.id"
           class="flex items-start gap-4 px-6 py-4 transition-colors group"
-          :class="n.read ? 'bg-white hover:bg-slate-50/50' : 'bg-blue-50/30 hover:bg-blue-50/60'"
+          :class="n.read ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/50' : 'bg-blue-50/30 hover:bg-blue-50/60'"
         >
           <!-- Icon -->
           <div class="flex-shrink-0 mt-0.5">
@@ -100,12 +100,12 @@ const handleMarkRead = (n) => {
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-sm font-bold text-slate-900 leading-snug">{{ n.title }}</p>
-                <p class="text-sm text-slate-500 mt-0.5 leading-relaxed">{{ n.message }}</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">{{ n.title }}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ n.message }}</p>
               </div>
               <!-- Time + unread dot -->
               <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
-                <span class="text-xs text-slate-400 whitespace-nowrap font-medium">{{ n.timeAgo }}</span>
+                <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap font-medium">{{ n.timeAgo }}</span>
                 <span v-if="!n.read" class="w-2 h-2 rounded-full bg-brand-primary flex-shrink-0"></span>
               </div>
             </div>
@@ -114,7 +114,7 @@ const handleMarkRead = (n) => {
           <!-- Mark as read button (shown on hover if unread) -->
           <button
             v-if="!n.read"
-            class="flex-shrink-0 mt-1 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+            class="flex-shrink-0 mt-1 text-slate-300 dark:text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
             title="Mark as read"
             @click="handleMarkRead(n)"
           >
@@ -126,7 +126,7 @@ const handleMarkRead = (n) => {
           <!-- Dismiss button (shown on hover if read) -->
           <button
             v-else
-            class="flex-shrink-0 mt-1 text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+            class="flex-shrink-0 mt-1 text-slate-300 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
             title="Dismiss"
             @click="store.dismiss(n.id)"
           >

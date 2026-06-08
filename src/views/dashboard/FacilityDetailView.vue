@@ -34,22 +34,22 @@ const goBack = () => router.push('/admin/facilities');
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div class="space-y-1">
-        <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+        <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
           <button @click="goBack" class="hover:text-brand-primary transition">Facilities</button>
           <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="text-slate-600">{{ facility.name }}</span>
+          <span class="text-slate-600 dark:text-slate-300">{{ facility.name }}</span>
         </nav>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">{{ facility.name }}</h1>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{{ facility.name }}</h1>
         <div class="flex items-center gap-3">
           <BaseBadge variant="primary">{{ facility.type }}</BaseBadge>
-          <span class="text-sm font-medium text-slate-500 flex items-center gap-1">
+          <span class="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">corporate_fare</span>
             {{ facility.organization }}
           </span>
         </div>
       </div>
       <div class="flex gap-2">
-        <button class="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-50 transition flex items-center gap-2">
+        <button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
           <span class="material-symbols-outlined text-lg">edit</span>
           Edit Facility
         </button>
@@ -71,22 +71,22 @@ const goBack = () => router.push('/admin/facilities');
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-72 flex flex-col">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary text-lg">trending_up</span>
           Reviews Trend (6 Months)
         </h3>
-        <div class="flex-grow bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Growth Analytics Placeholder</p>
+        <div class="flex-grow bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+          <p class="text-[10px] font-black text-slate-300 dark:text-slate-500 uppercase tracking-widest">Growth Analytics Placeholder</p>
         </div>
       </div>
-      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-72 flex flex-col">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary text-lg">event_note</span>
           Appointments Volume
         </h3>
-        <div class="flex-grow bg-slate-50 rounded-xl border border-dashed border-slate-200 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Operational Throughput Placeholder</p>
+        <div class="flex-grow bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+          <p class="text-[10px] font-black text-slate-300 dark:text-slate-500 uppercase tracking-widest">Operational Throughput Placeholder</p>
         </div>
       </div>
     </div>
@@ -94,14 +94,14 @@ const goBack = () => router.push('/admin/facilities');
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Left Column: Reviews -->
       <div class="lg:col-span-2 space-y-6">
-        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary">rate_review</span>
           Patient Reviews
         </h3>
         
         <ReviewSummary :stats="reviewStore.stats" />
 
-        <div class="pt-4 border-t border-slate-100">
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
           <InfiniteScroll 
             :loading="reviewStore.loading" 
             :disabled="!reviewStore.hasMore"
@@ -116,7 +116,7 @@ const goBack = () => router.push('/admin/facilities');
             </div>
             
             <div v-if="!reviewStore.hasMore" class="py-8 text-center">
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No more reviews to show</p>
+              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">No more reviews to show</p>
             </div>
           </InfiniteScroll>
         </div>
@@ -125,47 +125,47 @@ const goBack = () => router.push('/admin/facilities');
       <!-- Right Column: Info & Favorites -->
       <div class="space-y-6">
         <!-- Facility Info Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
-          <h3 class="text-lg font-bold text-slate-900">Facility Information</h3>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Facility Information</h3>
           
           <div class="space-y-4">
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
+              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
                 <span class="material-symbols-outlined text-lg">location_on</span>
               </div>
               <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Coordinates</p>
-                <p class="text-sm font-semibold text-slate-700">{{ facility.location || 'Not provided' }}</p>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Coordinates</p>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.location || 'Not provided' }}</p>
               </div>
             </div>
 
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
+              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
                 <span class="material-symbols-outlined text-lg">account_tree</span>
               </div>
               <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parent Facility</p>
-                <p class="text-sm font-semibold text-slate-700">{{ facility.parent || 'Main Facility' }}</p>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Parent Facility</p>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.parent || 'Main Facility' }}</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Recent Favorites -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
           <div class="flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-900">Recent Favorites</h3>
-            <span class="text-xs font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">{{ reviewStore.favorites.count }}</span>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Favorites</h3>
+            <span class="text-xs font-black text-rose-500 bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 rounded-full">{{ reviewStore.favorites.count }}</span>
           </div>
           
           <div class="space-y-4">
             <div v-for="user in reviewStore.favorites.recent" :key="user.id" class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-bold">
+              <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">
                 {{ user.name.charAt(0) }}
               </div>
-              <span class="text-sm font-semibold text-slate-700">{{ user.name }}</span>
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ user.name }}</span>
             </div>
-            <button class="w-full py-2 text-xs font-bold text-slate-400 hover:text-brand-primary transition uppercase tracking-widest">View all users</button>
+            <button class="w-full py-2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-brand-primary transition uppercase tracking-widest">View all users</button>
           </div>
         </div>
       </div>
@@ -173,8 +173,8 @@ const goBack = () => router.push('/admin/facilities');
   </div>
   
   <!-- Loading State -->
-  <div v-else class="flex flex-col items-center justify-center py-24 text-slate-400 space-y-4">
-    <div class="w-12 h-12 border-4 border-slate-200 border-t-brand-primary rounded-full animate-spin"></div>
+  <div v-else class="flex flex-col items-center justify-center py-24 text-slate-400 dark:text-slate-500 space-y-4">
+    <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-brand-primary rounded-full animate-spin"></div>
     <p class="font-medium uppercase tracking-widest text-xs">Loading facility details...</p>
   </div>
 </template>

@@ -70,9 +70,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="relative w-full h-full min-h-[320px] lg:min-h-[420px] rounded-2xl overflow-hidden border border-slate-200 shadow-md">
+  <div class="relative w-full h-full min-h-[320px] lg:min-h-[420px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md">
     <div ref="mapContainer" class="absolute inset-0 z-0"></div>
-    <div class="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200">
+    <div class="absolute bottom-3 left-3 z-[400] bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
       <div class="flex flex-wrap gap-x-3 gap-y-1">
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Hospital</span>
         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Clinic</span>

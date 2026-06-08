@@ -97,21 +97,21 @@ const transitionToEdit = () => {
 <template>
   <div 
     v-if="show" 
-    class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
+    class="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
     @click.self="$emit('close')"
   >
     <!-- Card Content -->
-    <div class="bg-white rounded-xl w-full max-w-[540px] shadow-2xl overflow-hidden border border-slate-200 animate-slide-up">
+    <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-[540px] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-slide-up">
       
       <!-- Modal Header -->
-      <div class="p-5 px-6 border-b border-slate-100 flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-900">
+      <div class="p-5 px-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           <span v-if="activeMode === 'view'">Facility Details</span>
           <span v-else-if="activeMode === 'edit'">Edit Facility</span>
           <span v-else>Add Facility</span>
         </h3>
         <button 
-          class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg cursor-pointer transition"
+          class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition"
           @click="$emit('close')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -125,28 +125,28 @@ const transitionToEdit = () => {
         <div class="flex flex-col gap-5">
           <div class="flex justify-between items-start">
             <div>
-              <h2 class="text-xl font-bold text-slate-900 mb-1.5">{{ facility?.name }}</h2>
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1.5">{{ facility?.name }}</h2>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="getTypeClass(facility?.type)">
                 {{ facility?.type }}
               </span>
             </div>
           </div>
           
-          <hr class="border-slate-100" />
+          <hr class="border-slate-100 dark:border-slate-700" />
           
           <div class="grid grid-cols-2 gap-y-5 gap-x-4">
             <div>
-              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Organization</h4>
-              <p class="text-sm font-semibold text-slate-900">{{ facility?.organization }}</p>
+              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-1">Organization</h4>
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ facility?.organization }}</p>
             </div>
             
             <div>
-              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Parent Facility</h4>
-              <p class="text-sm text-slate-700">{{ facility?.parent || 'None' }}</p>
+              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-1">Parent Facility</h4>
+              <p class="text-sm text-slate-700 dark:text-slate-300">{{ facility?.parent || 'None' }}</p>
             </div>
             
             <div>
-              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Location Coordinates</h4>
+              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-1">Location Coordinates</h4>
               <a 
                 v-if="facility?.location" 
                 :href="getMapLink(facility?.location)" 
@@ -159,20 +159,20 @@ const transitionToEdit = () => {
                 </svg>
                 {{ facility?.location }}
               </a>
-              <p v-else class="text-sm text-slate-700">None</p>
+              <p v-else class="text-sm text-slate-700 dark:text-slate-300">None</p>
             </div>
             
             <div>
-              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Files Attachment</h4>
-              <p class="text-sm text-slate-700">{{ facility?.files || 'None' }}</p>
+              <h4 class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-1">Files Attachment</h4>
+              <p class="text-sm text-slate-700 dark:text-slate-300">{{ facility?.files || 'None' }}</p>
             </div>
           </div>
         </div>
 
-        <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end gap-3">
+        <div class="mt-8 pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
           <button 
             type="button" 
-            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition cursor-pointer"
             @click="$emit('close')"
           >
             Close
@@ -191,11 +191,11 @@ const transitionToEdit = () => {
       <form v-else @submit.prevent="submitForm">
         <div class="p-6 flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="facName">Facility Name *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facName">Facility Name *</label>
             <input 
               id="facName" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
               required 
               placeholder="e.g. Nasser Medical Point"
               v-model="name"
@@ -203,10 +203,10 @@ const transitionToEdit = () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="facType">Type *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facType">Type *</label>
             <select 
               id="facType" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" 
               required 
               v-model="type"
             >
@@ -219,10 +219,10 @@ const transitionToEdit = () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="facOrg">Organization *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOrg">Organization *</label>
             <select 
               id="facOrg" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" 
               required 
               v-model="organization"
             >
@@ -234,10 +234,10 @@ const transitionToEdit = () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="facParent">Parent Facility</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facParent">Parent Facility</label>
             <select 
               id="facParent" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" 
               v-model="parent"
             >
               <option value="">None</option>
@@ -248,21 +248,21 @@ const transitionToEdit = () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="facLoc">Location Coordinates (Latitude, Longitude)</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facLoc">Location Coordinates (Latitude, Longitude)</label>
             <input 
               id="facLoc" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
               placeholder="e.g. 31.3478, 34.3012"
               v-model="location"
             />
           </div>
         </div>
 
-        <div class="p-4 px-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <div class="p-4 px-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
           <button 
             type="button" 
-            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition cursor-pointer"
             @click="$emit('close')"
           >
             Cancel

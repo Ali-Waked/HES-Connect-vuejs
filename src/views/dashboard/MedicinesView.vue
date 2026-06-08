@@ -11,8 +11,8 @@ const store = useMedicinesStore();
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Pharmaceutical Registry</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">Platform-wide inventory of approved medical drugs and supplies</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Pharmaceutical Registry</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Platform-wide inventory of approved medical drugs and supplies</p>
       </div>
     </div>
 

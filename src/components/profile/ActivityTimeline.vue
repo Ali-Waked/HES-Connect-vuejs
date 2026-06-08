@@ -26,11 +26,11 @@ function styleFor(type) {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <section class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm sm:p-6">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-slate-950">Recent Activity</h2>
-        <p class="mt-1 text-sm text-slate-500">Recent logins, changes, and system actions from audit logs.</p>
+        <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-100">Recent Activity</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Recent logins, changes, and system actions from audit logs.</p>
       </div>
       <span v-if="error" class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">{{ error }}</span>
     </div>
@@ -39,16 +39,16 @@ function styleFor(type) {
       <div v-for="index in 4" :key="index" class="flex gap-4">
         <div class="h-10 w-10 animate-pulse rounded-full bg-slate-200"></div>
         <div class="flex-1 space-y-2">
-          <div class="h-4 w-48 animate-pulse rounded bg-slate-200"></div>
-          <div class="h-3 w-full animate-pulse rounded bg-slate-100"></div>
+        <div class="h-4 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700"></div>
+        <div class="h-3 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-600"></div>
         </div>
       </div>
     </div>
 
-    <div v-else-if="!items.length" class="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-      <span class="material-symbols-outlined text-3xl text-slate-300">history</span>
-      <h3 class="mt-2 text-sm font-semibold text-slate-900">No activity yet</h3>
-      <p class="mt-1 text-sm text-slate-500">Audit log events will appear here.</p>
+    <div v-else-if="!items.length" class="mt-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-8 text-center">
+      <span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-500">history</span>
+      <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">No activity yet</h3>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Audit log events will appear here.</p>
     </div>
 
     <ol v-else class="mt-6 space-y-1">
@@ -59,23 +59,23 @@ function styleFor(type) {
               {{ item.type === 'login' ? 'login' : item.type === 'security' ? 'shield_lock' : item.type === 'clinical' ? 'medical_services' : 'settings_suggest' }}
             </span>
           </span>
-          <span v-if="index !== items.length - 1" class="mt-2 h-full w-px bg-slate-200"></span>
+          <span v-if="index !== items.length - 1" class="mt-2 h-full w-px bg-slate-200 dark:bg-slate-700"></span>
         </div>
-        <div class="min-w-0 flex-1 rounded-xl border border-slate-100 p-4">
+        <div class="min-w-0 flex-1 rounded-xl border border-slate-100 dark:border-slate-700 p-4">
           <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-            <h3 class="text-sm font-semibold text-slate-950">{{ item.title }}</h3>
-            <time class="text-xs font-medium text-slate-400">{{ formatDateTime(item.occurredAt) }}</time>
+            <h3 class="text-sm font-semibold text-slate-950 dark:text-slate-100">{{ item.title }}</h3>
+            <time class="text-xs font-medium text-slate-400 dark:text-slate-500">{{ formatDateTime(item.occurredAt) }}</time>
           </div>
-          <p class="mt-2 text-sm leading-6 text-slate-500">{{ item.description }}</p>
+          <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ item.description }}</p>
         </div>
       </li>
     </ol>
 
-    <div v-if="items.length" class="mt-2 flex justify-center border-t border-slate-100 pt-5">
+    <div v-if="items.length" class="mt-2 flex justify-center border-t border-slate-100 dark:border-slate-700 pt-5">
       <button
         type="button"
         :disabled="loading || !hasMore"
-        class="h-10 rounded-lg border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+        class="h-10 rounded-lg border border-slate-200 dark:border-slate-700 px-5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
         @click="$emit('load-more')"
       >
         {{ loading ? 'Loading...' : hasMore ? 'Load More' : 'No More Activity' }}

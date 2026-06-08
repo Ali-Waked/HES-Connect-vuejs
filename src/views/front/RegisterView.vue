@@ -66,38 +66,38 @@ async function handleSubmit() {
       <GoogleSignInButton @error="error = $event" />
 
       <div class="relative flex items-center py-1">
-        <div class="grow border-t border-slate-200"></div>
-        <span class="shrink-0 px-4 text-xs font-semibold uppercase text-slate-400">or</span>
-        <div class="grow border-t border-slate-200"></div>
+        <div class="grow border-t border-slate-200 dark:border-slate-700"></div>
+        <span class="shrink-0 px-4 text-xs font-semibold uppercase text-slate-400 dark:text-slate-500">or</span>
+        <div class="grow border-t border-slate-200 dark:border-slate-700"></div>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label for="name" class="mb-1.5 block text-sm font-semibold text-slate-700">Full name</label>
+          <label for="name" class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Full name</label>
           <input
             id="name"
             v-model="name"
             type="text"
             autocomplete="name"
             placeholder="Full name"
-            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
+            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
           />
         </div>
 
         <div>
-          <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700">Email address</label>
+          <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Email address</label>
           <input
             id="email"
             v-model="email"
             type="email"
             autocomplete="email"
             placeholder="you@example.com"
-            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
+            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
           />
         </div>
 
         <div>
-          <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700">Password</label>
+          <label for="password" class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
           <div class="relative">
             <input
               id="password"
@@ -105,11 +105,11 @@ async function handleSubmit() {
               :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password"
               placeholder="At least 6 characters"
-              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
+              class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 pr-11 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
             />
             <button
               type="button"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
               :title="showPassword ? 'Hide password' : 'Show password'"
               @click="showPassword = !showPassword"
             >
@@ -125,14 +125,14 @@ async function handleSubmit() {
         </div>
 
         <div>
-          <label for="confirmPassword" class="mb-1.5 block text-sm font-semibold text-slate-700">Confirm password</label>
+          <label for="confirmPassword" class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Confirm password</label>
           <input
             id="confirmPassword"
             v-model="confirmPassword"
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
             placeholder="Repeat your password"
-            class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 "
+            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
           />
         </div>
       </div>
@@ -146,7 +146,7 @@ async function handleSubmit() {
       </button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-slate-500">
+    <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
       Already have an account?
       <router-link to="/login" class="font-semibold text-brand-primary transition hover:text-brand-primary-hover">
         Sign in

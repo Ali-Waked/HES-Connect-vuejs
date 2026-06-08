@@ -10,8 +10,8 @@ const store = useReportsStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">System Reports</h1>
-        <p class="text-sm text-slate-500">View and export system-generated analytics and reports</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">System Reports</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">View and export system-generated analytics and reports</p>
       </div>
     </div>
 

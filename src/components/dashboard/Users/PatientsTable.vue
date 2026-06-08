@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
@@ -39,7 +39,7 @@ const handleDelete = () => {
     <div class="flex justify-between items-start">
       <div class="flex items-start gap-3">
         <button
-          class="mt-1 p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+          class="mt-1 p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
           title="Back to Users"
           @click="router.push('/admin/users')"
         >
@@ -48,8 +48,8 @@ const handleDelete = () => {
           </svg>
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Patient Records</h1>
-          <p class="text-sm text-slate-500 mt-1">{{ filtered.length }} registered {{ filtered.length === 1 ? 'patient' : 'patients' }}</p>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Patient Records</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ filtered.length }} registered {{ filtered.length === 1 ? 'patient' : 'patients' }}</p>
         </div>
       </div>
       <button class="inline-flex items-center gap-1.5 py-2.5 px-4.5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 transition cursor-pointer">
@@ -61,29 +61,29 @@ const handleDelete = () => {
     </div>
 
     <div class="relative">
-      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Search patients..."
-        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg bg-white placeholder-slate-400 focus:outline-none transition"
+        class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition"
       />
     </div>
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
       <div class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Patient</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Provider</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Last Seen</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Joined</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">History</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+            <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Patient</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Provider</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Last Seen</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Joined</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">History</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -94,23 +94,23 @@ const handleDelete = () => {
                     {{ initial(patient.name) }}
                   </div>
                   <div>
-                    <p class="text-sm font-semibold text-slate-900">{{ patient.name }}</p>
-                    <p class="text-xs text-slate-400">{{ patient.email }}</p>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.name }}</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ patient.email }}</p>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
-                  :class="patient.provider === 'Google' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-100 text-slate-600 border border-slate-200'"
+                  :class="patient.provider === 'Google' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'"
                 >{{ patient.provider }}</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ patient.lastSeen }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ patient.joined }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{{ patient.lastSeen }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{{ patient.joined }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="inline-flex items-center gap-1.5 text-sm font-semibold"
-                  :class="patient.status === 'Online' ? 'text-emerald-600' : 'text-slate-400'"
+                  :class="patient.status === 'Online' ? 'text-emerald-600' : 'text-slate-400 dark:text-slate-500'"
                 >
                   <svg v-if="patient.status === 'Online'" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
@@ -131,12 +131,12 @@ const handleDelete = () => {
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex justify-end gap-1.5">
-                  <button class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition cursor-pointer" title="Edit">
+                  <button class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 p-1.5 rounded-lg transition cursor-pointer" title="Edit">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
                   </button>
-                  <button class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer" title="Delete" @click="confirmDel(patient)">
+                  <button class="text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer" title="Delete" @click="confirmDel(patient)">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>

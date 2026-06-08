@@ -42,8 +42,8 @@ const viewOversight = (conv) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Support Conversations</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">Global oversight of all active and historical chat sessions</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Support Conversations</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Global oversight of all active and historical chat sessions</p>
       </div>
     </div>
 
@@ -56,12 +56,12 @@ const viewOversight = (conv) => {
     <BaseTable :columns="columns" :items="filteredConversations">
       <template #cell(participants)="{ item }">
         <div class="flex flex-col">
-          <span class="text-sm font-bold text-slate-900">{{ item.participants.join(' & ') }}</span>
+          <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.participants.join(' & ') }}</span>
         </div>
       </template>
 
       <template #cell(last_message)="{ item }">
-        <p class="text-sm text-slate-500 italic line-clamp-1">"{{ item.last_message }}"</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 italic line-clamp-1">"{{ item.last_message }}"</p>
       </template>
 
       <template #cell(status)="{ item }">
@@ -69,13 +69,13 @@ const viewOversight = (conv) => {
       </template>
 
       <template #cell(created_at)="{ item }">
-        <span class="text-xs text-slate-400 font-bold uppercase">{{ new Date(item.created_at).toLocaleString() }}</span>
+        <span class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase">{{ new Date(item.created_at).toLocaleString() }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <button 
           @click="viewOversight(item)"
-          class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+          class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
         </button>
@@ -85,25 +85,25 @@ const viewOversight = (conv) => {
     <!-- Oversight Modal -->
     <BaseDialog :show="showOversightModal" title="Conversation Oversight" size="lg" @close="showOversightModal = false">
       <div v-if="selectedConv" class="space-y-6">
-        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700">
           <div class="flex -space-x-4">
-            <div class="w-12 h-12 rounded-full bg-blue-500 border-4 border-white flex items-center justify-center text-white font-bold">D</div>
-            <div class="w-12 h-12 rounded-full bg-emerald-500 border-4 border-white flex items-center justify-center text-white font-bold">P</div>
+            <div class="w-12 h-12 rounded-full bg-blue-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold">D</div>
+            <div class="w-12 h-12 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold">P</div>
           </div>
           <div>
-            <h4 class="text-base font-bold text-slate-900">{{ selectedConv.participants.join(' vs ') }}</h4>
-            <p class="text-xs text-slate-500">Session ID: CONV-{{ selectedConv.id }}</p>
+            <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ selectedConv.participants.join(' vs ') }}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Session ID: CONV-{{ selectedConv.id }}</p>
           </div>
         </div>
 
         <!-- Chat Log Simulation -->
-        <div class="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-white border border-slate-200 rounded-2xl custom-scrollbar">
+        <div class="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl custom-scrollbar">
           <div class="flex flex-col gap-1 max-w-[80%]">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Dr. Ahmed Hassan</span>
-            <div class="p-3 bg-slate-100 rounded-2xl rounded-tl-none text-sm text-slate-700">
+            <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Dr. Ahmed Hassan</span>
+            <div class="p-3 bg-slate-100 dark:bg-slate-700 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300">
               Your lab results are ready for review. Please check them in your dashboard.
             </div>
-            <span class="text-[9px] text-slate-400 self-end">10:00 AM</span>
+            <span class="text-[9px] text-slate-400 dark:text-slate-500 self-end">10:00 AM</span>
           </div>
 
           <div class="flex flex-col gap-1 max-w-[80%] self-end items-end">
@@ -111,12 +111,12 @@ const viewOversight = (conv) => {
             <div class="p-3 bg-brand-primary text-white rounded-2xl rounded-tr-none text-sm shadow-md shadow-brand-primary/15">
               Thank you doctor. I will review them now. Is there anything concerning?
             </div>
-            <span class="text-[9px] text-slate-400 self-start">10:02 AM</span>
+            <span class="text-[9px] text-slate-400 dark:text-slate-500 self-start">10:02 AM</span>
           </div>
         </div>
 
         <div class="flex gap-3">
-          <button class="flex-grow py-3 bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-100 transition">Flag Conversation</button>
+          <button class="flex-grow py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">Flag Conversation</button>
           <button class="flex-grow py-3 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition">End Session</button>
         </div>
       </div>

@@ -53,8 +53,8 @@ const viewDetails = (log) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Platform Audit Logs</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">Traceable history of all administrative and system actions</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Platform Audit Logs</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Traceable history of all administrative and system actions</p>
       </div>
     </div>
 
@@ -70,7 +70,7 @@ const viewDetails = (log) => {
     <div class="flex flex-col md:flex-row gap-4">
       <BaseSearch v-model="searchQuery" placeholder="Search by user, table, or action..." />
       <div class="flex gap-2">
-        <input type="date" class="px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none " />
+        <input type="date" class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none " />
         <button class="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition">Filter</button>
       </div>
     </div>
@@ -82,17 +82,17 @@ const viewDetails = (log) => {
       </template>
 
       <template #cell(table_name)="{ item }">
-        <code class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{{ item.table_name }}</code>
+        <code class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{{ item.table_name }}</code>
       </template>
 
       <template #cell(date)="{ item }">
-        <span class="text-xs text-slate-500">{{ new Date(item.date).toLocaleString() }}</span>
+        <span class="text-xs text-slate-500 dark:text-slate-400">{{ new Date(item.date).toLocaleString() }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <button 
           @click="viewDetails(item)"
-          class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+          class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </button>
@@ -108,18 +108,18 @@ const viewDetails = (log) => {
     >
       <div v-if="selectedLog" class="space-y-6">
         <div class="grid grid-cols-2 gap-4">
-          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Action Type</p>
+          <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Action Type</p>
             <BaseBadge :variant="getActionVariant(selectedLog.action)">{{ selectedLog.action }}</BaseBadge>
           </div>
-          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target Table</p>
-            <span class="text-sm font-bold text-slate-900">{{ selectedLog.table_name }}</span>
+          <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Target Table</p>
+            <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ selectedLog.table_name }}</span>
           </div>
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Payload Changes</label>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Payload Changes</label>
           <JsonViewer :data="selectedLog.details" />
         </div>
 

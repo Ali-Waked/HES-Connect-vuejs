@@ -51,16 +51,16 @@ const submitForm = () => {
 <template>
   <div 
     v-if="show" 
-    class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
+    class="fixed inset-0 bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
     @click.self="$emit('close')"
   >
-    <div class="bg-white rounded-xl w-full max-w-[520px] shadow-2xl overflow-hidden border border-slate-200 animate-slide-up">
-      <div class="p-5 px-6 border-b border-slate-100 flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-900">
+    <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-[520px] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-slide-up">
+      <div class="p-5 px-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           {{ org ? 'Edit Organization' : 'Add Organization' }}
         </h3>
         <button 
-          class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg cursor-pointer transition"
+          class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition"
           @click="$emit('close')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -72,11 +72,11 @@ const submitForm = () => {
       <form @submit.prevent="submitForm">
         <div class="p-6 flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="orgName">Organization Name *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="orgName">Organization Name *</label>
             <input 
               id="orgName" 
               type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
               required 
               placeholder="e.g. Al-Awda Hospital Foundation"
               v-model="name"
@@ -84,10 +84,10 @@ const submitForm = () => {
           </div>
           
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="orgDesc">Description *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="orgDesc">Description *</label>
             <textarea 
               id="orgDesc" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none min-h-[90px] resize-y transition" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none min-h-[90px] resize-y transition" 
               required 
               placeholder="Provide a brief description of the organization..."
               v-model="description"
@@ -95,10 +95,10 @@ const submitForm = () => {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600" for="orgType">Type *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="orgType">Type *</label>
             <select 
               id="orgType" 
-              class="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 focus:outline-none transition cursor-pointer" 
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" 
               required 
               v-model="type"
             >
@@ -112,10 +112,10 @@ const submitForm = () => {
           </div>
         </div>
 
-        <div class="p-4 px-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <div class="p-4 px-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
           <button 
             type="button" 
-            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition cursor-pointer"
             @click="$emit('close')"
           >
             Cancel

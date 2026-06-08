@@ -6,6 +6,8 @@ export function useLandingData() {
   const stats = ref(null);
   const categoryCounts = ref(null);
   const overview = ref(null);
+  const platformStats = ref(null);
+  const featuredReviews = ref([]);
   const topFacilities = ref([]);
   const stories = ref([]);
   const articles = ref([]);
@@ -19,6 +21,8 @@ export function useLandingData() {
         statsData,
         countsData,
         overviewData,
+        platformStatsData,
+        featuredReviewsData,
         facilitiesData,
         storiesData,
         articlesData,
@@ -29,6 +33,8 @@ export function useLandingData() {
         publicApi.getStats(),
         publicApi.getFacilitiesCountsByType(),
         publicApi.getPlatformOverview(),
+        publicApi.getPlatformStats(),
+        publicApi.getFeaturedReviews(),
         publicApi.getFacilitiesTop(6),
         publicApi.getStoriesLatest(3),
         publicApi.getArticlesLatest(3),
@@ -40,6 +46,8 @@ export function useLandingData() {
       stats.value = statsData;
       categoryCounts.value = countsData;
       overview.value = overviewData;
+      platformStats.value = platformStatsData;
+      featuredReviews.value = featuredReviewsData;
       topFacilities.value = facilitiesData;
       stories.value = storiesData;
       articles.value = articlesData;
@@ -56,6 +64,8 @@ export function useLandingData() {
     stats,
     categoryCounts,
     overview,
+    platformStats,
+    featuredReviews,
     topFacilities,
     stories,
     articles,

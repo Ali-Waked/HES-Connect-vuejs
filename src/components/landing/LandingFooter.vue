@@ -1,10 +1,18 @@
 <script setup>
-const quickLinks = ['Home', 'Facilities', 'Doctors', 'Pharmacies', 'Stories', 'About Us', 'Contact'];
+const quickLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'Facilities', to: '/facilities' },
+  { label: 'Doctors', to: '/#doctors' },
+  { label: 'Pharmacies', to: '/facilities?type=pharmacy' },
+  { label: 'Stories', to: '/#stories' },
+  { label: 'About Us', to: '/about' },
+  { label: 'Contact', to: '/contact' }
+];
 const services = ['Book Appointment', 'Find a Doctor', 'Find a Pharmacy', 'Read Articles', 'Post a Job', 'Donate to Stories'];
 </script>
 
 <template>
-  <footer id="about" class="bg-landing-dark text-stone-300">
+  <footer id="about" class="bg-slate-900 text-stone-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
         <!-- Brand -->
@@ -23,7 +31,7 @@ const services = ['Book Appointment', 'Find a Doctor', 'Find a Pharmacy', 'Read 
           <div class="flex gap-3">
             <a v-for="social in ['facebook', 'twitter', 'instagram', 'linkedin']" :key="social" href="#" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
               <span class="sr-only">{{ social }}</span>
-              <svg class="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+              <svg class="w-4 h-4 text-slate-400 hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
             </a>
           </div>
         </div>
@@ -32,8 +40,8 @@ const services = ['Book Appointment', 'Find a Doctor', 'Find a Pharmacy', 'Read 
         <div>
           <h4 class="text-sm font-bold text-white mb-4">Quick Links</h4>
           <ul class="space-y-2.5">
-            <li v-for="link in quickLinks" :key="link">
-              <a href="#" class="text-sm text-slate-400 hover:text-white transition">{{ link }}</a>
+            <li v-for="link in quickLinks" :key="link.label">
+              <router-link :to="link.to" class="text-sm text-slate-400 hover:text-white transition">{{ link.label }}</router-link>
             </li>
           </ul>
         </div>
@@ -71,11 +79,11 @@ const services = ['Book Appointment', 'Find a Doctor', 'Find a Pharmacy', 'Read 
 
     <div class="border-t border-white/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-        <p>© 2026 Health Garagantam. All rights reserved.</p>
+        <p>&copy; {{ new Date().getFullYear() }} Health Garagantam. All rights reserved.</p>
         <div class="flex gap-4">
           <a href="#" class="hover:text-white transition">Privacy Policy</a>
           <a href="#" class="hover:text-white transition">Terms of Service</a>
-          <a href="#" class="hover:text-white transition">Contact Us</a>
+          <router-link to="/contact" class="hover:text-white transition">Contact Us</router-link>
         </div>
       </div>
     </div>

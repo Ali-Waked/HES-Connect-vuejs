@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useMedicinesStore } from '../../../stores/medicines';
 import BaseTable from '../global/BaseTable.vue';
@@ -85,25 +85,25 @@ const handleDelete = () => {
 
     <BaseTable :columns="columns" :items="filteredMedicines">
       <template #cell(image)="{ item }">
-        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+        <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center">
           <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" />
-          <span v-else class="material-symbols-outlined text-slate-400 text-xl">medical_services</span>
+          <span v-else class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-xl">medical_services</span>
         </div>
       </template>
 
       <template #cell(description)="{ item }">
-        <span class="text-sm text-slate-500">{{ truncate(item.description) }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ truncate(item.description) }}</span>
       </template>
 
       <template #cell(created_at)="{ item }">
-        <span class="text-xs text-slate-500">{{ formatDate(item.created_at) }}</span>
+        <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(item.created_at) }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="viewMedicine(item)"
-            class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
             title="View Details"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -113,7 +113,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="openEditModal(item)"
-            class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
             title="Edit"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -122,7 +122,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

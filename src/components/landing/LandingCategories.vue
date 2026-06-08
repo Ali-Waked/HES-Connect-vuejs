@@ -20,9 +20,9 @@ const categories = computed(() => [
 </script>
 
 <template>
-  <LandingSection id="categories" class="py-16 lg:py-20 bg-landing-warm">
+  <LandingSection id="categories" class="py-16 lg:py-20 bg-landing-warm dark:bg-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">Explore by Category</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-8">Explore by Category</h2>
 
       <div v-if="loading" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <LandingSkeleton variant="card" :count="4" />
@@ -32,7 +32,7 @@ const categories = computed(() => [
         <button
           v-for="cat in categories"
           :key="cat.type"
-          class="group bg-landing-cream rounded-xl border border-landing-border p-6 text-left hover:shadow-md hover:-translate-y-0.5 hover:border-brand-primary/30 transition-all duration-200 cursor-pointer"
+          class="group bg-landing-cream dark:bg-slate-900 rounded-xl border border-landing-border dark:border-slate-700 p-6 text-left hover:shadow-md hover:-translate-y-0.5 hover:border-brand-primary/30 transition-all duration-200 cursor-pointer"
           @click="router.push({ path: '/facilities', query: { type: cat.type } })"
         >
           <div :class="`w-12 h-12 rounded-xl ${cat.iconBg} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`">
@@ -40,9 +40,9 @@ const categories = computed(() => [
               <path stroke-linecap="round" stroke-linejoin="round" :d="cat.icon"/>
             </svg>
           </div>
-          <h3 class="text-base font-bold text-slate-900 mb-1">{{ cat.label }}</h3>
+          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">{{ cat.label }}</h3>
           <p class="text-2xl font-extrabold text-brand-primary mb-1">{{ cat.count }}</p>
-          <p class="text-sm text-slate-500">{{ cat.desc }}</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">{{ cat.desc }}</p>
         </button>
       </div>
     </div>

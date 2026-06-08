@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useReportsStore } from '../../../stores/reports';
 import BaseTable from '../global/BaseTable.vue';
@@ -60,14 +60,14 @@ const handleDelete = () => {
 
     <BaseTable :columns="columns" :items="filteredReports">
       <template #cell(generated_at)="{ item }">
-        <span class="text-sm text-slate-500">{{ formatDate(item.generated_at) }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ formatDate(item.generated_at) }}</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="viewReport(item)"
-            class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
             title="View Details"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -77,7 +77,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
             title="Delete Report"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

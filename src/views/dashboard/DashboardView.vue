@@ -15,8 +15,8 @@ const stats = computed(() => [
   <div class="space-y-8 animate-fade-in">
     <!-- Page Header -->
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-      <p class="text-sm text-slate-500 mt-1">Welcome back — Health Ecosystem overview</p>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back — Health Ecosystem overview</p>
     </div>
 
     <!-- Stats Grid -->
@@ -24,7 +24,7 @@ const stats = computed(() => [
       <div
         v-for="stat in stats"
         :key="stat.label"
-        class="bg-white rounded-xl border border-slate-200 p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow"
       >
         <!-- Icon bubble -->
         <div
@@ -66,32 +66,32 @@ const stats = computed(() => [
           </svg>
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-900">{{ stat.value }}</p>
-          <p class="text-sm text-slate-500 font-medium">{{ stat.label }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ stat.value }}</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">{{ stat.label }}</p>
         </div>
       </div>
     </div>
 
     <!-- Quick Links -->
-    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-      <h2 class="text-base font-bold text-slate-800 mb-4">Quick Access</h2>
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-xs">
+      <h2 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-4">Quick Access</h2>
       <div class="flex flex-wrap gap-3">
-        <router-link to="/admin/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 text-sm font-semibold rounded-lg border border-teal-200 transition cursor-pointer">
+        <router-link to="/admin/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-sm font-semibold rounded-lg border border-teal-200 dark:border-teal-800 transition cursor-pointer">
           Organizations →
         </router-link>
-        <router-link to="/admin/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-semibold rounded-lg border border-blue-200 transition cursor-pointer">
+        <router-link to="/admin/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-lg border border-blue-200 dark:border-blue-800 transition cursor-pointer">
           Facilities →
         </router-link>
-        <router-link to="/admin/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50 hover:bg-orange-100 text-orange-700 text-sm font-semibold rounded-lg border border-orange-200 transition cursor-pointer">
+        <router-link to="/admin/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm font-semibold rounded-lg border border-orange-200 dark:border-orange-800 transition cursor-pointer">
           Jobs →
         </router-link>
-        <router-link to="/admin/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 text-sm font-semibold rounded-lg border border-rose-200 transition cursor-pointer">
+        <router-link to="/admin/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-semibold rounded-lg border border-rose-200 dark:border-rose-800 transition cursor-pointer">
           Articles →
         </router-link>
-        <router-link to="/admin/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-semibold rounded-lg border border-purple-200 transition cursor-pointer">
+        <router-link to="/admin/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-sm font-semibold rounded-lg border border-purple-200 dark:border-purple-800 transition cursor-pointer">
           Stories →
         </router-link>
-        <router-link to="/admin/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 transition cursor-pointer">
+        <router-link to="/admin/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-600 transition cursor-pointer">
           Departments →
         </router-link>
       </div>

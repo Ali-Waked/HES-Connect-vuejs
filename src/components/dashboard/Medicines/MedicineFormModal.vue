@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, watch } from 'vue';
 import BaseDialog from '../global/BaseDialog.vue';
 import ImageUploader from '../global/ImageUploader.vue';
@@ -58,23 +58,23 @@ const handleSubmit = () => {
   >
     <form @submit.prevent="handleSubmit" class="space-y-5">
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Medicine Name <span class="text-rose-500">*</span></label>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Medicine Name <span class="text-rose-500">*</span></label>
         <input 
           v-model="form.name"
           type="text"
           class="w-full p-3 text-sm border rounded-xl focus:outline-none transition"
-          :class="errors.name ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'"
+          :class="errors.name ? 'border-rose-300 bg-rose-50' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'"
           placeholder="e.g. Paracetamol 500mg"
         />
         <p v-if="errors.name" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors.name }}</p>
       </div>
 
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Description</label>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
         <textarea 
           v-model="form.description"
           rows="4"
-          class="w-full p-3 text-sm border border-slate-200 rounded-xl focus:outline-none transition resize-none"
+          class="w-full p-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none transition resize-none"
           placeholder="Brief description of the medicine and its uses..."
         ></textarea>
       </div>
@@ -85,7 +85,7 @@ const handleSubmit = () => {
         <button 
           type="button"
           @click="$emit('close')"
-          class="py-2.5 px-6 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-bold rounded-lg transition"
+          class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition"
         >
           Cancel
         </button>

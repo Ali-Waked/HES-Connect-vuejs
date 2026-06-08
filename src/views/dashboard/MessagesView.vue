@@ -10,8 +10,8 @@ const store = useMessagesStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Contact Messages</h1>
-        <p class="text-sm text-slate-500">Manage and respond to inquiries from users</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Contact Messages</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Manage and respond to inquiries from users</p>
       </div>
     </div>
 

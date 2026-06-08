@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue';
 import BaseDialog from '../global/BaseDialog.vue';
 import BaseBadge from '../global/BaseBadge.vue';
@@ -49,37 +49,37 @@ const sendReply = () => {
     @close="$emit('close')"
   >
     <div v-if="message" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold">
             {{ message.name.charAt(0) }}
           </div>
           <div>
-            <h4 class="text-sm font-bold text-slate-900">{{ message.name }}</h4>
-            <p class="text-xs text-slate-500">{{ message.email }}</p>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ message.name }}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ message.email }}</p>
           </div>
         </div>
         <div class="flex flex-col items-end gap-1">
           <BaseBadge :variant="getStatusVariant(message.status)">
             {{ message.status }}
           </BaseBadge>
-          <span class="text-[10px] text-slate-400 font-medium">{{ formatDate(message.created_at) }}</span>
+          <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ formatDate(message.created_at) }}</span>
         </div>
       </div>
 
       <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
-        <div class="p-4 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Message</label>
+        <div class="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
           {{ message.message }}
         </div>
       </div>
 
-      <div v-if="message.status !== 'replied'" class="space-y-3 pt-4 border-t border-slate-100">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Quick Reply</label>
+      <div v-if="message.status !== 'replied'" class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Quick Reply</label>
         <textarea 
           v-model="replyText"
           rows="4"
-          class="w-full p-4 text-sm border border-slate-200 rounded-xl focus:outline-none transition resize-none"
+          class="w-full p-4 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none transition resize-none"
           placeholder="Type your reply here..."
         ></textarea>
         <div class="flex justify-end">

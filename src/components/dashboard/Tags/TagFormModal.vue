@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, watch } from 'vue';
 import BaseDialog from '../global/BaseDialog.vue';
 import { useTagsStore } from '../../../stores/tags';
@@ -45,14 +45,14 @@ const handleSubmit = () => {
   >
     <form @submit.prevent="handleSubmit" class="space-y-5">
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Tag Name</label>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tag Name</label>
         <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">#</span>
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 font-bold text-sm">#</span>
           <input 
             v-model="tagName"
             type="text"
             class="w-full pl-7 pr-4 py-3 text-sm border rounded-xl focus:outline-none transition"
-            :class="error ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'"
+            :class="error ? 'border-rose-300 bg-rose-50' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'"
             placeholder="emergency"
           />
         </div>
@@ -63,7 +63,7 @@ const handleSubmit = () => {
         <button 
           type="button"
           @click="$emit('close')"
-          class="py-2.5 px-6 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-bold rounded-lg transition"
+          class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition"
         >
           Cancel
         </button>

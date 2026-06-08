@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { useTagsStore } from '../../../stores/tags';
 import BaseTable from '../global/BaseTable.vue';
@@ -69,20 +69,20 @@ const handleDelete = () => {
 
     <BaseTable :columns="columns" :items="filteredTags">
       <template #cell(name)="{ item }">
-        <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-full border border-slate-200">
+        <span class="inline-flex items-center px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">
           #{{ item.name }}
         </span>
       </template>
 
       <template #cell(count)="{ item }">
-        <span class="text-sm font-semibold text-slate-600">{{ item.count }} articles</span>
+        <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ item.count }} articles</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="openEditModal(item)"
-            class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
             title="Edit"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

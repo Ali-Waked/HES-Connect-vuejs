@@ -56,8 +56,8 @@ const formatDate = (dateString) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Appointments</h1>
-        <p class="text-sm text-slate-500 mt-1 font-medium">Monitor and manage all clinical schedules across the platform</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Appointments</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Monitor and manage all clinical schedules across the platform</p>
       </div>
     </div>
 
@@ -75,7 +75,7 @@ const formatDate = (dateString) => {
       <BaseSearch v-model="searchQuery" placeholder="Search patient or doctor..." />
       <select 
         v-model="statusFilter"
-        class="min-w-[160px] p-2.5 text-sm border border-slate-200 rounded-xl bg-white text-slate-700 focus:outline-none transition cursor-pointer shadow-sm"
+        class="min-w-[160px] p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none transition cursor-pointer shadow-sm"
       >
         <option value="all">All Status</option>
         <option value="Booked">Booked</option>
@@ -88,15 +88,15 @@ const formatDate = (dateString) => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="filteredAppointments">
       <template #cell(patient)="{ item }">
-        <span class="text-sm font-bold text-slate-900">{{ item.patient }}</span>
+        <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.patient }}</span>
       </template>
       
       <template #cell(doctor)="{ item }">
-        <span class="text-sm font-medium text-slate-600">{{ item.doctor }}</span>
+        <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{ item.doctor }}</span>
       </template>
 
       <template #cell(date)="{ item }">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-tighter">{{ formatDate(item.date) }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">{{ formatDate(item.date) }}</span>
       </template>
 
       <template #cell(status)="{ item }">
@@ -107,7 +107,7 @@ const formatDate = (dateString) => {
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end">
-          <button class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition" title="View Details">
+          <button class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition" title="View Details">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
           </button>
         </div>
