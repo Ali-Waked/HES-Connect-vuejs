@@ -5,7 +5,9 @@ import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue
 import BaseTable from '../../components/dashboard/global/BaseTable.vue';
 import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
 import BaseEmptyState from '../../components/dashboard/global/BaseEmptyState.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useClinicalStore();
 
 const columns = [
@@ -37,8 +39,8 @@ const formatDate = (dateString) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Medication Requests</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Verify and approve pharmaceutical dispense requests</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.medicationRequests') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ t('pageTitles.medicationRequestsDesc') }}</p>
       </div>
     </div>
 
@@ -52,7 +54,7 @@ const formatDate = (dateString) => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="store.medicationRequests">
       <template #cell(patient)="{ item }">
-        <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.patient }}</span>
+        <span class="text-sm font-bold text-slate-900 dark:text-white">{{ item.patient }}</span>
       </template>
 
       <template #cell(prescription)="{ item }">
@@ -67,7 +69,7 @@ const formatDate = (dateString) => {
         <div v-if="item.status === 'Pending'" class="flex justify-end gap-2">
           <button 
             @click="store.rejectRequest(item.id)"
-            class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition"
+            class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 hover:bg-rose-50/30 dark:hover:bg-rose-900/20 rounded-lg transition"
           >
             Reject
           </button>

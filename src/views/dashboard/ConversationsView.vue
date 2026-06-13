@@ -4,7 +4,9 @@ import BaseTable from '../../components/dashboard/global/BaseTable.vue';
 import BaseSearch from '../../components/dashboard/global/BaseSearch.vue';
 import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
 import BaseDialog from '../../components/dashboard/global/BaseDialog.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const conversations = ref([
   { id: 1, participants: ['Dr. Ahmed Hassan', 'Khalid Abu Amr'], last_message: 'Your lab results are ready for review.', created_at: '2026-06-07T10:00:00Z', status: 'Active' },
   { id: 2, participants: ['Dr. Fatima Al-Zahroa', 'Layla Ibrahim'], last_message: 'Please follow the dosage instructions carefully.', created_at: '2026-06-06T15:30:00Z', status: 'Active' },
@@ -42,8 +44,8 @@ const viewOversight = (conv) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Support Conversations</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Global oversight of all active and historical chat sessions</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.conversations') }}</h1>
+        <p class="text-sm text-slate-500 mt-1 font-medium">{{ t('pageTitles.conversationsDesc') }}</p>
       </div>
     </div>
 
@@ -56,7 +58,7 @@ const viewOversight = (conv) => {
     <BaseTable :columns="columns" :items="filteredConversations">
       <template #cell(participants)="{ item }">
         <div class="flex flex-col">
-          <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.participants.join(' & ') }}</span>
+          <span class="text-sm font-bold text-slate-900 dark:text-white">{{ item.participants.join(' & ') }}</span>
         </div>
       </template>
 
@@ -85,22 +87,22 @@ const viewOversight = (conv) => {
     <!-- Oversight Modal -->
     <BaseDialog :show="showOversightModal" title="Conversation Oversight" size="lg" @close="showOversightModal = false">
       <div v-if="selectedConv" class="space-y-6">
-        <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
           <div class="flex -space-x-4">
             <div class="w-12 h-12 rounded-full bg-blue-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold">D</div>
             <div class="w-12 h-12 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold">P</div>
           </div>
           <div>
-            <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ selectedConv.participants.join(' vs ') }}</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Session ID: CONV-{{ selectedConv.id }}</p>
+            <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ selectedConv.participants.join(' vs ') }}</h4>
+            <p class="text-xs text-slate-500">Session ID: CONV-{{ selectedConv.id }}</p>
           </div>
         </div>
 
         <!-- Chat Log Simulation -->
-        <div class="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl custom-scrollbar">
+        <div class="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl custom-scrollbar">
           <div class="flex flex-col gap-1 max-w-[80%]">
             <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Dr. Ahmed Hassan</span>
-            <div class="p-3 bg-slate-100 dark:bg-slate-700 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300">
+            <div class="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300">
               Your lab results are ready for review. Please check them in your dashboard.
             </div>
             <span class="text-[9px] text-slate-400 dark:text-slate-500 self-end">10:00 AM</span>
@@ -116,8 +118,8 @@ const viewOversight = (conv) => {
         </div>
 
         <div class="flex gap-3">
-          <button class="flex-grow py-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">Flag Conversation</button>
-          <button class="flex-grow py-3 bg-slate-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition">End Session</button>
+          <button class="flex-grow py-3 bg-rose-50/30 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-100/50 dark:hover:bg-rose-900/40 transition">Flag Conversation</button>
+          <button class="flex-grow py-3 bg-slate-900 dark:bg-slate-700 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 transition">End Session</button>
         </div>
       </div>
     </BaseDialog>
@@ -130,4 +132,5 @@ const viewOversight = (conv) => {
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 </style>

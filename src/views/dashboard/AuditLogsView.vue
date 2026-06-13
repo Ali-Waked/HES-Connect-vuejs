@@ -7,7 +7,9 @@ import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
 import BaseSearch from '../../components/dashboard/global/BaseSearch.vue';
 import BaseDialog from '../../components/dashboard/global/BaseDialog.vue';
 import JsonViewer from '../../components/dashboard/global/JsonViewer.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useAuditStore();
 
 const columns = [
@@ -53,8 +55,8 @@ const viewDetails = (log) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Platform Audit Logs</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Traceable history of all administrative and system actions</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.auditLogs') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ t('pageTitles.auditLogsDesc') }}</p>
       </div>
     </div>
 
@@ -70,8 +72,8 @@ const viewDetails = (log) => {
     <div class="flex flex-col md:flex-row gap-4">
       <BaseSearch v-model="searchQuery" placeholder="Search by user, table, or action..." />
       <div class="flex gap-2">
-        <input type="date" class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none " />
-        <button class="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition">Filter</button>
+        <input type="date" class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100" />
+        <button class="px-4 py-2 bg-slate-900 dark:bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-brand-primary-hover transition">Filter</button>
       </div>
     </div>
 
@@ -82,7 +84,7 @@ const viewDetails = (log) => {
       </template>
 
       <template #cell(table_name)="{ item }">
-        <code class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{{ item.table_name }}</code>
+        <code class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{{ item.table_name }}</code>
       </template>
 
       <template #cell(date)="{ item }">
@@ -114,7 +116,7 @@ const viewDetails = (log) => {
           </div>
           <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Target Table</p>
-            <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ selectedLog.table_name }}</span>
+            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ selectedLog.table_name }}</span>
           </div>
         </div>
 
@@ -123,13 +125,13 @@ const viewDetails = (log) => {
           <JsonViewer :data="selectedLog.details" />
         </div>
 
-        <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+        <div class="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+          <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400">
             <span class="material-symbols-outlined">person</span>
           </div>
           <div>
-            <p class="text-xs text-blue-500 font-bold uppercase tracking-widest">Modified By</p>
-            <p class="text-sm font-bold text-blue-900">{{ selectedLog.user }}</p>
+            <p class="text-xs text-blue-500 dark:text-blue-400 font-bold uppercase tracking-widest">Modified By</p>
+            <p class="text-sm font-bold text-blue-900 dark:text-blue-200">{{ selectedLog.user }}</p>
           </div>
         </div>
       </div>

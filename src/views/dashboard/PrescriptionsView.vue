@@ -5,7 +5,9 @@ import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue
 import BaseTable from '../../components/dashboard/global/BaseTable.vue';
 import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
 import BaseSearch from '../../components/dashboard/global/BaseSearch.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useClinicalStore();
 
 const columns = [
@@ -27,8 +29,8 @@ const formatDate = (dateString) => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Prescriptions</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">History of all digital prescriptions issued across clinical departments</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.prescriptions') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ t('pageTitles.prescriptionsDesc') }}</p>
       </div>
     </div>
 
@@ -43,7 +45,7 @@ const formatDate = (dateString) => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="store.prescriptions">
       <template #cell(id)="{ item }">
-        <span class="text-sm font-black text-slate-900 dark:text-slate-100">{{ item.id }}</span>
+        <span class="text-sm font-black text-slate-900 dark:text-white">{{ item.id }}</span>
       </template>
 
       <template #cell(medicines)="{ item }">
@@ -51,7 +53,7 @@ const formatDate = (dateString) => {
           <span 
             v-for="(med, idx) in item.medicines" 
             :key="idx"
-            class="px-1.5 py-0.5 bg-slate-50 dark:bg-slate-700 text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 rounded uppercase tracking-tighter"
+            class="px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 rounded uppercase tracking-tighter"
           >
             {{ med.name }} ({{ med.dose }})
           </span>

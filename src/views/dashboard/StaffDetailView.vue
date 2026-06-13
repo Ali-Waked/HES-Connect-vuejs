@@ -8,6 +8,7 @@ import ReviewSummary from '../../components/dashboard/global/ReviewSummary.vue';
 import ReviewCard from '../../components/dashboard/global/ReviewCard.vue';
 import InfiniteScroll from '../../components/dashboard/global/InfiniteScroll.vue';
 import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
+import { useLocaleField } from '../../composables/useLocaleField';
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +22,8 @@ onMounted(() => {
   reviewStore.reset();
   reviewStore.fetchReviews(staffId.value, 'staff');
 });
+
+const { localField } = useLocaleField();
 
 const loadMore = () => {
   reviewStore.fetchReviews(staffId.value, 'staff');
@@ -36,9 +39,9 @@ const initial = (name) => name ? name.replace('Dr. ', '').charAt(0).toUpperCase(
 <template>
   <div v-if="member" class="space-y-8 animate-fade-in">
     <!-- Profile Header -->
-    <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
-      <div :class="`w-32 h-32 rounded-3xl ${avatarColor(member.name)} text-white text-4xl font-black flex items-center justify-center shadow-xl shadow-brand-primary/10 shrink-0`">
-        {{ initial(member.name) }}
+    <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-8 items-center md:items-start">
+      <div :class="`w-32 h-32 rounded-3xl ${avatarColor(localField(member, 'name'))} text-white text-4xl font-black flex items-center justify-center shadow-xl shadow-brand-primary/10 shrink-0`">
+        {{ initial(localField(member, 'name')) }}
       </div>
       
       <div class="flex-grow text-center md:text-left space-y-4">
@@ -46,20 +49,20 @@ const initial = (name) => name ? name.replace('Dr. ', '').charAt(0).toUpperCase(
           <nav class="flex items-center justify-center md:justify-start gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
             <button @click="goBack" class="hover:text-brand-primary transition">Staff</button>
             <span class="material-symbols-outlined text-[10px]">chevron_right</span>
-            <span class="text-slate-600 dark:text-slate-300">Profile Detail</span>
+            <span class="text-slate-600 dark:text-slate-400">Profile Detail</span>
           </nav>
-          <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{{ member.name }}</h1>
+          <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ localField(member, 'name') }}</h1>
           <div class="flex flex-wrap justify-center md:justify-start items-center gap-3 mt-2">
             <BaseBadge variant="primary">{{ member.specialization }}</BaseBadge>
             <BaseBadge variant="neutral">{{ member.experience }} Years Experience</BaseBadge>
-            <span class="inline-flex items-center gap-1.5 text-sm font-semibold" :class="member.status === 'Online' ? 'text-emerald-600' : 'text-slate-400 dark:text-slate-500'">
+            <span class="inline-flex items-center gap-1.5 text-sm font-semibold" :class="member.status === 'Online' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
               <span class="w-2 h-2 rounded-full" :class="member.status === 'Online' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'"></span>
               {{ member.status }}
             </span>
           </div>
         </div>
 
-        <div class="flex flex-wrap justify-center md:justify-start gap-6 py-4 border-t border-slate-50 dark:border-slate-700 mt-4">
+        <div class="flex flex-wrap justify-center md:justify-start gap-6 py-4 border-t border-slate-50 dark:border-slate-800 mt-4">
           <div class="space-y-0.5">
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center md:text-left">Email Address</p>
             <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ member.email }}</p>
@@ -95,13 +98,13 @@ const initial = (name) => name ? name.replace('Dr. ', '').charAt(0).toUpperCase(
 
     <!-- Reviews Section -->
     <div class="space-y-6">
-      <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
         <span class="material-symbols-outlined text-brand-primary">verified_user</span>
         Patient Feedback
       </h3>
       <ReviewSummary :stats="reviewStore.stats" />
 
-      <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
         <InfiniteScroll 
           :loading="reviewStore.loading" 
           :disabled="!reviewStore.hasMore"
@@ -116,8 +119,8 @@ const initial = (name) => name ? name.replace('Dr. ', '').charAt(0).toUpperCase(
             />
           </div>
           
-          <div v-if="!reviewStore.hasMore" class="py-12 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
-            <span class="material-symbols-outlined text-slate-300 dark:text-slate-500 text-4xl mb-2">done_all</span>
+          <div v-if="!reviewStore.hasMore" class="py-12 text-center bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
+            <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 text-4xl mb-2">done_all</span>
             <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">End of results</p>
           </div>
         </InfiniteScroll>

@@ -7,7 +7,9 @@ import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
 import BaseSearch from '../../components/dashboard/global/BaseSearch.vue';
 import BaseEmptyState from '../../components/dashboard/global/BaseEmptyState.vue';
 import ConfirmModal from '../../components/dashboard/global/ConfirmModal.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useCommentsStore();
 
 const columns = [
@@ -58,8 +60,8 @@ const handleDelete = () => {
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Content Moderation</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Manage and moderate user discussions across articles and stories</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.contentModeration') }}</h1>
+        <p class="text-sm text-slate-500 mt-1 font-medium">{{ t('pageTitles.contentModerationDesc') }}</p>
       </div>
     </div>
 
@@ -78,7 +80,7 @@ const handleDelete = () => {
     <!-- Table -->
     <BaseTable :columns="columns" :items="filteredComments">
       <template #cell(user)="{ item }">
-        <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ item.user }}</span>
+        <span class="text-sm font-bold text-slate-900 dark:text-white">{{ item.user }}</span>
       </template>
 
       <template #cell(article)="{ item }">
@@ -98,14 +100,14 @@ const handleDelete = () => {
           <button 
             v-if="item.status !== 'Approved'"
             @click="store.updateStatus(item.id, 'Approved')"
-            class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition"
+            class="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/20 rounded-lg transition"
             title="Approve"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition"
+            class="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50/30 dark:hover:bg-rose-900/20 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>

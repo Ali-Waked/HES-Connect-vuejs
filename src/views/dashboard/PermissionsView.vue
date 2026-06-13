@@ -2,7 +2,9 @@
 import { useAccessStore } from '../../stores/access';
 import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
 import PermissionsTable from '../../components/dashboard/Access/PermissionsTable.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useAccessStore();
 </script>
 
@@ -10,8 +12,8 @@ const store = useAccessStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">System Permissions</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Atomic access control units used to build roles</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.systemPermissions') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('pageTitles.permissionsDesc') }}</p>
       </div>
     </div>
 
