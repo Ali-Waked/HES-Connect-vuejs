@@ -4,9 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useNotificationsStore } from '@/stores/notifications';
 import { useScrollNavbar } from '@/composables/useScrollNavbar';
-import ThemeToggle from '@/components/global/ThemeToggle.vue';
+import LanguageSwitcher from '@/components/global/LanguageSwitcher.vue';
 import NotificationsDropdown from '@/components/dashboard/global/NotificationsDropdown.vue';
 import UserProfileDropdown from '@/components/dashboard/global/UserProfileDropdown.vue';
+import { useI18n } from 'vue-i18n';
+import { useDarkMode } from '@/composables/useDarkMode';
 
 const props = defineProps({
   variant: { type: String, default: 'landing' },
@@ -14,6 +16,8 @@ const props = defineProps({
 });
 const emit = defineEmits(['toggleMobile']);
 
+const { t } = useI18n();
+const { isDark, toggleDarkMode } = useDarkMode();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -28,15 +32,15 @@ const isHeroTop = computed(() => route.path === '/' && !isScrolled.value);
 
 let sectionObserver = null;
 
-const navLinks = [
-  { id: 'home', label: 'Home', href: '#home', type: 'section' },
-  { id: 'facilities', label: 'Facilities', href: '/facilities', type: 'route', path: '/facilities' },
-  { id: 'doctors', label: 'Doctors', href: '/doctors', type: 'route', path: '/doctors' },
-  { id: 'pharmacies', label: 'Pharmacies', href: '/facilities?type=pharmacy', type: 'route', path: '/facilities', query: { type: 'pharmacy' } },
-  { id: 'stories', label: 'Stories', href: '/stories', type: 'route', path: '/stories' },
-  { id: 'about', label: 'About Us', href: '/about', type: 'route', path: '/about' },
-  { id: 'contact', label: 'Contact', href: '/contact', type: 'route', path: '/contact' },
-];
+const navLinks = computed(() => [
+  { id: 'home', label: t('nav.home'), href: '#home', type: 'section' },
+  { id: 'facilities', label: t('nav.facilities'), href: '/facilities', type: 'route', path: '/facilities' },
+  { id: 'doctors', label: t('nav.doctors'), href: '/doctors', type: 'route', path: '/doctors' },
+  { id: 'pharmacies', label: t('nav.pharmacies'), href: '/facilities?type=pharmacy', type: 'route', path: '/facilities', query: { type: 'pharmacy' } },
+  { id: 'stories', label: t('nav.stories'), href: '/stories', type: 'route', path: '/stories' },
+  { id: 'about', label: t('nav.about'), href: '/about', type: 'route', path: '/about' },
+  { id: 'contact', label: t('nav.contact'), href: '/contact', type: 'route', path: '/contact' },
+]);
 
 function isLinkActive(link) {
   if (link.type === 'route') {
@@ -61,7 +65,7 @@ function mobileLinkClasses(link) {
   const active = isLinkActive(link);
   return active
     ? 'bg-brand-primary/10 text-brand-primary font-semibold border-l-[3px] border-brand-primary'
-    : 'text-stone-700 dark:text-slate-300 hover:bg-brand-primary/5 border-l-[3px] border-transparent';
+    : 'text-stone-700 hover:bg-brand-primary/5 border-l-[3px] border-transparent';
 }
 
 function setupScrollSpy() {
@@ -167,7 +171,7 @@ watch(() => route.path, async () => {
     <!-- Skeleton -->
     <header
       v-if="loading"
-      class="fixed inset-x-0 top-0 z-50 bg-landing-cream/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-landing-border dark:border-slate-700 shadow-md shadow-slate-900/5 h-16 lg:h-[70px]"
+      class="fixed inset-x-0 top-0 z-50 bg-landing-cream/95/95 backdrop-blur-md border-b border-landing-border shadow-md shadow-slate-900/5 h-16 lg:h-[70px]"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div class="flex items-center justify-between h-full">
@@ -191,8 +195,8 @@ watch(() => route.path, async () => {
       v-else
       class="fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ease-out"
       :class="isHeroTop
-        ? 'border-b-[#80808038] bg-[linear-gradient(45deg,#d7e2de,#ffffff1c)] dark:bg-[linear-gradient(45deg,#0f172a,#1e293b88)] shadow-none backdrop-blur-0'
-        : 'bg-landing-cream/95 dark:bg-slate-900/95 backdrop-blur-md border-landing-border dark:border-slate-700 shadow-md shadow-slate-900/5'"
+        ? 'border-b-[#80808038] bg-[linear-gradient(45deg,#d7e2de,#ffffff1c)][linear-gradient(45deg,#0f172a,#1e293b88)] shadow-none backdrop-blur-0'
+        : 'bg-landing-cream/95/95 backdrop-blur-md border-landing-border shadow-md shadow-slate-900/5'"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 lg:h-[70px]">
@@ -211,19 +215,31 @@ watch(() => route.path, async () => {
             class="hidden lg:flex items-center gap-1 p-1 rounded-xl border transition-all duration-300"
             :class="isHeroTop
               ? 'bg-landing-cream/55 border-white/40 backdrop-blur-sm'
-              : 'bg-landing-warm/60 dark:bg-slate-800/60 border-landing-border/70 dark:border-slate-700/70'"
+              : 'bg-landing-warm/60/60 border-landing-border/70/70'"
           >
             <button
               v-for="link in navLinks"
               :key="link.id"
-              class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer dark:text-slate-300 dark:hover:text-white"
+              class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer"
               :class="linkClasses(link)"
               @click="navigate(link)"
             >{{ link.label }}</button>
           </nav>
 
           <div class="hidden lg:flex items-center gap-2">
-            <ThemeToggle />
+            <button
+              class="p-2 text-landing-muted hover:text-brand-primary hover:bg-brand-primary/8 rounded-lg cursor-pointer transition"
+              @click="toggleDarkMode"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              </svg>
+            </button>
+            <LanguageSwitcher />
             <template v-if="authStore.isAuthenticated">
               <button
                 class="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-brand-primary/8 transition cursor-pointer"
@@ -238,16 +254,16 @@ watch(() => route.path, async () => {
               <button
                 class="px-4 py-2 text-sm font-semibold text-brand-primary border border-brand-primary/40 rounded-lg hover:bg-brand-primary/8 transition cursor-pointer"
                 @click="router.push('/login')"
-              >Login</button>
+              >{{ $t('nav.login') }}</button>
               <button
                 class="px-4 py-2 text-sm font-semibold text-white bg-brand-primary hover:bg-brand-primary-hover rounded-lg shadow-md shadow-brand-primary/20 transition cursor-pointer"
                 @click="router.push('/register')"
-              >Register</button>
+              >{{ $t('nav.register') }}</button>
             </template>
           </div>
 
           <button
-            class="lg:hidden p-2 text-landing-muted dark:text-slate-400 hover:text-brand-primary hover:bg-brand-primary/8 rounded-lg cursor-pointer transition"
+            class="lg:hidden p-2 text-landing-muted hover:text-brand-primary hover:bg-brand-primary/8 rounded-lg cursor-pointer transition"
             @click="mobileOpen = !mobileOpen"
           >
             <svg v-if="!mobileOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -261,7 +277,7 @@ watch(() => route.path, async () => {
       </div>
 
       <div
-        class="lg:hidden overflow-hidden transition-all duration-300 border-t border-landing-border bg-landing-cream dark:bg-slate-900 dark:border-slate-700"
+        class="lg:hidden overflow-hidden transition-all duration-300 border-t border-landing-border bg-landing-cream"
         :class="mobileOpen ? 'max-h-[530px] opacity-100' : 'max-h-0 opacity-0'"
       >
         <nav class="px-4 py-4 space-y-1">
@@ -272,16 +288,28 @@ watch(() => route.path, async () => {
             :class="mobileLinkClasses(link)"
             @click="navigate(link)"
           >{{ link.label }}</button>
-          <div class="pt-3 border-t border-landing-border dark:border-slate-700 flex flex-col gap-2">
-            <div class="flex justify-center py-1">
-              <ThemeToggle />
+          <div class="pt-3 border-t border-landing-border flex flex-col gap-2">
+            <div class="flex justify-center items-center gap-4 py-1">
+              <button
+                class="p-2 text-landing-muted hover:text-brand-primary rounded-lg cursor-pointer transition"
+                @click="toggleDarkMode"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+              </button>
+              <LanguageSwitcher />
             </div>
             <template v-if="authStore.isAuthenticated">
-              <button class="w-full py-2.5 text-sm font-semibold text-brand-primary border border-brand-primary/40 rounded-lg cursor-pointer" @click="router.push('/profile'); mobileOpen = false">My Profile</button>
+              <button class="w-full py-2.5 text-sm font-semibold text-brand-primary border border-brand-primary/40 rounded-lg cursor-pointer" @click="router.push('/profile'); mobileOpen = false">{{ $t('nav.profile') }}</button>
             </template>
             <template v-else>
-              <button class="w-full py-2.5 text-sm font-semibold text-brand-primary border border-brand-primary/40 rounded-lg cursor-pointer" @click="router.push('/login'); mobileOpen = false">Login</button>
-              <button class="w-full py-2.5 text-sm font-semibold text-white bg-brand-primary rounded-lg cursor-pointer" @click="router.push('/register'); mobileOpen = false">Register</button>
+              <button class="w-full py-2.5 text-sm font-semibold text-brand-primary border border-brand-primary/40 rounded-lg cursor-pointer" @click="router.push('/login'); mobileOpen = false">{{ $t('nav.login') }}</button>
+              <button class="w-full py-2.5 text-sm font-semibold text-white bg-brand-primary rounded-lg cursor-pointer" @click="router.push('/register'); mobileOpen = false">{{ $t('nav.register') }}</button>
             </template>
           </div>
         </nav>
@@ -294,7 +322,7 @@ watch(() => route.path, async () => {
     <!-- Skeleton -->
     <header
       v-if="loading"
-      class="h-[70px] bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full"
+      class="h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full"
     >
       <div class="flex items-center gap-3">
         <div class="w-6 h-6 skeleton-shimmer rounded lg:hidden"></div>
@@ -311,12 +339,12 @@ watch(() => route.path, async () => {
     <!-- Real -->
     <header
       v-else
-      class="h-[70px] bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full transition-opacity duration-300"
+      class="h-[70px] bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full transition-all duration-300"
     >
       <!-- Left: page title + mobile menu -->
       <div class="flex items-center gap-3">
         <button
-          class="lg:hidden text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition"
+          class="lg:hidden text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition"
           @click="$emit('toggleMobile')"
         >
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -328,11 +356,23 @@ watch(() => route.path, async () => {
 
       <!-- Right: bell + profile -->
       <div class="flex items-center gap-4 lg:gap-5">
-        <ThemeToggle />
+        <button
+          class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-full cursor-pointer transition"
+          @click="toggleDarkMode"
+          :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+          </svg>
+        </button>
+        <LanguageSwitcher />
         <!-- Bell wrapper -->
         <div class="relative">
           <button
-            class="relative p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-full cursor-pointer transition"
+            class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-full cursor-pointer transition"
             title="Notifications"
             @click="toggleNotifications"
           >
@@ -341,7 +381,7 @@ watch(() => route.path, async () => {
             </svg>
             <span
               v-if="notifStore.unreadCount > 0"
-              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center text-[9px] font-bold text-white leading-none"
+              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center text-[9px] font-bold text-white leading-none"
             >{{ notifStore.unreadCount > 9 ? '9+' : notifStore.unreadCount }}</span>
           </button>
 
@@ -354,7 +394,7 @@ watch(() => route.path, async () => {
         <!-- User Profile -->
         <div v-if="authStore.user" class="relative">
           <button
-            class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-lg transition"
+            class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 rounded-lg transition"
             @click="toggleProfileMenu"
           >
             <div class="w-9 h-9 bg-brand-primary text-white font-bold rounded-full flex items-center justify-center text-sm shadow-xs shadow-brand-primary/10">
@@ -362,10 +402,10 @@ watch(() => route.path, async () => {
             </div>
             <div class="hidden sm:flex flex-col text-left">
               <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none mb-0.5">{{ authStore.user.name }}</span>
-              <span class="text-[10px] text-slate-400 leading-none">{{ authStore.user.email }}</span>
+              <span class="text-[10px] text-slate-400 dark:text-slate-500 leading-none">{{ authStore.user.email }}</span>
             </div>
             <svg
-              class="w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform"
+              class="w-4 h-4 text-slate-400 transition-transform"
               :class="showProfileMenu ? 'rotate-180' : ''"
               xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
             >

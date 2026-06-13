@@ -1,129 +1,109 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-
-const AUTH_KEY = 'hes_auth';
-const USERS_KEY = 'hes_users';
-
-function loadAuth() {
-  try {
-    const saved = localStorage.getItem(AUTH_KEY);
-    return saved ? JSON.parse(saved) : null;
-  } catch {
-    return null;
-  }
-}
-
-function getUsers() {
-  try {
-    const saved = localStorage.getItem(USERS_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function buildUser(userData) {
-  const name = userData.name || userData.email?.split('@')[0] || 'User';
-  return {
-    name,
-    email: userData.email,
-    role: userData.role || 'User',
-    initials: name.charAt(0).toUpperCase(),
-    provider: userData.provider || 'email',
-    picture: userData.picture || null
-  };
-}
-
-const saved = loadAuth();
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import axiosClient, { csrfCookie } from '@/axiosClient'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(saved?.user || null);
-  const isAuthenticated = ref(!!saved?.user);
+  const user    = ref(null)
+  const errors  = ref({})
+  const loading = ref(false)
 
-  function persist() {
-    if (user.value) {
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ user: user.value }));
-    } else {
-      localStorage.removeItem(AUTH_KEY);
+  const isAuthenticated = computed(() => !!user.value)
+
+  async function fetchUser() {
+    try {
+      const { data } = await axiosClient.get('/user')
+      user.value = {
+        ...data,
+        initials: data.name
+          ? data.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+          : '?'
+      }
+    } catch {
+      user.value = null
     }
   }
 
-  function setUser(userData) {
-    user.value = buildUser(userData);
-    isAuthenticated.value = true;
-    persist();
-  }
-
-  function login(userData) {
-    setUser(userData);
-  }
-
-  function loginWithEmail({ email, password }) {
-    const normalizedEmail = email.trim().toLowerCase();
-    const users = getUsers();
-    const found = users.find(
-      (u) => u.email.toLowerCase() === normalizedEmail && u.password === password
-    );
-
-    if (found) {
-      setUser({ name: found.name, email: found.email });
-      return;
+  async function login(credentials) {
+    errors.value  = {}
+    loading.value = true
+    try {
+      console.log(credentials);
+      await csrfCookie()
+      await axiosClient.post('/login', credentials)
+      await fetchUser()
+      return { success: true }
+    } catch (err) {
+      console.log(err);
+      if (err.response?.status === 422) {
+        errors.value = err.response.data.errors ?? {}
+      } else if (err.response?.status === 429) {
+        errors.value = { email: ['Too many attempts. Please wait and try again.'] }
+      } else {
+        errors.value = { email: ['Invalid credentials. Please try again.'] }
+      }
+      return { success: false }
+    } finally {
+      loading.value = false
     }
-
-    if (normalizedEmail === 'admin@health.ps' && password === 'admin123') {
-      setUser({ name: 'Admin', email: normalizedEmail, role: 'Administrator' });
-      return;
-    }
-
-    throw new Error('Invalid email or password.');
   }
 
-  function register({ name, email, password }) {
-    const normalizedEmail = email.trim().toLowerCase();
-    const users = getUsers();
-
-    if (users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
-      throw new Error('An account with this email already exists.');
+  async function register(form) {
+    errors.value  = {}
+    loading.value = true
+    try {
+      await csrfCookie()
+      await axiosClient.post('/register', form)
+      await fetchUser()
+      return { success: true }
+    } catch (err) {
+      if (err.response?.status === 422) {
+        errors.value = err.response.data.errors ?? {}
+      } else {
+        errors.value = { email: ['Registration failed. Please try again.'] }
+      }
+      return { success: false }
+    } finally {
+      loading.value = false
     }
-
-    users.push({ name: name.trim(), email: normalizedEmail, password });
-    saveUsers(users);
-    setUser({ name: name.trim(), email: normalizedEmail });
   }
 
-  function loginWithGoogle(profile) {
-    setUser({
-      name: profile.name,
-      email: profile.email,
-      picture: profile.picture,
-      provider: 'google'
-    });
+  async function logout() {
+    try {
+      await axiosClient.post('/logout')
+    } finally {
+      user.value = null
+    }
   }
 
   function updateProfile({ name }) {
-    if (!user.value) return;
-    user.value = buildUser({ ...user.value, name });
-    persist();
+    if (user.value) {
+      user.value = {
+        ...user.value,
+        name,
+        initials: name
+          .split(' ')
+          .map(w => w[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2)
+      }
+    }
   }
 
-  function logout() {
-    isAuthenticated.value = false;
-    user.value = null;
-    persist();
+  async function init() {
+    await fetchUser()
   }
 
   return {
     user,
+    errors,
+    loading,
     isAuthenticated,
     login,
-    loginWithEmail,
     register,
-    loginWithGoogle,
+    logout,
+    fetchUser,
     updateProfile,
-    logout
-  };
-});
+    init,
+  }
+})
