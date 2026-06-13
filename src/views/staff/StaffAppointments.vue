@@ -2,24 +2,24 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Appointments</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage all patient appointments</p>
+        <h2 class="text-xl font-bold text-slate-900">Appointments</h2>
+        <p class="text-sm text-slate-500">Manage all patient appointments</p>
       </div>
       <div class="flex gap-2">
-        <input v-model="search" placeholder="Search patient..." class="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm w-48" />
-        <input type="date" v-model="dateFilter" class="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm" />
+        <input v-model="search" placeholder="Search patient..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm w-48" />
+        <input type="date" v-model="dateFilter" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" />
       </div>
     </div>
 
     <div class="flex gap-2">
-      <button v-for="tab in tabs" :key="tab.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeTab === tab.key ? 'bg-brand-primary text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'" @click="activeTab = tab.key; page = 1">{{ tab.label }}</button>
+      <button v-for="tab in tabs" :key="tab.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeTab === tab.key ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" @click="activeTab = tab.key; page = 1">{{ tab.label }}</button>
     </div>
 
     <DataTable :columns="columns" :items="paginated" :loading="loading" empty-title="No appointments found" empty-description="Try changing filters.">
       <template #cell-patientName="{ item }">
         <div class="flex items-center gap-2">
           <AvatarInitial :name="item.patientName" size="sm" />
-          <span class="font-semibold text-slate-900 dark:text-slate-100">{{ item.patientName }}</span>
+          <span class="font-semibold text-slate-900">{{ item.patientName }}</span>
         </div>
       </template>
       <template #cell-status="{ item }">
@@ -27,18 +27,18 @@
       </template>
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="viewAppt(item)">View</button>
+          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="viewAppt(item)">View</button>
           <button v-if="item.status === 'booked'" class="rounded-md bg-green-600 px-3 py-1.5 text-xs text-white" @click="confirmAction('complete', item)">Complete</button>
-          <button v-if="item.status !== 'cancelled'" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="confirmAction('cancel', item)">Cancel</button>
-          <button v-if="item.status !== 'cancelled' && item.status !== 'completed'" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="openReschedule(item)">Reschedule</button>
+          <button v-if="item.status !== 'cancelled'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="confirmAction('cancel', item)">Cancel</button>
+          <button v-if="item.status !== 'cancelled' && item.status !== 'completed'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="openReschedule(item)">Reschedule</button>
         </div>
       </template>
     </DataTable>
 
     <div v-if="totalPages > 1" class="flex items-center justify-center gap-2">
-      <button :disabled="page <= 1" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm" @click="page--">Prev</button>
-      <span class="text-sm text-slate-500 dark:text-slate-400">Page {{ page }} of {{ totalPages }}</span>
-      <button :disabled="page >= totalPages" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm" @click="page++">Next</button>
+      <button :disabled="page <= 1" class="rounded-md border border-slate-200 px-3 py-1.5 text-sm" @click="page--">Prev</button>
+      <span class="text-sm text-slate-500">Page {{ page }} of {{ totalPages }}</span>
+      <button :disabled="page >= totalPages" class="rounded-md border border-slate-200 px-3 py-1.5 text-sm" @click="page++">Next</button>
     </div>
 
     <AppointmentDetailModal :show="detailModal" :appointment-id="selectedId" @close="detailModal = false" />

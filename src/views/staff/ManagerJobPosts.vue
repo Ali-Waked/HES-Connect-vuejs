@@ -2,15 +2,15 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Job Posts</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage job openings</p>
+        <h2 class="text-xl font-bold text-slate-900">Job Posts</h2>
+        <p class="text-sm text-slate-500">Manage job openings</p>
       </div>
       <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="openAdd">+ Add Job Post</button>
     </div>
 
     <DataTable :columns="columns" :items="store.jobPosts" :loading="loading" empty-title="No job posts">
       <template #cell-applyMethod="{ item }">
-        <span class="material-symbols-outlined text-[18px]" :class="item.applyMethod === 'email' ? 'text-blue-600' : 'text-slate-600 dark:text-slate-300'">{{ item.applyMethod === 'email' ? 'mail' : 'link' }}</span>
+        <span class="material-symbols-outlined text-[18px]" :class="item.applyMethod === 'email' ? 'text-blue-600' : 'text-slate-600'">{{ item.applyMethod === 'email' ? 'mail' : 'link' }}</span>
       </template>
       <template #cell-endDate="{ item }">
         <span :class="isNearEnd(item.endDate) ? 'text-red-600 font-bold' : ''">{{ item.endDate }}</span>
@@ -20,8 +20,8 @@
       </template>
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="openEdit(item.id)">Edit</button>
-          <button class="rounded-md border border-red-200 dark:border-red-700 px-3 py-1.5 text-xs text-red-600 dark:text-red-400" @click="confirmDelete(item)">Delete</button>
+          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="openEdit(item.id)">Edit</button>
+          <button class="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600" @click="confirmDelete(item)">Delete</button>
         </div>
       </template>
     </DataTable>

@@ -2,8 +2,8 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Documents</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Uploaded facility documents</p>
+        <h2 class="text-xl font-bold text-slate-900">Documents</h2>
+        <p class="text-sm text-slate-500">Uploaded facility documents</p>
       </div>
       <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="uploadModal = true">+ Upload Document</button>
     </div>

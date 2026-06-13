@@ -10,7 +10,7 @@ const store = useStaffStore();
       <div
         v-for="toast in store.toasts"
         :key="toast.id"
-        class="min-w-72 rounded-xl border bg-white dark:bg-slate-800 px-4 py-3 text-sm font-semibold shadow-lg"
+        class="min-w-72 rounded-xl border bg-white px-4 py-3 text-sm font-semibold shadow-lg"
         :class="toast.type === 'error' ? 'border-red-200 text-red-700' : 'border-green-200 text-green-700'"
       >
         {{ toast.message }}

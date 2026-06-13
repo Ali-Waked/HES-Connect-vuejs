@@ -10,35 +10,35 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Today's Schedule -->
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-start justify-between">
           <div>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Today's Schedule</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Appointments for today, sorted by time</p>
+            <h3 class="text-lg font-bold text-slate-900">Today's Schedule</h3>
+            <p class="text-sm text-slate-500">Appointments for today, sorted by time</p>
           </div>
           <div>
-            <button v-if="!loading" class="rounded-md bg-slate-100 dark:bg-slate-700 px-3 py-2 text-sm text-slate-700 dark:text-slate-300" @click="$router.push('/staff/appointments')">View all</button>
+            <button v-if="!loading" class="rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700" @click="$router.push('/staff/appointments')">View all</button>
           </div>
         </div>
 
         <div class="mt-4">
           <div v-if="loading">
             <div class="space-y-3">
-              <div class="h-12 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-700"></div>
-              <div class="h-12 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-700"></div>
-              <div class="h-12 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-700"></div>
+              <div class="h-12 w-full animate-pulse rounded bg-slate-100"></div>
+              <div class="h-12 w-full animate-pulse rounded bg-slate-100"></div>
+              <div class="h-12 w-full animate-pulse rounded bg-slate-100"></div>
             </div>
           </div>
 
           <div v-else>
             <template v-if="todayAppts.length">
               <ul class="space-y-3">
-                <li v-for="appt in todayApptsSorted" :key="appt.id" class="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-700 p-3 hover:shadow-md transition">
+                <li v-for="appt in todayApptsSorted" :key="appt.id" class="flex items-center justify-between rounded-lg border border-slate-100 p-3 hover:shadow-md transition">
                   <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 text-teal-600 font-bold">{{ appt.time }}</div>
                     <div>
-                      <div class="font-semibold text-slate-900 dark:text-slate-100">{{ appt.patientName }}</div>
-                      <div class="text-xs text-slate-500 dark:text-slate-400">{{ appt.facilityName }}</div>
+                      <div class="font-semibold text-slate-900">{{ appt.patientName }}</div>
+                      <div class="text-xs text-slate-500">{{ appt.facilityName }}</div>
                     </div>
                   </div>
 
@@ -46,7 +46,7 @@
                     <StatusBadge :status="appt.status" />
                     <div class="flex gap-2">
                                           <button v-if="appt.status !== 'completed'" class="rounded-md bg-brand-primary px-3 py-1.5 text-sm text-white" @click="openConfirm('complete', appt)">Complete</button>
-                                          <button v-if="appt.status !== 'cancelled'" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300" @click="openConfirm('cancel', appt)">Cancel</button>
+                                          <button v-if="appt.status !== 'cancelled'" class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700" @click="openConfirm('cancel', appt)">Cancel</button>
                     </div>
                   </div>
                 </li>
@@ -55,8 +55,8 @@
 
             <div v-else class="text-center py-8">
               <div class="text-4xl">🎉</div>
-              <p class="mt-2 text-sm font-bold text-slate-900 dark:text-slate-100">No appointments today</p>
-              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Enjoy the free time or manage your schedule.</p>
+              <p class="mt-2 text-sm font-bold text-slate-900">No appointments today</p>
+              <p class="mt-1 text-sm text-slate-500">Enjoy the free time or manage your schedule.</p>
             </div>
           </div>
         </div>
@@ -64,78 +64,78 @@
 
       <!-- Recent Reviews & Articles -->
       <aside class="space-y-6">
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Reviews</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Last reviews from patients</p>
+              <h3 class="text-lg font-bold text-slate-900">Recent Reviews</h3>
+              <p class="text-sm text-slate-500">Last reviews from patients</p>
             </div>
             <div class="text-right">
-              <div class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ avgRatingDisplay }}</div>
-              <div class="text-sm text-slate-500 dark:text-slate-400">Based on {{ reviews.length }} reviews</div>
+              <div class="text-2xl font-bold text-slate-900">{{ avgRatingDisplay }}</div>
+              <div class="text-sm text-slate-500">Based on {{ reviews.length }} reviews</div>
             </div>
           </div>
 
           <div class="mt-4 space-y-3">
-            <div v-for="rev in recentReviews" :key="rev.id" class="rounded-lg border border-slate-100 dark:border-slate-700 p-3">
+            <div v-for="rev in recentReviews" :key="rev.id" class="rounded-lg border border-slate-100 p-3">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <AvatarInitial :name="rev.patientName" size="sm" />
                   <div>
-                    <div class="font-semibold text-slate-900 dark:text-slate-100">{{ rev.patientName }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ rev.date }}</div>
+                    <div class="font-semibold text-slate-900">{{ rev.patientName }}</div>
+                    <div class="text-xs text-slate-500">{{ rev.date }}</div>
                   </div>
                 </div>
                 <div class="text-sm font-bold text-amber-600">{{ rev.rating }} ★</div>
               </div>
-              <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">{{ rev.comment }}</p>
+              <p class="mt-2 text-sm text-slate-700">{{ rev.comment }}</p>
             </div>
           </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">My Articles</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Latest articles</p>
+              <h3 class="text-lg font-bold text-slate-900">My Articles</h3>
+              <p class="text-sm text-slate-500">Latest articles</p>
             </div>
-            <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm" @click="$router.push('/admin/articles')">Write New Article</button>
+            <button class="rounded-md border border-slate-200 px-3 py-2 text-sm" @click="$router.push('/admin/articles')">Write New Article</button>
           </div>
 
           <div class="mt-4 space-y-2">
-            <div v-for="art in recentArticles" :key="art.id" class="flex items-center justify-between rounded-md p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+            <div v-for="art in recentArticles" :key="art.id" class="flex items-center justify-between rounded-md p-2 hover:bg-slate-50 transition">
               <div>
-                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ art.title }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">{{ art.category }} • {{ art.date }}</div>
+                <div class="font-semibold text-slate-900">{{ art.title }}</div>
+                <div class="text-xs text-slate-500">{{ art.category }} • {{ art.date }}</div>
               </div>
               <div class="flex items-center gap-2">
                 <StatusBadge :status="art.status" />
-                <div class="text-sm text-slate-500 dark:text-slate-400">{{ art.views }}</div>
+                <div class="text-sm text-slate-500">{{ art.views }}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Upcoming Unavailable Dates</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Planned leaves and blocks</p>
+              <h3 class="text-lg font-bold text-slate-900">Upcoming Unavailable Dates</h3>
+              <p class="text-sm text-slate-500">Planned leaves and blocks</p>
             </div>
-            <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm" @click="$router.push('/staff/schedule')">Manage Schedule</button>
+            <button class="rounded-md border border-slate-200 px-3 py-2 text-sm" @click="$router.push('/staff/schedule')">Manage Schedule</button>
           </div>
 
           <div class="mt-4">
             <ul class="space-y-2">
-              <li v-for="d in upcomingUnavailable" :key="d.id" class="flex items-center justify-between rounded-md p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+              <li v-for="d in upcomingUnavailable" :key="d.id" class="flex items-center justify-between rounded-md p-2 hover:bg-slate-50 transition">
                 <div>
-                  <div class="font-semibold text-slate-900 dark:text-slate-100">{{ d.date }}</div>
-                  <div class="text-xs text-slate-500 dark:text-slate-400">{{ d.reason }}</div>
+                  <div class="font-semibold text-slate-900">{{ d.date }}</div>
+                  <div class="text-xs text-slate-500">{{ d.reason }}</div>
                 </div>
-                <div class="text-sm text-slate-500 dark:text-slate-400">&nbsp;</div>
+                <div class="text-sm text-slate-500">&nbsp;</div>
               </li>
             </ul>
-            <div v-if="!upcomingUnavailable.length" class="text-sm text-slate-500 dark:text-slate-400 mt-3">No upcoming unavailable dates.</div>
+            <div v-if="!upcomingUnavailable.length" class="text-sm text-slate-500 mt-3">No upcoming unavailable dates.</div>
           </div>
         </div>
       </aside>

@@ -9,16 +9,16 @@
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"></div>
-      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"></div>
+      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100"></div>
     </div>
 
     <template v-else>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Appointments This Week</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Count by day (Sun–Sat)</p>
+            <h3 class="text-lg font-bold text-slate-900">Appointments This Week</h3>
+            <p class="text-sm text-slate-500">Count by day (Sun–Sat)</p>
           </div>
           <div class="mt-6">
             <svg viewBox="0 0 350 180" class="w-full">
@@ -36,21 +36,21 @@
           </div>
         </section>
 
-        <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Department Summary</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Quick overview</p>
+              <h3 class="text-lg font-bold text-slate-900">Department Summary</h3>
+              <p class="text-sm text-slate-500">Quick overview</p>
             </div>
           </div>
           <div class="mt-4 space-y-3">
-            <div v-for="dept in store.departments" :key="dept.id" class="flex items-center justify-between rounded-lg border border-slate-100 dark:border-slate-700 p-3">
+            <div v-for="dept in store.departments" :key="dept.id" class="flex items-center justify-between rounded-lg border border-slate-100 p-3">
               <div>
-                <p class="font-semibold text-slate-900 dark:text-slate-100">{{ dept.name }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ dept.headDoctor }}</p>
+                <p class="font-semibold text-slate-900">{{ dept.name }}</p>
+                <p class="text-xs text-slate-500">{{ dept.headDoctor }}</p>
               </div>
               <div class="flex items-center gap-3">
-                <span class="rounded-full bg-slate-100 dark:bg-slate-700 px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-400">{{ dept.staffCount }} staff</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{{ dept.staffCount }} staff</span>
                 <button class="text-sm font-semibold text-brand-primary" @click="$router.push('/staff/departments')">Manage</button>
               </div>
             </div>
@@ -58,53 +58,53 @@
         </section>
       </div>
 
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Pending Documents</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Documents awaiting review</p>
+            <h3 class="text-lg font-bold text-slate-900">Pending Documents</h3>
+            <p class="text-sm text-slate-500">Documents awaiting review</p>
           </div>
         </div>
         <div class="mt-4">
           <div v-if="pendingDocsList.length" class="overflow-x-auto">
             <table class="w-full text-left">
-              <thead class="border-b border-slate-200 dark:border-slate-700">
+              <thead class="border-b border-slate-200">
                 <tr>
-                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Document Type</th>
-                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Upload Date</th>
-                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Status</th>
-                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500 dark:text-slate-400"></th>
+                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500">Document Type</th>
+                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500">Upload Date</th>
+                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500">Status</th>
+                  <th class="px-4 py-3 text-xs font-bold uppercase text-slate-500"></th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-                <tr v-for="doc in pendingDocsList" :key="doc.id" class="transition hover:bg-slate-50/70 dark:hover:bg-slate-700/70">
-                  <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">{{ doc.documentType }}</td>
-                  <td class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">{{ doc.uploadDate }}</td>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="doc in pendingDocsList" :key="doc.id" class="transition hover:bg-slate-50/70/70">
+                  <td class="px-4 py-3 font-semibold text-slate-900">{{ doc.documentType }}</td>
+                  <td class="px-4 py-3 text-sm text-slate-500">{{ doc.uploadDate }}</td>
                   <td class="px-4 py-3"><StatusBadge :status="doc.status" /></td>
-                  <td class="px-4 py-3"><button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300">Review</button></td>
+                  <td class="px-4 py-3"><button class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700">Review</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div v-else class="py-8 text-center text-sm text-slate-500 dark:text-slate-400">No pending documents.</div>
+          <div v-else class="py-8 text-center text-sm text-slate-500">No pending documents.</div>
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Job Posts</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Latest openings</p>
+            <h3 class="text-lg font-bold text-slate-900">Recent Job Posts</h3>
+            <p class="text-sm text-slate-500">Latest openings</p>
           </div>
           <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="$router.push('/staff/job-posts')">Post New Job</button>
         </div>
         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div v-for="post in recentJobs" :key="post.id" class="rounded-lg border border-slate-100 dark:border-slate-700 p-4">
-            <p class="font-bold text-slate-900 dark:text-slate-100">{{ post.title }}</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ends: {{ post.endDate }}</p>
+          <div v-for="post in recentJobs" :key="post.id" class="rounded-lg border border-slate-100 p-4">
+            <p class="font-bold text-slate-900">{{ post.title }}</p>
+            <p class="mt-1 text-xs text-slate-500">Ends: {{ post.endDate }}</p>
             <div class="mt-2 flex items-center gap-2">
               <StatusBadge :status="post.status" />
-              <span class="material-symbols-outlined text-[18px] text-slate-400 dark:text-slate-500">{{ post.applyMethod === 'email' ? 'mail' : 'link' }}</span>
+              <span class="material-symbols-outlined text-[18px] text-slate-400">{{ post.applyMethod === 'email' ? 'mail' : 'link' }}</span>
             </div>
           </div>
         </div>

@@ -1,30 +1,30 @@
 <template>
   <div class="animate-fade-in space-y-6">
     <div>
-      <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Reviews</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Patient feedback and ratings</p>
+      <h2 class="text-xl font-bold text-slate-900">Reviews</h2>
+      <p class="text-sm text-slate-500">Patient feedback and ratings</p>
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div class="h-32 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"></div>
-      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"></div>
+      <div class="h-32 w-full animate-pulse rounded-xl bg-slate-100"></div>
+      <div class="h-48 w-full animate-pulse rounded-xl bg-slate-100"></div>
     </div>
 
     <template v-else>
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center gap-6">
           <div class="text-center">
-            <div class="text-5xl font-bold text-slate-900 dark:text-slate-100">{{ avg }}</div>
+            <div class="text-5xl font-bold text-slate-900">{{ avg }}</div>
             <div class="mt-1 text-2xl text-amber-500">{{ fullStars }}</div>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Based on {{ store.reviews.length }} reviews</p>
+            <p class="mt-1 text-sm text-slate-500">Based on {{ store.reviews.length }} reviews</p>
           </div>
           <div class="flex-1 space-y-2">
             <div v-for="star in 5" :key="star" class="flex items-center gap-2 text-sm">
-              <span class="w-6 text-slate-600 dark:text-slate-300">{{ 6 - star }}★</span>
-              <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-700">
+              <span class="w-6 text-slate-600">{{ 6 - star }}★</span>
+              <div class="flex-1 h-2 rounded-full bg-slate-100">
                 <div class="h-2 rounded-full bg-amber-400" :style="{ width: breakdown[5 - star] + '%' }"></div>
               </div>
-              <span class="w-8 text-slate-500 dark:text-slate-400 text-xs">{{ breakdown[5 - star] }}%</span>
+              <span class="w-8 text-slate-500 text-xs">{{ breakdown[5 - star] }}%</span>
             </div>
           </div>
         </div>

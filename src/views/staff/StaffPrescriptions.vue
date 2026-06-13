@@ -2,8 +2,8 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Prescriptions</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage prescribed medicines</p>
+        <h2 class="text-xl font-bold text-slate-900">Prescriptions</h2>
+        <p class="text-sm text-slate-500">Manage prescribed medicines</p>
       </div>
       <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="formModal = true">+ New Prescription</button>
     </div>
@@ -13,7 +13,7 @@
         <span class="text-sm">{{ item.medicines.length }} medicines</span>
       </template>
       <template #cell-actions="{ item }">
-        <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="viewPrescription(item.id)">View</button>
+        <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="viewPrescription(item.id)">View</button>
       </template>
     </DataTable>
 

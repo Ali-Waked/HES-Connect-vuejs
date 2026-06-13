@@ -2,17 +2,17 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Inventory</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Medicine stock management</p>
+        <h2 class="text-xl font-bold text-slate-900">Inventory</h2>
+        <p class="text-sm text-slate-500">Medicine stock management</p>
       </div>
       <div class="flex gap-2">
-        <input v-model="search" placeholder="Search medicine..." class="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm w-48" />
+        <input v-model="search" placeholder="Search medicine..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm w-48" />
         <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="addModal = true">+ Add to Inventory</button>
       </div>
     </div>
 
     <div class="flex gap-2">
-      <button v-for="f in filters" :key="f.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeFilter === f.key ? 'bg-brand-primary text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'" @click="activeFilter = f.key">{{ f.label }}</button>
+      <button v-for="f in filters" :key="f.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeFilter === f.key ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" @click="activeFilter = f.key">{{ f.label }}</button>
     </div>
 
     <DataTable :columns="columns" :items="filtered" :loading="loading" empty-title="No items found">
@@ -24,8 +24,8 @@
       </template>
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="editItem(item)">Edit</button>
-          <button class="rounded-md border border-red-200 dark:border-red-700 px-3 py-1.5 text-xs text-red-600 dark:text-red-400" @click="confirmDelete(item)">Delete</button>
+          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="editItem(item)">Edit</button>
+          <button class="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600" @click="confirmDelete(item)">Delete</button>
         </div>
       </template>
     </DataTable>

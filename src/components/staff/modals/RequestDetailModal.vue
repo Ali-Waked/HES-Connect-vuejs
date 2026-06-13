@@ -4,25 +4,25 @@
       <div class="flex items-center gap-3">
         <AvatarInitial :name="request.patientName" />
         <div>
-          <p class="font-bold text-slate-900 dark:text-slate-100">{{ request.patientName }}</p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ request.date }}</p>
+          <p class="font-bold text-slate-900">{{ request.patientName }}</p>
+          <p class="text-sm text-slate-500">{{ request.date }}</p>
         </div>
       </div>
       <div class="space-y-2">
-        <h4 class="font-bold text-slate-900 dark:text-slate-100">Prescribed Medicines</h4>
-        <div v-for="med in request.medicines" :key="med.name" class="rounded-lg border border-slate-100 dark:border-slate-700 p-3">
+        <h4 class="font-bold text-slate-900">Prescribed Medicines</h4>
+        <div v-for="med in request.medicines" :key="med.name" class="rounded-lg border border-slate-100 p-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="font-semibold">{{ med.name }}</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400">{{ med.dosage }} — {{ med.duration }}</p>
+              <p class="text-xs text-slate-500">{{ med.dosage }} — {{ med.duration }}</p>
             </div>
             <span class="text-xs font-semibold" :class="stockLevel(med.name).color">{{ stockLevel(med.name).text }}</span>
           </div>
         </div>
       </div>
-      <div v-if="request.status === 'pending'" class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
-        <button class="rounded-md border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm text-slate-700 dark:text-slate-300" @click="reject">Reject</button>
-        <button class="rounded-md bg-green-600 px-4 py-2 text-sm text-white" @click="approve">Approve</button>
+      <div v-if="request.status === 'pending'" class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+        <button class="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700" @click="reject">{{ $t('statuses.rejected') }}</button>
+        <button class="rounded-md bg-green-600 px-4 py-2 text-sm text-white" @click="approve">{{ $t('statuses.approved') }}</button>
       </div>
     </div>
   </StaffModalShell>
@@ -33,9 +33,11 @@ import { computed } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
 import StaffModalShell from './StaffModalShell.vue'
 import AvatarInitial from '../shared/AvatarInitial.vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({ show: Boolean, requestId: Number })
 const emit = defineEmits(['close'])
+const { t } = useI18n()
 const store = useStaffStore()
 const request = computed(() => store.medicationRequests.find(r => r.id === props.requestId))
 

@@ -1,17 +1,17 @@
 <template>
   <div class="animate-fade-in space-y-6">
     <div>
-      <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Reports</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Analytics and insights</p>
+      <h2 class="text-xl font-bold text-slate-900">Reports</h2>
+      <p class="text-sm text-slate-500">Analytics and insights</p>
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="h-64 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-700"></div>
+      <div v-for="i in 3" :key="i" class="h-64 w-full animate-pulse rounded-xl bg-slate-100"></div>
     </div>
 
     <template v-else>
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Appointments by Status</h3>
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Appointments by Status</h3>
         <div class="flex flex-col sm:flex-row items-center gap-8">
           <svg width="180" height="180" viewBox="0 0 180 180">
             <g v-for="(seg, i) in donutSegments" :key="i">
@@ -24,28 +24,28 @@
           <div class="space-y-2">
             <div v-for="leg in legend" :key="leg.label" class="flex items-center gap-2 text-sm">
               <span class="h-3 w-3 rounded-full" :style="{ background: leg.color }"></span>
-              <span class="text-slate-700 dark:text-slate-300">{{ leg.label }}</span>
+              <span class="text-slate-700">{{ leg.label }}</span>
               <span class="font-bold">{{ leg.count }}</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Staff by Specialization</h3>
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Staff by Specialization</h3>
         <div class="space-y-3">
           <div v-for="bar in specBars" :key="bar.label" class="flex items-center gap-3">
-            <span class="w-32 text-sm text-slate-700 dark:text-slate-300">{{ bar.label }}</span>
-            <div class="flex-1 h-6 rounded-md bg-slate-100 dark:bg-slate-700">
+            <span class="w-32 text-sm text-slate-700">{{ bar.label }}</span>
+            <div class="flex-1 h-6 rounded-md bg-slate-100">
               <div class="h-6 rounded-md bg-brand-primary transition-all" :style="{ width: bar.percent + '%' }"></div>
             </div>
-            <span class="w-8 text-sm font-bold text-slate-700 dark:text-slate-300">{{ bar.count }}</span>
+            <span class="w-8 text-sm font-bold text-slate-700">{{ bar.count }}</span>
           </div>
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Reviews Over Time</h3>
+      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Reviews Over Time</h3>
         <svg viewBox="0 0 400 200" class="w-full">
           <text x="20" y="30" font-size="10" fill="#94a3b8">5.0</text>
           <text x="20" y="80" font-size="10" fill="#94a3b8">4.5</text>

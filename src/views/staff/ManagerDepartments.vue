@@ -2,8 +2,8 @@
   <div class="animate-fade-in space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Departments</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage hospital departments</p>
+        <h2 class="text-xl font-bold text-slate-900">Departments</h2>
+        <p class="text-sm text-slate-500">Manage hospital departments</p>
       </div>
       <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="openAdd">+ Add Department</button>
     </div>
@@ -11,8 +11,8 @@
     <DataTable :columns="columns" :items="store.departments" :loading="loading" empty-title="No departments">
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="openEdit(item.id)">Edit</button>
-          <button class="rounded-md border border-red-200 dark:border-red-700 px-3 py-1.5 text-xs text-red-600 dark:text-red-400" @click="confirmDelete(item)">Delete</button>
+          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="openEdit(item.id)">Edit</button>
+          <button class="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-600" @click="confirmDelete(item)">Delete</button>
         </div>
       </template>
     </DataTable>

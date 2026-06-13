@@ -1,12 +1,12 @@
 <template>
   <div class="animate-fade-in space-y-6">
     <div>
-      <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Medication Requests</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Approve or reject medicine requests</p>
+      <h2 class="text-xl font-bold text-slate-900">Medication Requests</h2>
+      <p class="text-sm text-slate-500">Approve or reject medicine requests</p>
     </div>
 
     <div class="flex gap-2">
-      <button v-for="tab in tabs" :key="tab.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeTab === tab.key ? 'bg-brand-primary text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'" @click="activeTab = tab.key">{{ tab.label }}</button>
+      <button v-for="tab in tabs" :key="tab.key" class="rounded-md px-4 py-2 text-sm font-semibold transition" :class="activeTab === tab.key ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" @click="activeTab = tab.key">{{ tab.label }}</button>
     </div>
 
     <DataTable :columns="columns" :items="filtered" :loading="loading" empty-title="No requests found">
@@ -18,9 +18,9 @@
       </template>
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="viewRequest(item.id)">View</button>
+          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="viewRequest(item.id)">View</button>
           <button v-if="item.status === 'pending'" class="rounded-md bg-green-600 px-3 py-1.5 text-xs text-white" @click="confirmApprove(item)">Approve</button>
-          <button v-if="item.status === 'pending'" class="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300" @click="confirmReject(item)">Reject</button>
+          <button v-if="item.status === 'pending'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="confirmReject(item)">Reject</button>
         </div>
       </template>
     </DataTable>
