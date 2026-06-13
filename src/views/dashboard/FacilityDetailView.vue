@@ -1,59 +1,84 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useDashboardStore } from '../../stores/dashboard';
 import { useEntityReviewsStore } from '../../stores/entityReviews';
 import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
 import ReviewSummary from '../../components/dashboard/global/ReviewSummary.vue';
 import ReviewCard from '../../components/dashboard/global/ReviewCard.vue';
 import InfiniteScroll from '../../components/dashboard/global/InfiniteScroll.vue';
 import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
+import { useLocaleField } from '../../composables/useLocaleField';
+import { useFacilities } from '../../composables/useFacilities';
+import { useDashboardHelpers } from '../../composables/useDashboardHelpers';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
-const dashboardStore = useDashboardStore();
 const reviewStore = useEntityReviewsStore();
 
-const facilityId = computed(() => parseInt(route.params.id));
-const facility = computed(() => dashboardStore.facilities.find(f => f.id === facilityId.value));
+const { fetchFacility } = useFacilities();
+const { getTypeClass } = useDashboardHelpers();
+const { t } = useI18n();
+const facility = ref(null);
+const loading = ref(true);
 
-onMounted(() => {
-  reviewStore.reset();
-  reviewStore.fetchReviews(facilityId.value, 'facility');
+const facilityTypeLabels = {
+  hospital: 'categories.hospital',
+  clinic: 'categories.clinic',
+  pharmacy: 'categories.pharmacy',
+  medical_point: 'categories.medicalPoint',
+}
+
+onMounted(async () => {
+  const id = route.params.id;
+  try {
+    facility.value = await fetchFacility(id);
+    reviewStore.reset();
+    reviewStore.fetchReviews(id, 'facility');
+  } catch (err) {
+    router.push('/admin/facilities');
+  } finally {
+    loading.value = false;
+  }
 });
 
+const { localField } = useLocaleField();
+
 const loadMore = () => {
-  reviewStore.fetchReviews(facilityId.value, 'facility');
+  reviewStore.fetchReviews(route.params.id, 'facility');
 };
 
 const goBack = () => router.push('/admin/facilities');
 </script>
 
 <template>
-  <div v-if="facility" class="space-y-8 animate-fade-in">
+  <div v-if="facility && !loading" class="space-y-8 animate-fade-in">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div class="space-y-1">
         <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
           <button @click="goBack" class="hover:text-brand-primary transition">Facilities</button>
           <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="text-slate-600 dark:text-slate-300">{{ facility.name }}</span>
+          <span class="text-slate-600 dark:text-slate-400">{{ localField(facility, 'name') }}</span>
         </nav>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{{ facility.name }}</h1>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ localField(facility, 'name') }}</h1>
         <div class="flex items-center gap-3">
-          <BaseBadge variant="primary">{{ facility.type }}</BaseBadge>
+          <BaseBadge variant="primary" :class="getTypeClass(facility.type)">{{ t(facilityTypeLabels[facility.type] || 'categories.hospital') }}</BaseBadge>
           <span class="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">corporate_fare</span>
-            {{ facility.organization }}
+            {{ facility.organization ? localField(facility.organization, 'name') : '—' }}
           </span>
         </div>
       </div>
       <div class="flex gap-2">
-        <button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
+        <router-link
+          :to="`/admin/facilities?edit=${facility.uuid}`"
+          class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2"
+        >
           <span class="material-symbols-outlined text-lg">edit</span>
           Edit Facility
-        </button>
-        <button class="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition flex items-center gap-2 shadow-lg shadow-slate-900/10">
+        </router-link>
+        <button class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white text-sm font-bold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition flex items-center gap-2 shadow-lg shadow-slate-900/10 dark:shadow-none">
           <span class="material-symbols-outlined text-lg">share</span>
           Share
         </button>
@@ -71,22 +96,22 @@ const goBack = () => router.push('/admin/facilities');
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-72 flex flex-col">
+        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary text-lg">trending_up</span>
           Reviews Trend (6 Months)
         </h3>
-        <div class="flex-grow bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 dark:text-slate-500 uppercase tracking-widest">Growth Analytics Placeholder</p>
+        <div class="flex-grow bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+          <p class="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Growth Analytics Placeholder</p>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm h-72 flex flex-col">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary text-lg">event_note</span>
           Appointments Volume
         </h3>
-        <div class="flex-grow bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 dark:text-slate-500 uppercase tracking-widest">Operational Throughput Placeholder</p>
+        <div class="flex-grow bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+          <p class="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Operational Throughput Placeholder</p>
         </div>
       </div>
     </div>
@@ -94,14 +119,14 @@ const goBack = () => router.push('/admin/facilities');
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Left Column: Reviews -->
       <div class="lg:col-span-2 space-y-6">
-        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <span class="material-symbols-outlined text-brand-primary">rate_review</span>
           Patient Reviews
         </h3>
         
         <ReviewSummary :stats="reviewStore.stats" />
 
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
           <InfiniteScroll 
             :loading="reviewStore.loading" 
             :disabled="!reviewStore.hasMore"
@@ -125,12 +150,12 @@ const goBack = () => router.push('/admin/facilities');
       <!-- Right Column: Info & Favorites -->
       <div class="space-y-6">
         <!-- Facility Info Card -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Facility Information</h3>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Facility Information</h3>
           
           <div class="space-y-4">
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
+              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
                 <span class="material-symbols-outlined text-lg">location_on</span>
               </div>
               <div>
@@ -140,27 +165,27 @@ const goBack = () => router.push('/admin/facilities');
             </div>
 
             <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
+              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
                 <span class="material-symbols-outlined text-lg">account_tree</span>
               </div>
               <div>
                 <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Parent Facility</p>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.parent || 'Main Facility' }}</p>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.parent ? localField(facility.parent, 'name') : 'Main Facility' }}</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Recent Favorites -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
           <div class="flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Favorites</h3>
-            <span class="text-xs font-black text-rose-500 bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 rounded-full">{{ reviewStore.favorites.count }}</span>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Favorites</h3>
+            <span class="text-xs font-black text-rose-500 bg-rose-50/30 dark:bg-rose-900/20 px-2 py-0.5 rounded-full">{{ reviewStore.favorites.count }}</span>
           </div>
           
           <div class="space-y-4">
             <div v-for="user in reviewStore.favorites.recent" :key="user.id" class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">
+              <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">
                 {{ user.name.charAt(0) }}
               </div>
               <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ user.name }}</span>
