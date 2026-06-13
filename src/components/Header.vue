@@ -22,25 +22,25 @@ const tabTitle = computed(() => {
 </script>
 
 <template>
-  <header class="h-[70px] bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full">
+  <header class="h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-30 w-full">
     <!-- Left Section: Header Title (Desktop) & Menu toggle (Mobile) -->
     <div class="flex items-center gap-3">
       <button 
-        class="lg:hidden text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition"
+        class="lg:hidden text-slate-600 hover:text-slate-900 p-1.5 hover:bg-slate-100 rounded-lg cursor-pointer transition"
         @click="$emit('toggleMobile')"
       >
         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <span class="text-base lg:text-lg font-semibold text-slate-800 dark:text-slate-200 tracking-tight">{{ tabTitle }}</span>
+      <span class="text-base lg:text-lg font-semibold text-slate-800 tracking-tight">{{ tabTitle }}</span>
     </div>
 
     <!-- Right Section: Alerts & Profile dropdown -->
     <div class="flex items-center gap-4 lg:gap-5">
       <!-- Notification Icon button -->
       <button 
-        class="relative p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-full cursor-pointer transition" 
+        class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-full cursor-pointer transition" 
         title="Notifications"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -50,15 +50,15 @@ const tabTitle = computed(() => {
       </button>
       
       <!-- User Profile card -->
-      <div class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-lg transition">
+      <div class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition">
         <div class="w-9 h-9 bg-brand-primary text-white font-bold rounded-full flex items-center justify-center text-sm shadow-xs shadow-brand-primary/10">
           A
         </div>
         <div class="hidden sm:flex flex-col text-left">
-          <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none mb-0.5">Admin</span>
-          <span class="text-[10px] text-slate-400 dark:text-slate-500 leading-none">admin@health.ps</span>
+          <span class="text-xs font-semibold text-slate-800 leading-none mb-0.5">Admin</span>
+          <span class="text-[10px] text-slate-400 leading-none">admin@health.ps</span>
         </div>
-        <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <svg class="w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
         </svg>
       </div>

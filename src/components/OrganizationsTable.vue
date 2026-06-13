@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useLocaleField } from '../composables/useLocaleField';
 import { useDashboardStore } from '../stores/dashboard';
 import OrganizationModal from './OrganizationModal.vue';
 import ConfirmModal from './ConfirmModal.vue';
 
 const store = useDashboardStore();
+const { localField } = useLocaleField();
 
 // Search and filtering state
 const searchQuery = ref('');
@@ -21,8 +23,8 @@ const filteredOrgs = computed(() => {
     const matchesType = selectedType.value === 'all' || org.type === selectedType.value;
     const query = searchQuery.value.toLowerCase().trim();
     const matchesSearch = !query || 
-      org.name.toLowerCase().includes(query) || 
-      org.description.toLowerCase().includes(query);
+      localField(org, 'name').toLowerCase().includes(query) || 
+      localField(org, 'description').toLowerCase().includes(query);
       
     return matchesType && matchesSearch;
   });
@@ -77,7 +79,7 @@ const handleDelete = () => {
     <!-- Page Header -->
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Organizations</h1>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Organizations</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ filteredCount }} registered {{ filteredCount === 1 ? 'organization' : 'organizations' }}</p>
       </div>
       <button 
@@ -99,13 +101,13 @@ const handleDelete = () => {
         </svg>
         <input 
           type="text" 
-          class="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition" 
+          class="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition" 
           placeholder="Search organizations..." 
           v-model="searchQuery"
         />
       </div>
       <select 
-        class="min-w-[150px] p-2.5 pr-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px] transition" 
+        class="min-w-[150px] p-2.5 pr-9 text-sm border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px] transition" 
         style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
         v-model="selectedType"
       >
@@ -119,23 +121,23 @@ const handleDelete = () => {
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
       <!-- Empty state -->
       <div v-if="filteredOrgs.length === 0" class="flex flex-col items-center justify-center py-12 px-6 text-center gap-4">
-        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500">
+        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500">
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <p class="text-sm font-semibold text-slate-600 dark:text-slate-400">No organizations found matching your criteria.</p>
-        <button class="inline-flex items-center justify-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 transition cursor-pointer" @click="resetFilters">Reset Filters</button>
+        <button class="inline-flex items-center justify-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 transition cursor-pointer" @click="resetFilters">Reset Filters</button>
       </div>
 
       <!-- Table -->
       <div v-else class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left">
           <thead>
-            <tr class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+            <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[45%]">Name</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[15%]">Type</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[15%]">Created</th>
@@ -143,16 +145,16 @@ const handleDelete = () => {
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[10%] text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
             <tr 
               v-for="org in filteredOrgs" 
               :key="org.id"
-              class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
+              class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
             >
               <td class="px-6 py-4.5">
                 <div class="flex flex-col gap-0.5">
-                  <span class="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-normal">{{ org.name }}</span>
-                  <span class="text-xs text-slate-500 dark:text-slate-400 leading-normal">{{ org.description }}</span>
+                  <span class="text-sm font-semibold text-slate-900 dark:text-white leading-normal">{{ localField(org, 'name') }}</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400 leading-normal">{{ localField(org, 'description') }}</span>
                 </div>
               </td>
               <td class="px-6 py-4.5 whitespace-nowrap">
@@ -169,7 +171,7 @@ const handleDelete = () => {
               <td class="px-6 py-4.5 whitespace-nowrap text-right">
                 <div class="flex justify-end gap-1.5">
                   <button 
-                    class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 p-1.5 rounded-lg transition cursor-pointer"
+                    class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer"
                     title="Edit Organization" 
                     @click="openEditModal(org)"
                   >
@@ -178,7 +180,7 @@ const handleDelete = () => {
                     </svg>
                   </button>
                   <button 
-                    class="text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition cursor-pointer"
+                    class="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/30 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition cursor-pointer"
                     title="Delete Organization" 
                     @click="confirmDelete(org)"
                   >
@@ -205,7 +207,7 @@ const handleDelete = () => {
     <ConfirmModal 
       :show="showDeleteModal"
       title="Delete Organization"
-      :message="`Are you sure you want to delete <strong>${selectedOrg?.name}</strong>? This action cannot be undone.`"
+      :message="`Are you sure you want to delete <strong>${localField(selectedOrg, 'name')}</strong>? This action cannot be undone.`"
       confirm-text="Delete"
       @confirm="handleDelete"
       @close="showDeleteModal = false"
