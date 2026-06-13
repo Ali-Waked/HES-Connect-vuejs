@@ -3,32 +3,37 @@ import { ref, watch } from 'vue'
 
 export const useThemeStore = defineStore('theme', () => {
   const saved = localStorage.getItem('theme')
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const isDark = ref(saved ? saved === 'dark' : prefersDark)
 
-  function applyTheme(dark) {
-    const html = document.documentElement
-    if (dark) {
-      html.classList.add('dark')
-    } else {
-      html.classList.remove('dark')
-    }
+  const isDark = ref(
+    saved
+      ? saved === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+
+  const applyTheme = (dark) => {
+    document.documentElement.classList.toggle('dark', dark)
   }
 
-  applyTheme(isDark.value)
+  watch(
+    isDark,
+    (value) => {
+      localStorage.setItem('theme', value ? 'dark' : 'light')
+      applyTheme(value)
+    },
+    { immediate: true }
+  )
 
-  watch(isDark, (val) => {
-    localStorage.setItem('theme', val ? 'dark' : 'light')
-    applyTheme(val)
-  })
-
-  function toggle() {
+  const toggle = () => {
     isDark.value = !isDark.value
   }
 
-  function setDark(value) {
+  const setDark = (value) => {
     isDark.value = value
   }
 
-  return { isDark, toggle, setDark }
+  return {
+    isDark,
+    toggle,
+    setDark,
+  }
 })
