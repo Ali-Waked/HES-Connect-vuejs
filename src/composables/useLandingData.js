@@ -1,5 +1,6 @@
 import { ref, onMounted } from 'vue';
 import * as publicApi from '../api/public';
+import { useRefetchOnLanguageChange } from './useRefetchOnLanguageChange';
 
 export function useLandingData() {
   const loading = ref(true);
@@ -15,7 +16,8 @@ export function useLandingData() {
   const doctors = ref([]);
   const announcements = ref([]);
 
-  onMounted(async () => {
+  async function fetchAll() {
+    loading.value = true;
     try {
       const [
         statsData,
@@ -57,7 +59,13 @@ export function useLandingData() {
     } finally {
       loading.value = false;
     }
+  }
+
+  onMounted(() => {
+    fetchAll();
   });
+
+  useRefetchOnLanguageChange(fetchAll);
 
   return {
     loading,

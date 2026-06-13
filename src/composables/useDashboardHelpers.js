@@ -21,10 +21,10 @@ export function useDashboardHelpers() {
       'Government': 'bg-blue-100 text-blue-800',
       
       // Facility Types
-      'Medical Point': 'bg-amber-100 text-amber-800',
-      'Pharmacy': 'bg-emerald-100 text-emerald-800',
-      'Clinic': 'bg-blue-100 text-blue-800',
-      'Hospital': 'bg-red-100 text-red-800'
+      'medical_point': 'bg-amber-100 text-amber-800',
+      'pharmacy': 'bg-emerald-100 text-emerald-800',
+      'clinic': 'bg-blue-100 text-blue-800',
+      'hospital': 'bg-red-100 text-red-800'
     };
     return typeMap[type] || 'bg-amber-100 text-amber-800';
   };
