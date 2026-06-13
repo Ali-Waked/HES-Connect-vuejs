@@ -1,7 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import BaseDialog from '../global/BaseDialog.vue';
 import PermissionSelector from '../global/PermissionSelector.vue';
+import LocalizedInput from '@/components/shared/localized/LocalizedInput.vue';
 import { useAccessStore } from '../../../stores/access';
 
 const props = defineProps({
@@ -11,42 +13,47 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 const store = useAccessStore();
+const { t: $t } = useI18n();
 
-const form = ref({
-  name: '',
+const form = reactive({
+  name: { en: '', ar: '' },
   permissions: []
 });
 
-const errors = ref({});
+const errors = reactive({ name: '' });
 
 watch(() => props.show, (val) => {
   if (isShowing) {
     if (props.role) {
-      form.value = { 
-        name: props.role.name,
-        permissions: [...props.role.permissions]
-      };
+      form.name = { en: props.role.name?.en || props.role.name_en || '', ar: props.role.name?.ar || props.role.name_ar || '' };
+      form.permissions = [...(props.role.permissions || [])];
     } else {
-      form.value = { name: '', permissions: [] };
+      form.name = { en: '', ar: '' };
+      form.permissions = [];
     }
-    errors.value = {};
+    errors.name = '';
   }
 });
 
 const validate = () => {
-  errors.value = {};
-  if (!form.value.name.trim()) errors.value.name = 'Role name is required';
-  if (form.value.permissions.length === 0) errors.value.permissions = 'At least one permission is required';
-  return Object.keys(errors.value).length === 0;
+  errors.name = '';
+  if (!form.name.en?.trim()) { errors.name = $t('common.required'); return false }
+  if (!form.name.ar?.trim()) { errors.name = $t('common.required'); return false }
+  return true;
 };
 
 const handleSubmit = () => {
   if (!validate()) return;
 
+  const payload = {
+    name: { en: form.name.en.trim(), ar: form.name.ar.trim() },
+    permissions: form.permissions
+  };
+
   if (props.role) {
-    store.updateRole(props.role.id, form.value);
+    store.updateRole(props.role.id, payload);
   } else {
-    store.addRole(form.value);
+    store.addRole(payload);
   }
   emit('close');
 };
@@ -55,22 +62,12 @@ const handleSubmit = () => {
 <template>
   <BaseDialog 
     :show="show" 
-    :title="role ? 'Edit Role' : 'Create New Role'" 
+    :title="role ? $t('common.editRole') : $t('common.createNewRole')" 
     size="lg"
     @close="$emit('close')"
   >
     <form @submit.prevent="handleSubmit" class="space-y-6">
-      <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Role Name <span class="text-rose-500">*</span></label>
-        <input 
-          v-model="form.name"
-          type="text"
-          class="w-full p-3 text-sm border rounded-xl focus:outline-none transition"
-          :class="errors.name ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-white'"
-          placeholder="e.g. Facility Manager"
-        />
-        <p v-if="errors.name" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors.name }}</p>
-      </div>
+      <LocalizedInput v-model="form.name" field="name" :label="$t('common.name')" required :error="errors.name" />
 
       <PermissionSelector 
         v-model="form.permissions"
@@ -79,19 +76,19 @@ const handleSubmit = () => {
       />
       <p v-if="errors.permissions" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors.permissions }}</p>
 
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
         <button 
           type="button"
           @click="$emit('close')"
-          class="py-2.5 px-6 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-bold rounded-lg transition"
+          class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-lg transition"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </button>
         <button 
           type="submit"
           class="py-2.5 px-8 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/15 transition"
         >
-          {{ role ? 'Save Changes' : 'Create Role' }}
+          {{ role ? $t('common.saveChanges') : $t('common.createRole') }}
         </button>
       </div>
     </form>

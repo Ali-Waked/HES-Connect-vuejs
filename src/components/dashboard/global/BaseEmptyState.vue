@@ -10,7 +10,7 @@ defineEmits(['reset']);
 
 <template>
   <div class="flex flex-col items-center justify-center py-12 px-6 text-center gap-4">
-    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
+    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600">
       <svg v-if="icon === 'mail'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
@@ -34,12 +34,12 @@ defineEmits(['reset']);
       </svg>
     </div>
     <div class="max-w-xs">
-      <h3 class="text-base font-bold text-slate-900">{{ title }}</h3>
-      <p class="text-sm text-slate-500 mt-1">{{ description }}</p>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ title }}</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ description }}</p>
     </div>
     <button 
       v-if="$attrs.onReset"
-      class="inline-flex items-center justify-center py-2 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-600 transition cursor-pointer mt-2"
+      class="inline-flex items-center justify-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 transition cursor-pointer mt-2"
       @click="$emit('reset')"
     >
       Reset Filters

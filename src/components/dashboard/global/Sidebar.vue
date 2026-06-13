@@ -1,68 +1,71 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
 defineProps({
   mobileOpen: { type: Boolean, required: true }
 });
 
 defineEmits(['closeMobile']);
 
+const { t } = useI18n();
+
 const menuGroups = [
   {
-    title: 'Platform Overview',
+    title: () => t('sidebar.platformOverview'),
     items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'grid_view' },
-      { id: 'audit-logs', label: 'Audit Logs', icon: 'history' },
-      { id: 'reports', label: 'Reports', icon: 'assessment' }
+      { id: 'dashboard', label: () => t('sidebar.dashboard'), icon: 'grid_view' },
+      { id: 'audit-logs', label: () => t('sidebar.auditLogs'), icon: 'history' },
+      { id: 'reports', label: () => t('sidebar.reports'), icon: 'assessment' }
     ]
   },
   {
-    title: 'Medical Operations',
+    title: () => t('sidebar.medicalOperations'),
     items: [
-      { id: 'appointments', label: 'Appointments', icon: 'calendar_month' },
-      { id: 'prescriptions', label: 'Prescriptions', icon: 'description' },
-      { id: 'medication-requests', label: 'Med. Requests', icon: 'medication_liquid' },
-      { id: 'medicines', label: 'Medicines', icon: 'pill' }
+      { id: 'appointments', label: () => t('sidebar.appointments'), icon: 'calendar_month' },
+      { id: 'prescriptions', label: () => t('sidebar.prescriptions'), icon: 'description' },
+      { id: 'medication-requests', label: () => t('sidebar.medRequests'), icon: 'medication_liquid' },
+      { id: 'medicines', label: () => t('sidebar.medicines'), icon: 'pill' }
     ]
   },
   {
-    title: 'Directory',
+    title: () => t('sidebar.directory'),
     items: [
-      { id: 'organizations', label: 'Organizations', icon: 'corporate_fare' },
-      { id: 'facilities', label: 'Facilities', icon: 'home_health' },
-      { id: 'departments', label: 'Departments', icon: 'lan' },
-      { id: 'staff', label: 'Staff', icon: 'medical_information' },
-      { id: 'patients', label: 'Patients', icon: 'patient_list' }
+      { id: 'organizations', label: () => t('sidebar.organizations'), icon: 'corporate_fare' },
+      { id: 'organization-users', label: () => t('sidebar.organizationUsers'), icon: 'group_add' },
+      { id: 'facilities', label: () => t('sidebar.facilities'), icon: 'home_health' },
+      { id: 'departments', label: () => t('sidebar.departments'), icon: 'lan' }
     ]
   },
   {
-    title: 'Users & Access',
+    title: () => t('sidebar.usersAccess'),
     items: [
-      { id: 'users', label: 'All Users', icon: 'group' },
-      { id: 'roles', label: 'Roles', icon: 'shield_person' },
-      { id: 'permissions', label: 'Permissions', icon: 'vpn_key' },
-      { id: 'tags', label: 'Tags', icon: 'tag' }
+      { id: 'users', label: () => t('sidebar.allUsers'), icon: 'group' },
+      { id: 'roles', label: () => t('sidebar.roles'), icon: 'shield_person' },
+      { id: 'permissions', label: () => t('sidebar.permissions'), icon: 'vpn_key' },
+      { id: 'tags', label: () => t('sidebar.tags'), icon: 'tag' }
     ]
   },
   {
-    title: 'Content & Community',
+    title: () => t('sidebar.contentCommunity'),
     items: [
-      { id: 'articles', label: 'Articles', icon: 'article' },
-      { id: 'stories', label: 'Stories', icon: 'auto_stories' },
-      { id: 'reviews', label: 'Reviews', icon: 'star' },
-      { id: 'comments', label: 'Comments', icon: 'chat_bubble' }
+      { id: 'categories', label: () => t('sidebar.categories'), icon: 'category' },
+      { id: 'articles', label: () => t('sidebar.articles'), icon: 'article' },
+      { id: 'stories', label: () => t('sidebar.stories'), icon: 'auto_stories' },
+      { id: 'reviews', label: () => t('sidebar.reviews'), icon: 'star' }
     ]
   },
   {
-    title: 'Communications',
+    title: () => t('sidebar.communications'),
     items: [
-      { id: 'messages', label: 'Contact Inbox', icon: 'mail' },
-      { id: 'conversations', label: 'Conversations', icon: 'forum' }
+      { id: 'messages', label: () => t('sidebar.contactInbox'), icon: 'mail' },
+      { id: 'conversations', label: () => t('sidebar.conversations'), icon: 'forum' }
     ]
   },
   {
-    title: 'System',
+    title: () => t('sidebar.system'),
     items: [
-      { id: 'jobs', label: 'Job Board', icon: 'work' },
-      { id: 'settings', label: 'Settings', icon: 'settings' }
+      { id: 'jobs', label: () => t('sidebar.jobBoard'), icon: 'work' },
+      { id: 'settings', label: () => t('sidebar.settings'), icon: 'settings' }
     ]
   }
 ];
@@ -79,34 +82,37 @@ const menuGroups = [
 
     <!-- Sidebar Aside drawer -->
     <aside 
-      class="fixed top-0 bottom-0 left-0 w-[280px] bg-slate-900 text-slate-100 flex flex-col p-6 z-40 transition-transform duration-300 lg:translate-x-0"
-      :class="mobileOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed top-0 bottom-0 w-[280px] bg-slate-900 text-slate-100 flex flex-col p-6 z-40 transition-transform duration-300"
+      :class="[
+        $i18n.locale === 'ar' ? 'right-0 lg:translate-x-0' : 'left-0 lg:translate-x-0',
+        mobileOpen ? 'translate-x-0' : ($i18n.locale === 'ar' ? 'translate-x-full' : '-translate-x-full')
+      ]"
     >
       <!-- Brand Logo Section -->
-      <div class="flex items-center gap-3 pb-8 px-2 border-b border-white/5 mb-6">
-        <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-primary/20 font-bold">
+      <div class="flex items-center gap-3 pb-8 px-2 border-b border-white/5 dark:border-white/10 mb-6">
+        <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white  font-bold">
           <span class="material-symbols-outlined text-2xl font-bold">clinical_notes</span>
         </div>
         <div class="flex flex-col min-w-0">
-          <span class="text-sm font-black text-white tracking-tight truncate">HES Super Admin</span>
-          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Platform Owner</span>
+          <span class="text-sm font-black text-white tracking-tight truncate">{{ t('sidebar.heSAdmin') }}</span>
+          <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('sidebar.platformOwner') }}</span>
         </div>
       </div>
 
       <!-- Menu Navigation -->
       <nav class="flex-grow overflow-y-auto pr-2 custom-scrollbar -mr-2">
         <div v-for="group in menuGroups" :key="group.title" class="mb-8 last:mb-0">
-          <h5 class="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] mb-4">{{ group.title }}</h5>
-          <ul class="space-y-1 list-none pl-0 m-0">
+          <h5 class="px-4 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em] mb-4">{{ group.title() }}</h5>
+          <ul class="space-y-1 list-none m-0">
             <li v-for="item in group.items" :key="item.id" class="w-full">
               <router-link 
                 :to="`/admin/${item.id}`"
-                class="flex items-center gap-3 py-2.5 px-4 text-[13px] font-bold rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-200 cursor-pointer group" 
-                active-class="bg-brand-primary! text-white! shadow-lg shadow-brand-primary/25"
+                class="flex items-center gap-3 py-2.5 px-4 text-[13px] font-bold rounded-xl text-slate-400 hover:bg-white/5 dark:hover:bg-white/10 hover:text-white transition-all duration-200 cursor-pointer group" 
+                active-class="bg-brand-primary! text-white! "
                 @click="$emit('closeMobile')"
               >
                 <span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">{{ item.icon }}</span>
-                <span>{{ item.label }}</span>
+                <span>{{ item.label() }}</span>
               </router-link>
             </li>
           </ul>
@@ -114,12 +120,12 @@ const menuGroups = [
       </nav>
 
       <!-- Sidebar Footer -->
-      <div class="pt-6 border-t border-white/5 flex items-center justify-between mt-auto">
+      <div class="pt-6 border-t border-white/5 dark:border-white/10 flex items-center justify-between mt-auto">
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-          <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">System Online</span>
+          <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('sidebar.systemOnline') }}</span>
         </div>
-        <span class="text-[9px] font-bold text-slate-600">v2.4.0-PRO</span>
+        <span class="text-[9px] font-bold text-slate-600 dark:text-slate-500">v2.4.0-PRO</span>
       </div>
     </aside>
   </div>

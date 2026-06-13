@@ -80,18 +80,18 @@ const handleDelete = () => {
       </template>
 
       <template #cell(description)="{ item }">
-        <span class="text-sm text-slate-500">{{ item.description }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ item.description }}</span>
       </template>
 
       <template #cell(roles_count)="{ item }">
-        <span class="text-sm font-semibold text-slate-600">{{ getRolesForPermission(item.id).length }} roles</span>
+        <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ getRolesForPermission(item.id).length }} roles</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="openEditModal(item)"
-            class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
             title="Edit"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

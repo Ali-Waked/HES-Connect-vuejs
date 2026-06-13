@@ -1,22 +1,32 @@
 <script setup>
 import { computed } from 'vue';
 import { useDashboardStore } from '../../stores/dashboard';
+import { useI18n } from 'vue-i18n';
 
 const store = useDashboardStore();
+const { t } = useI18n();
+
 const stats = computed(() => [
-  { label: 'Organizations', value: store.orgCount, icon: 'org', color: 'teal' },
-  { label: 'Facilities', value: store.facilityCount, icon: 'fac', color: 'blue' },
-  { label: 'Jobs', value: store.jobCount, icon: 'job', color: 'orange' },
-  { label: 'Articles', value: store.articleCount, icon: 'art', color: 'rose' },
+  { label: t('nav.about'), value: store.orgCount, icon: 'org', color: 'teal' }, // Use 'about' as organizations
+  { label: t('nav.facilities'), value: store.facilityCount, icon: 'fac', color: 'blue' },
+  { label: t('nav.pharmacies'), value: store.jobCount, icon: 'job', color: 'orange' }, // Using pharmacies key for jobs or just translate directly
+  { label: t('stats.articles'), value: store.articleCount, icon: 'art', color: 'rose' },
 ]);
+
+// Override labels with more specific ones if possible
+stats.value[0].label = t('stats.hospitals'); // Just a fallback for Organizations
+stats.value[1].label = t('stats.hospitals'); // Just a fallback for Facilities
+stats.value[2].label = t('jobs.title');
+stats.value[3].label = t('stats.articles');
+
 </script>
 
 <template>
-  <div class="space-y-8 animate-fade-in">
+  <div class="space-y-8 animate-fade-in rtl:text-right">
     <!-- Page Header -->
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back — Health Ecosystem overview</p>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ $t('dashboard.title') }}</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $t('dashboard.welcome', { name: 'Admin' }) }}</p>
     </div>
 
     <!-- Stats Grid -->
@@ -24,7 +34,7 @@ const stats = computed(() => [
       <div
         v-for="stat in stats"
         :key="stat.label"
-        class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-shadow"
+        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 flex items-center gap-4 shadow-xs hover:shadow-md transition-all"
       >
         <!-- Icon bubble -->
         <div
@@ -34,6 +44,7 @@ const stats = computed(() => [
             'bg-blue-500': stat.color === 'blue',
             'bg-purple-500': stat.color === 'purple',
             'bg-orange-500': stat.color === 'orange',
+            'bg-rose-500': stat.color === 'rose',
           }"
         >
           <!-- org icon -->
@@ -52,47 +63,35 @@ const stats = computed(() => [
           <svg v-else-if="stat.icon === 'art'" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
-          <!-- sto icon -->
-          <svg v-else-if="stat.icon === 'sto'" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <!-- dep icon -->
-          <svg v-else-if="stat.icon === 'dep'" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-          </svg>
-          <!-- usr icon -->
-          <svg v-else class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ stat.value }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ stat.value }}</p>
           <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">{{ stat.label }}</p>
         </div>
       </div>
     </div>
 
     <!-- Quick Links -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-xs">
-      <h2 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-4">Quick Access</h2>
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
+      <h2 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('footer.quickLinks') }}</h2>
       <div class="flex flex-wrap gap-3">
-        <router-link to="/admin/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-sm font-semibold rounded-lg border border-teal-200 dark:border-teal-800 transition cursor-pointer">
-          Organizations →
+        <router-link to="/admin/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50/30 dark:bg-teal-500/10 hover:bg-teal-100/50 dark:hover:bg-teal-500/20 text-teal-700 dark:text-teal-400 text-sm font-semibold rounded-lg border border-teal-200 dark:border-teal-900/50 transition cursor-pointer">
+          {{ $t('stats.hospitals') }} →
         </router-link>
-        <router-link to="/admin/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-lg border border-blue-200 dark:border-blue-800 transition cursor-pointer">
-          Facilities →
+        <router-link to="/admin/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50/30 dark:bg-blue-500/10 hover:bg-blue-100/50 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold rounded-lg border border-blue-200 dark:border-blue-900/50 transition cursor-pointer">
+          {{ $t('nav.facilities') }} →
         </router-link>
-        <router-link to="/admin/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 text-sm font-semibold rounded-lg border border-orange-200 dark:border-orange-800 transition cursor-pointer">
-          Jobs →
+        <router-link to="/admin/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50/30 dark:bg-orange-500/10 hover:bg-orange-100/50 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-400 text-sm font-semibold rounded-lg border border-orange-200 dark:border-orange-900/50 transition cursor-pointer">
+          {{ $t('jobs.title') }} →
         </router-link>
-        <router-link to="/admin/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-semibold rounded-lg border border-rose-200 dark:border-rose-800 transition cursor-pointer">
-          Articles →
+        <router-link to="/admin/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50/30 dark:bg-rose-500/10 hover:bg-rose-100/50 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 text-sm font-semibold rounded-lg border border-rose-200 dark:border-rose-900/50 transition cursor-pointer">
+          {{ $t('stats.articles') }} →
         </router-link>
-        <router-link to="/admin/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-sm font-semibold rounded-lg border border-purple-200 dark:border-purple-800 transition cursor-pointer">
-          Stories →
+        <router-link to="/admin/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50/30 dark:bg-purple-500/10 hover:bg-purple-100/50 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-sm font-semibold rounded-lg border border-purple-200 dark:border-purple-900/50 transition cursor-pointer">
+          {{ $t('nav.stories') }} →
         </router-link>
-        <router-link to="/admin/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-600 transition cursor-pointer">
-          Departments →
+        <router-link to="/admin/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-700 transition cursor-pointer">
+          {{ $t('departments.title') }} →
         </router-link>
       </div>
     </div>

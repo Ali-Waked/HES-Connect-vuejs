@@ -36,23 +36,23 @@ const groupedPermissions = computed(() => groupPermissions(rolePermissions.value
     @close="$emit('close')"
   >
     <div v-if="role" class="space-y-6">
-      <div class="flex justify-between items-start border-b border-slate-100 pb-4">
+      <div class="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
-          <h4 class="text-2xl font-black text-slate-900 tracking-tight">{{ role.name }}</h4>
-          <p class="text-sm text-slate-500 mt-1">System Role Definition</p>
+          <h4 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ role.name }}</h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">System Role Definition</p>
         </div>
         <div class="text-right">
           <div class="text-2xl font-black text-brand-primary">{{ role.user_count }}</div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Users</p>
+          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Active Users</p>
         </div>
       </div>
 
       <div class="space-y-4">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned Permissions ({{ role.permissions.length }})</label>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assigned Permissions ({{ role.permissions.length }})</label>
         
         <div class="space-y-4">
           <div v-for="(perms, group) in groupedPermissions" :key="group" class="space-y-2">
-            <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ group }}</h5>
+            <h5 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ group }}</h5>
             <div class="flex flex-wrap gap-2">
               <BaseBadge 
                 v-for="perm in perms" 
@@ -66,10 +66,10 @@ const groupedPermissions = computed(() => groupPermissions(rolePermissions.value
         </div>
       </div>
 
-      <div class="flex justify-center pt-4 border-t border-slate-100">
+      <div class="flex justify-center pt-4 border-t border-slate-100 dark:border-slate-800">
         <button 
           @click="$emit('close')"
-          class="w-full py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-bold rounded-xl transition"
+          class="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-bold rounded-xl transition"
         >
           Close View
         </button>

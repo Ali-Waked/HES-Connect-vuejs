@@ -78,7 +78,7 @@ const handleDelete = () => {
 
     <BaseTable :columns="columns" :items="filteredRoles">
       <template #cell(name)="{ item }">
-        <span class="text-sm font-bold text-slate-900">{{ item.name }}</span>
+        <span class="text-sm font-bold text-slate-900 dark:text-white">{{ item.name }}</span>
       </template>
 
       <template #cell(permissions)="{ item }">
@@ -86,14 +86,14 @@ const handleDelete = () => {
       </template>
 
       <template #cell(user_count)="{ item }">
-        <span class="text-sm font-semibold text-slate-600">{{ item.user_count }} users</span>
+        <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">{{ item.user_count }} users</span>
       </template>
 
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button 
             @click="viewRole(item)"
-            class="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
             title="View Details"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="openEditModal(item)"
-            class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
             title="Edit"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

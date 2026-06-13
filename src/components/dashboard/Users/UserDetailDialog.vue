@@ -1,9 +1,10 @@
-﻿<script setup>
+<script setup>
 import { computed } from 'vue';
 import BaseDialog from '../global/BaseDialog.vue';
 import BaseBadge from '../global/BaseBadge.vue';
 import { useAccessStore } from '../../../stores/access';
 import { useDashboardStore } from '../../../stores/dashboard';
+import { useLocaleField } from '../../../composables/useLocaleField';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -15,6 +16,7 @@ const emit = defineEmits(['close']);
 
 const accessStore = useAccessStore();
 const dashboardStore = useDashboardStore();
+const { localField } = useLocaleField();
 
 const userRole = computed(() => {
   if (!props.user) return null;
@@ -59,14 +61,14 @@ const handleRoleChange = (e) => {
           <img v-if="user.profile?.coverImage" :src="user.profile.coverImage" class="w-full h-full object-cover opacity-50" />
         </div>
         <div class="absolute -bottom-6 left-6 flex items-end gap-4">
-          <div class="w-24 h-24 rounded-2xl bg-white dark:bg-slate-800 p-1 shadow-xl">
-            <div class="w-full h-full rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center font-black text-3xl border-4 border-white">
-              {{ user.name.charAt(0) }}
+          <div class="w-24 h-24 rounded-2xl bg-white dark:bg-slate-900 p-1 shadow-xl">
+            <div class="w-full h-full rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center font-black text-3xl border-4 border-white dark:border-slate-900">
+              {{ localField(user, 'name').charAt(0) }}
             </div>
           </div>
           <div class="mb-2 pb-1">
-            <h4 class="text-xl font-black text-slate-900 dark:text-slate-100 leading-none">{{ user.name }}</h4>
-            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">{{ type }} â€¢ Joined {{ user.joined || 'Recently' }}</p>
+            <h4 class="text-xl font-black text-slate-900 dark:text-white leading-none">{{ localField(user, 'name') }}</h4>
+            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">{{ type }} • Joined {{ user.joined || 'Recently' }}</p>
           </div>
         </div>
       </div>
@@ -98,8 +100,8 @@ const handleRoleChange = (e) => {
           </div>
 
           <!-- Permissions Section -->
-          <div class="pt-6 border-t border-slate-100 dark:border-slate-700 space-y-4">
-            <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Inherited Permissions</label>
+          <div class="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+            <label class="block text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Inherited Permissions</label>
             <div v-if="userRole" class="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               <div v-for="(perms, group) in groupedPermissions" :key="group" class="space-y-2">
                 <h5 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ group }}</h5>
@@ -107,7 +109,7 @@ const handleRoleChange = (e) => {
                   <span 
                     v-for="perm in perms" 
                     :key="perm.id"
-                    class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase tracking-tighter"
+                    class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase tracking-tighter"
                   >
                     {{ perm.name.split(':')[1] || perm.name }}
                   </span>
@@ -119,13 +121,13 @@ const handleRoleChange = (e) => {
 
         <!-- Role & Management Column -->
         <div class="space-y-6">
-          <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 space-y-6">
+          <div class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 space-y-6">
             <div class="space-y-3">
-              <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Access Role</label>
+              <label class="block text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Access Role</label>
               <select 
                 :value="user.role_id"
                 @change="handleRoleChange"
-                class="w-full p-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none transition cursor-pointer bg-white dark:bg-slate-800 shadow-sm"
+                class="w-full p-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none transition cursor-pointer bg-white dark:bg-slate-900 dark:text-slate-100 shadow-sm"
               >
                 <option v-for="role in accessStore.roles" :key="role.id" :value="role.id">
                   {{ role.name }}
@@ -135,7 +137,7 @@ const handleRoleChange = (e) => {
 
             <div class="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-700">
               <button class="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition">Reset Password</button>
-              <button class="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-rose-600 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-50 hover:border-rose-100 transition">Suspend User</button>
+              <button class="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-100 dark:hover:border-rose-900/30 transition">Suspend User</button>
             </div>
           </div>
 
@@ -145,10 +147,10 @@ const handleRoleChange = (e) => {
         </div>
       </div>
 
-      <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700">
+      <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
         <button 
           @click="$emit('close')"
-          class="px-8 py-3 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition shadow-lg"
+          class="px-8 py-3 bg-slate-900 dark:bg-slate-700 text-white text-sm font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-600 transition shadow-lg"
         >
           Save Changes
         </button>

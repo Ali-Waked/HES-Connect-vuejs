@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 
 const props = defineProps({
-  modelValue: { type: String, default: '' },
+  modelValue: { type: [String, File], default: null },
   label: { type: String, default: 'Upload Image' },
   aspectRatio: { type: String, default: 'aspect-video' }
 });
@@ -10,17 +10,39 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const isDragging = ref(false);
-const previewUrl = ref(props.modelValue);
+const previewUrl = ref(null);
+let objectUrl = null;
+
+function revokeObjectUrl() {
+  if (objectUrl) {
+    URL.revokeObjectURL(objectUrl);
+    objectUrl = null;
+  }
+}
+
+watch(() => props.modelValue, (val) => {
+  revokeObjectUrl();
+  if (val instanceof File) {
+    previewUrl.value = URL.createObjectURL(val);
+    objectUrl = previewUrl.value;
+  } else if (typeof val === 'string' && val) {
+    previewUrl.value = val;
+  } else {
+    previewUrl.value = null;
+  }
+}, { immediate: true });
+
+onUnmounted(() => {
+  revokeObjectUrl();
+});
 
 const handleFile = (file) => {
   if (!file || !file.type.startsWith('image/')) return;
-  
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    previewUrl.value = e.target.result;
-    emit('update:modelValue', e.target.result);
-  };
-  reader.readAsDataURL(file);
+
+  revokeObjectUrl();
+  previewUrl.value = URL.createObjectURL(file);
+  objectUrl = previewUrl.value;
+  emit('update:modelValue', file);
 };
 
 const onDrop = (e) => {
@@ -35,16 +57,17 @@ const onFileChange = (e) => {
 };
 
 const removeImage = () => {
-  previewUrl.value = '';
-  emit('update:modelValue', '');
+  revokeObjectUrl();
+  previewUrl.value = null;
+  emit('update:modelValue', null);
 };
 </script>
 
 <template>
   <div class="space-y-2">
     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">{{ label }}</label>
-    
-    <div 
+
+    <div
       v-if="!previewUrl"
       class="relative border-2 border-dashed rounded-xl transition-all duration-200 group"
       :class="[
@@ -55,9 +78,9 @@ const removeImage = () => {
       @dragleave.prevent="isDragging = false"
       @drop.prevent="onDrop"
     >
-      <input 
-        type="file" 
-        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+      <input
+        type="file"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         accept="image/*"
         @change="onFileChange"
       />
@@ -75,7 +98,7 @@ const removeImage = () => {
           <span class="material-symbols-outlined text-xl">edit</span>
           <input type="file" class="hidden" accept="image/*" @change="onFileChange" />
         </label>
-        <button 
+        <button
           @click="removeImage"
           class="p-2 bg-white rounded-lg text-rose-600 hover:bg-rose-50 transition shadow-lg cursor-pointer"
         >

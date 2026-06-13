@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 defineProps({
   show: { type: Boolean, required: true },
   title: { type: String, default: 'Confirm Action' },
@@ -16,16 +20,16 @@ defineEmits(['confirm', 'close']);
     class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
     @click.self="$emit('close')"
   >
-    <div class="bg-white rounded-xl w-full max-w-[440px] shadow-2xl overflow-hidden border border-slate-200 animate-slide-up">
+    <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-[440px] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-slide-up">
       <div class="p-6 pb-0 flex justify-between items-center">
         <h3 
           class="text-lg font-bold"
-          :class="isDanger ? 'text-red-600' : 'text-slate-900'"
+          :class="isDanger ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'"
         >
           {{ title }}
         </h3>
         <button 
-          class="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-lg cursor-pointer transition"
+          class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition"
           @click="$emit('close')"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -35,16 +39,16 @@ defineEmits(['confirm', 'close']);
       </div>
       
       <div class="p-6 pt-3">
-        <p class="text-sm text-slate-600 leading-relaxed" v-html="message"></p>
+        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed" v-html="message"></p>
       </div>
 
-      <div class="p-4 px-6 bg-slate-50 flex justify-end gap-3">
+      <div class="p-4 px-6 bg-slate-50 dark:bg-slate-900/40 flex justify-end gap-3">
         <button 
           type="button" 
-          class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+          class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition cursor-pointer"
           @click="$emit('close')"
         >
-          Cancel
+          {{ t('common.cancel') }}
         </button>
         <button 
           type="button" 
