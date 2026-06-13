@@ -2,7 +2,9 @@
 import { useMessagesStore } from '../../stores/messages';
 import BaseStatsCard from '../../components/dashboard/global/BaseStatsCard.vue';
 import MessagesTable from '../../components/dashboard/Messages/MessagesTable.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useMessagesStore();
 </script>
 
@@ -10,8 +12,8 @@ const store = useMessagesStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Contact Messages</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage and respond to inquiries from users</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.contactMessages') }}</h1>
+        <p class="text-sm text-slate-500">{{ t('pageTitles.messagesDesc') }}</p>
       </div>
     </div>
 

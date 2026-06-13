@@ -1,5 +1,6 @@
-﻿<script setup>
+<script setup>
 import BaseDialog from '../global/BaseDialog.vue';
+import { useLocaleField } from '../../../composables/useLocaleField';
 
 defineProps({
   show: { type: Boolean, required: true },
@@ -7,6 +8,8 @@ defineProps({
 });
 
 defineEmits(['close']);
+
+const { localField } = useLocaleField();
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -22,9 +25,9 @@ const formatDate = (dateString) => {
     @close="$emit('close')"
   >
     <div v-if="medicine" class="space-y-6">
-      <div class="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 group">
+      <div class="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 group">
         <img v-if="medicine.image" :src="medicine.image" class="w-full h-full object-cover" />
-        <div v-else class="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-500">
+        <div v-else class="w-full h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-600">
           <span class="material-symbols-outlined text-6xl">medical_services</span>
           <p class="text-sm font-medium mt-2">No image available</p>
         </div>
@@ -32,23 +35,23 @@ const formatDate = (dateString) => {
 
       <div class="space-y-4">
         <div>
-          <h4 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ medicine.name }}</h4>
+          <h4 class="text-2xl font-bold text-slate-900 dark:text-white">{{ localField(medicine, 'name') }}</h4>
           <p class="text-xs font-mono text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">UUID: {{ medicine.uuid }}</p>
         </div>
 
-        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
           <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">About this Medicine</label>
-          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ medicine.description || 'No description provided.' }}</p>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ localField(medicine, 'description') || 'No description provided.' }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl">
             <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Added On</label>
-            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">{{ formatDate(medicine.created_at) }}</p>
+            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ formatDate(medicine.created_at) }}</p>
           </div>
           <div class="p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl">
             <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Last Updated</label>
-            <p class="text-xs font-bold text-slate-900 dark:text-slate-100">{{ formatDate(medicine.updated_at) }}</p>
+            <p class="text-xs font-bold text-slate-900 dark:text-white">{{ formatDate(medicine.updated_at) }}</p>
           </div>
         </div>
       </div>
@@ -56,7 +59,7 @@ const formatDate = (dateString) => {
       <div class="flex justify-center pt-2">
         <button 
           @click="$emit('close')"
-          class="w-full py-3 bg-slate-900 text-white hover:bg-slate-800 text-sm font-bold rounded-xl transition shadow-lg shadow-slate-900/10"
+          class="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600 text-sm font-bold rounded-xl transition shadow-lg shadow-slate-900/10 dark:shadow-none"
         >
           Close Preview
         </button>

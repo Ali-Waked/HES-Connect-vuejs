@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import BaseDialog from '../global/BaseDialog.vue';
 import JsonViewer from '../global/JsonViewer.vue';
 
@@ -26,15 +26,15 @@ const formatDate = (dateString) => {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Report ID</p>
-          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ report.id }}</p>
+          <p class="text-sm font-bold text-slate-900 dark:text-white">{{ report.id }}</p>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Type</p>
-          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ report.type }}</p>
+          <p class="text-sm font-bold text-slate-900 dark:text-white">{{ report.type }}</p>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Generated At</p>
-          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ formatDate(report.generated_at) }}</p>
+          <p class="text-sm font-bold text-slate-900 dark:text-white">{{ formatDate(report.generated_at) }}</p>
         </div>
       </div>
 

@@ -2,7 +2,9 @@
 import { usePaymentsStore } from '../../stores/payments';
 import BaseStatsCard from '../../components/dashboard/global/BaseStatsCard.vue';
 import PaymentsTable from '../../components/dashboard/Payments/PaymentsTable.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = usePaymentsStore();
 </script>
 
@@ -10,8 +12,8 @@ const store = usePaymentsStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Payments Records</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Monitor all incoming transactions and payment methods</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">{{ t('pageTitles.paymentsRecords') }}</h1>
+        <p class="text-sm text-slate-500">{{ t('pageTitles.paymentsDesc') }}</p>
       </div>
     </div>
 

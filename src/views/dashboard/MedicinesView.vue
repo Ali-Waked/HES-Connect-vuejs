@@ -2,7 +2,9 @@
 import { useMedicinesStore } from '../../stores/medicines';
 import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
 import MedicinesTable from '../../components/dashboard/Medicines/MedicinesTable.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useMedicinesStore();
 </script>
 
@@ -11,7 +13,7 @@ const store = useMedicinesStore();
     <!-- Header -->
     <div class="flex justify-between items-end">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Pharmaceutical Registry</h1>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.pharmaceuticalRegistry') }}</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Platform-wide inventory of approved medical drugs and supplies</p>
       </div>
     </div>

@@ -1,8 +1,9 @@
-﻿<script setup>
+<script setup>
 import BaseDialog from '../global/BaseDialog.vue';
 import BaseBadge from '../global/BaseBadge.vue';
 import RatingStars from '../global/RatingStars.vue';
 import { useReviewsStore } from '../../../stores/reviews';
+import { useLocaleField } from '../../../composables/useLocaleField';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -11,6 +12,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 const store = useReviewsStore();
+const { localField } = useLocaleField();
 
 const getStatusVariant = (status) => {
   switch (status) {
@@ -45,13 +47,13 @@ const hide = () => {
     @close="$emit('close')"
   >
     <div v-if="review" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <span class="material-symbols-outlined">person</span>
           </div>
           <div>
-            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ review.user }}</h4>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ review.user }}</h4>
             <div class="flex items-center gap-2">
               <RatingStars :rating="review.rating" size="xs" />
               <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ formatDate(review.created_at) }}</span>
@@ -65,8 +67,8 @@ const hide = () => {
 
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Comment</label>
-        <div class="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
-          "{{ review.comment }}"
+        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
+          "{{ localField(review, 'comment') }}"
         </div>
       </div>
 
@@ -74,7 +76,7 @@ const hide = () => {
         <button 
           v-if="review.status !== 'hidden'"
           @click="hide"
-          class="inline-flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition"
+          class="inline-flex items-center justify-center gap-2 py-2 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition"
         >
           <span class="material-symbols-outlined text-lg">visibility_off</span>
           Hide Review

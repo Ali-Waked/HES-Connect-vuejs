@@ -1,7 +1,8 @@
-﻿<script setup>
+<script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
+import { useLocaleField } from '../../../composables/useLocaleField';
 
 const route = useRoute();
 const router = useRouter();
@@ -10,13 +11,15 @@ const store = useDashboardStore();
 const jobId = computed(() => parseInt(route.params.id));
 const job = computed(() => store.jobs.find(j => j.id === jobId.value));
 
+const { localField } = useLocaleField();
+
 const goBack = () => router.push('/admin/jobs');
 
-// â”€â”€â”€ Status helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Status helpers ──────────────────────────────────────────────────────────
 const statusClass = (s) => ({
   'approved': 'bg-emerald-100 text-emerald-700 border border-emerald-200',
   'pending':  'bg-amber-100 text-amber-700 border border-amber-200',
-}[s] || 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400');
+}[s] || 'bg-slate-100 text-slate-600');
 </script>
 
 <template>
@@ -24,14 +27,14 @@ const statusClass = (s) => ({
     <!-- Breadcrumbs -->
     <nav class="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
       <button @click="goBack" class="hover:text-brand-primary transition cursor-pointer">Job Posts</button>
-      <svg class="w-4 h-4 text-slate-300 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="w-4 h-4 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
-      <span class="text-slate-900 dark:text-slate-100 truncate max-w-[200px]">{{ job.title }}</span>
+      <span class="text-slate-900 dark:text-white truncate max-w-[200px]">{{ localField(job, 'title') }}</span>
     </nav>
 
     <!-- Job Header Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
       <div class="p-8 space-y-6">
         <div class="space-y-4">
           <div class="flex flex-wrap items-center gap-3">
@@ -43,25 +46,25 @@ const statusClass = (s) => ({
             </span>
           </div>
 
-          <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
-            {{ job.title }}
+          <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+            {{ localField(job, 'title') }}
           </h1>
 
-          <div class="flex flex-wrap items-center gap-y-3 gap-x-6 pt-2 border-t border-slate-100 dark:border-slate-700 mt-6">
+          <div class="flex flex-wrap items-center gap-y-3 gap-x-6 pt-2 border-t border-slate-100 dark:border-slate-800 mt-6">
             <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+              <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div class="flex flex-col">
                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Posted By</span>
-                <span class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ job.author }}</span>
+                <span class="text-sm font-bold text-slate-900 dark:text-white">{{ job.author }}</span>
               </div>
             </div>
 
             <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+              <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -75,16 +78,16 @@ const statusClass = (s) => ({
         </div>
 
         <!-- Description -->
-        <div class="prose prose-slate max-w-none pt-8 border-t border-slate-100 dark:border-slate-700">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Role Description</h3>
+        <div class="max-w-none pt-8 border-t border-slate-100 dark:border-slate-800">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Role Description</h3>
           <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">
-            {{ job.description }}
+            {{ localField(job, 'description') }}
           </p>
         </div>
 
         <!-- Application Info -->
-        <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 border border-slate-100 dark:border-slate-700 mt-8">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+        <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-100 dark:border-slate-700 mt-8">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
             <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
             </svg>
@@ -100,13 +103,13 @@ const statusClass = (s) => ({
             >
               {{ job.apply_value }}
             </a>
-            <span v-else class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ job.apply_value }}</span>
+            <span v-else class="text-sm font-bold text-slate-900 dark:text-white">{{ job.apply_value }}</span>
           </div>
         </div>
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-8 py-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex flex-wrap gap-3">
+      <div class="px-8 py-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-3">
         <button 
           v-if="job.status === 'pending'"
           @click="store.updateJobStatus(job.id, 'approved')"
@@ -116,7 +119,7 @@ const statusClass = (s) => ({
         </button>
         <button 
           @click="goBack"
-          class="px-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition cursor-pointer"
+          class="px-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-bold rounded-lg transition cursor-pointer"
         >
           Back to List
         </button>

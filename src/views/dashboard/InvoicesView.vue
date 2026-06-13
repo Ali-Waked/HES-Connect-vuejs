@@ -2,7 +2,9 @@
 import { useInvoicesStore } from '../../stores/invoices';
 import BaseStatsCard from '../../components/dashboard/global/BaseStatsCard.vue';
 import InvoicesTable from '../../components/dashboard/Invoices/InvoicesTable.vue';
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const store = useInvoicesStore();
 </script>
 
@@ -10,8 +12,8 @@ const store = useInvoicesStore();
   <div class="space-y-6 animate-fade-in">
     <div class="flex justify-between items-start">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Invoice Management</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Manage patient billing and payment statuses</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">{{ t('pageTitles.invoiceManagement') }}</h1>
+        <p class="text-sm text-slate-500">{{ t('pageTitles.invoicesDesc') }}</p>
       </div>
     </div>
 

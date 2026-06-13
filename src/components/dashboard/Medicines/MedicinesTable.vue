@@ -1,5 +1,6 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from 'vue';
+import { useLocaleField } from '../../../composables/useLocaleField';
 import { useMedicinesStore } from '../../../stores/medicines';
 import BaseTable from '../global/BaseTable.vue';
 import BaseSearch from '../global/BaseSearch.vue';
@@ -9,6 +10,7 @@ import MedicineFormModal from './MedicineFormModal.vue';
 import MedicineDetailDialog from './MedicineDetailDialog.vue';
 
 const store = useMedicinesStore();
+const { localField } = useLocaleField();
 
 const columns = [
   { key: 'id', label: 'ID', width: '80px' },
@@ -23,8 +25,8 @@ const searchQuery = ref('');
 
 const filteredMedicines = computed(() => {
   return store.medicines.filter(m => {
-    return m.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-           m.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+    return localField(m, 'name').toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+           localField(m, 'description').toLowerCase().includes(searchQuery.value.toLowerCase());
   }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
@@ -84,15 +86,19 @@ const handleDelete = () => {
     </div>
 
     <BaseTable :columns="columns" :items="filteredMedicines">
+      <template #cell(name)="{ item }">
+        <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ localField(item, 'name') }}</span>
+      </template>
+
       <template #cell(image)="{ item }">
-        <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center">
+        <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center">
           <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" />
           <span v-else class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-xl">medical_services</span>
         </div>
       </template>
 
       <template #cell(description)="{ item }">
-        <span class="text-sm text-slate-500 dark:text-slate-400">{{ truncate(item.description) }}</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">{{ truncate(localField(item, 'description')) }}</span>
       </template>
 
       <template #cell(created_at)="{ item }">
@@ -113,7 +119,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="openEditModal(item)"
-            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
             title="Edit"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -122,7 +128,7 @@ const handleDelete = () => {
           </button>
           <button 
             @click="confirmDelete(item)"
-            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
             title="Delete"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -163,7 +169,7 @@ const handleDelete = () => {
     <ConfirmModal 
       :show="showDeleteConfirm"
       title="Delete Medicine"
-      :message="`Are you sure you want to delete <strong>${selectedMedicine?.name}</strong>? This action cannot be undone.`"
+      :message="`Are you sure you want to delete <strong>${localField(selectedMedicine, 'name')}</strong>? This action cannot be undone.`"
       @confirm="handleDelete"
       @close="showDeleteConfirm = false"
     />

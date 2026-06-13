@@ -1,7 +1,8 @@
-﻿<script setup>
+<script setup>
 import { ref } from 'vue';
 import BaseDialog from '../global/BaseDialog.vue';
 import BaseBadge from '../global/BaseBadge.vue';
+import { useLocaleField } from '../../../composables/useLocaleField';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -9,6 +10,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'replied']);
+
+const { localField } = useLocaleField();
 
 const replyText = ref('');
 const isReplying = ref(false);
@@ -49,14 +52,14 @@ const sendReply = () => {
     @close="$emit('close')"
   >
     <div v-if="message" class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold">
-            {{ message.name.charAt(0) }}
+            {{ localField(message, 'name').charAt(0) }}
           </div>
           <div>
-            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ message.name }}</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400">{{ message.email }}</p>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ localField(message, 'name') }}</h4>
+            <p class="text-xs text-slate-500">{{ message.email }}</p>
           </div>
         </div>
         <div class="flex flex-col items-end gap-1">
@@ -69,8 +72,8 @@ const sendReply = () => {
 
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Message</label>
-        <div class="p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-          {{ message.message }}
+        <div class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+          {{ localField(message, 'message') }}
         </div>
       </div>
 
@@ -79,7 +82,7 @@ const sendReply = () => {
         <textarea 
           v-model="replyText"
           rows="4"
-          class="w-full p-4 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none transition resize-none"
+          class="w-full p-4 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition resize-none"
           placeholder="Type your reply here..."
         ></textarea>
         <div class="flex justify-end">
@@ -94,7 +97,7 @@ const sendReply = () => {
           </button>
         </div>
       </div>
-      <div v-else class="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3 text-emerald-700">
+      <div v-else class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800 flex items-center gap-3 text-emerald-700 dark:text-emerald-400">
         <span class="material-symbols-outlined">check_circle</span>
         <span class="text-sm font-medium">This message has been replied to.</span>
       </div>
