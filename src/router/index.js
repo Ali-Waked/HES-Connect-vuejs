@@ -23,13 +23,13 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { guestOnly: true }
+    meta: { requiresGuest: true }
   },
   {
     path: '/register',
     name: 'register',
     component: RegisterView,
-    meta: { guestOnly: true }
+    meta: { requiresGuest: true }
   },
   {
     path: '/facilities',
@@ -117,14 +117,14 @@ const routes = [
         component: () => import('../views/dashboard/ConversationsView.vue')
       },
       {
-        path: 'comments',
-        name: 'comments',
-        component: () => import('../views/dashboard/CommentsView.vue')
-      },
-      {
         path: 'organizations',
         name: 'organizations',
         component: () => import('../views/dashboard/OrganizationsView.vue')
+      },
+      {
+        path: 'organization-users',
+        name: 'organization-users',
+        component: () => import('../views/dashboard/OrganizationUsersView.vue')
       },
       {
         path: 'facilities',
@@ -165,7 +165,12 @@ const routes = [
         path: 'stories/:id',
         name: 'story-detail',
         component: () => import('../views/dashboard/StoryDetailView.vue'),
-        props: true // Automatically passes the :id parameter as a prop to the component
+        props: true
+      },
+      {
+        path: 'categories',
+        name: 'categories',
+        component: () => import('../views/dashboard/CategoriesView.vue')
       },
       {
         path: 'articles',
@@ -189,7 +194,6 @@ const routes = [
         component: () => import('../views/dashboard/JobDetailView.vue'),
         props: true
       },
-      // Restoring previously missing route definitions for your imported views:
       {
         path: 'roles',
         name: 'roles',
@@ -283,8 +287,13 @@ const router = createRouter({
 });
 
 // Navigation Guards
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore();
+
+  // Ensure auth state is loaded before checking guards
+  if (!authStore.initCalled) {
+    await authStore.init();
+  }
 
   // Route requires authentication, but user is anonymous
   if (to.matched.some((record) => record.meta.requiresAuth) && !authStore.isAuthenticated) {
@@ -292,7 +301,7 @@ router.beforeEach((to) => {
   }
 
   // Route is for guests only, but user is signed in
-  if (to.meta.guestOnly && authStore.isAuthenticated) {
+  if ((to.meta.requiresGuest || to.meta.guestOnly) && authStore.isAuthenticated) {
     return { name: 'dashboard' };
   }
 });
