@@ -25,30 +25,30 @@ const stats = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-landing-cream dark:bg-slate-900 font-sans antialiased text-landing-dark dark:text-slate-100">
+  <div class="min-h-screen bg-landing-cream font-sans antialiased text-landing-dark">
     <AppNavbar variant="landing" />
 
     <main class="pt-28 lg:pt-32">
-      <section class="border-b border-landing-border dark:border-slate-700 bg-white/60 dark:bg-slate-900/60">
+      <section class="border-b border-landing-border bg-white/60/60">
         <div class="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:pb-20 lg:pt-14">
           <div>
             <span class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1.5 text-xs font-bold uppercase text-brand-primary">
               About Health Garagantam
             </span>
-            <h1 class="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 dark:text-slate-100 sm:text-5xl">
+            <h1 class="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
               A clearer healthcare access layer for Gaza.
             </h1>
-            <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400">
+            <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
               Health Garagantam connects patients, healthcare providers, facilities, pharmacies, and support services through a focused digital platform built for real healthcare workflows.
             </p>
           </div>
 
-          <div class="rounded-2xl border border-landing-border dark:border-slate-700 bg-landing-cream dark:bg-slate-800 p-6 shadow-sm">
-            <h2 class="text-base font-bold text-slate-950 dark:text-slate-100">What the platform supports</h2>
+          <div class="rounded-2xl border border-landing-border bg-landing-cream p-6 shadow-sm">
+            <h2 class="text-base font-bold text-slate-950">What the platform supports</h2>
             <div class="mt-5 space-y-4">
               <div class="flex items-start gap-3">
                 <span class="mt-1 h-2 w-2 rounded-full bg-brand-primary"></span>
-                <p class="text-sm leading-6 text-slate-600 dark:text-slate-400">Facility and provider discovery for patients.</p>
+                <p class="text-sm leading-6 text-slate-600">Facility and provider discovery for patients.</p>
               </div>
               <div class="flex items-start gap-3">
                 <span class="mt-1 h-2 w-2 rounded-full bg-brand-primary"></span>
@@ -69,10 +69,10 @@ const stats = [
             <article
               v-for="item in values"
               :key="item.title"
-              class="rounded-2xl border border-landing-border dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm"
+              class="rounded-2xl border border-landing-border bg-white p-6 shadow-sm"
             >
-              <h2 class="text-lg font-bold text-slate-950 dark:text-slate-100">{{ item.title }}</h2>
-              <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ item.description }}</p>
+              <h2 class="text-lg font-bold text-slate-950">{{ item.title }}</h2>
+              <p class="mt-3 text-sm leading-6 text-slate-500">{{ item.description }}</p>
             </article>
           </div>
         </div>

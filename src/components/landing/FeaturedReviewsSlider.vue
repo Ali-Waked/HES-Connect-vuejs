@@ -19,24 +19,24 @@ const breakpoints = {
 </script>
 
 <template>
-  <section class="py-16 lg:py-20 bg-landing-cream dark:bg-slate-900">
+  <section class="py-16 lg:py-20 bg-landing-cream">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-10">
-        <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100">What People Are Saying</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Real feedback from our community</p>
+        <h2 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">What People Are Saying</h2>
+        <p class="text-sm text-slate-500 mt-1 dark:text-slate-400">Real feedback from our community</p>
       </div>
 
       <div v-if="loading" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div v-for="n in 3" :key="n" class="bg-white dark:bg-slate-800 rounded-xl border border-landing-border dark:border-slate-700 p-5 animate-pulse">
+        <div v-for="n in 3" :key="n" class="bg-white rounded-xl border border-landing-border p-5 animate-pulse dark:bg-slate-800">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700"></div>
             <div class="flex-1 space-y-1.5">
-              <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24"></div>
-              <div class="h-2.5 bg-slate-100 dark:bg-slate-700 rounded w-16"></div>
+              <div class="h-3 bg-slate-100 rounded w-24 dark:bg-slate-700"></div>
+              <div class="h-2.5 bg-slate-100 rounded w-16 dark:bg-slate-700"></div>
             </div>
           </div>
-          <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded w-full mb-1.5"></div>
-          <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded w-3/4"></div>
+          <div class="h-3 bg-slate-100 rounded w-full mb-1.5 dark:bg-slate-700"></div>
+          <div class="h-3 bg-slate-100 rounded w-3/4 dark:bg-slate-700"></div>
         </div>
       </div>
 

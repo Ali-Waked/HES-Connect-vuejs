@@ -15,10 +15,10 @@ const initial = (name) => name?.replace('Dr. ', '').charAt(0) || '?';
 </script>
 
 <template>
-  <LandingSection id="doctors" class="py-16 lg:py-20 bg-landing-warm dark:bg-slate-800">
+  <LandingSection id="doctors" class="py-16 lg:py-20 bg-landing-warm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Our Top Doctors</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Our Top Doctors</h2>
         <button class="text-sm font-semibold text-brand-primary hover:underline transition cursor-pointer" @click="router.push('/facilities')">View All →</button>
       </div>
 
@@ -30,14 +30,14 @@ const initial = (name) => name?.replace('Dr. ', '').charAt(0) || '?';
         <div
           v-for="(doc, idx) in doctors"
           :key="doc.id"
-          class="snap-start shrink-0 w-[260px] bg-landing-cream dark:bg-slate-900 rounded-xl border border-landing-border dark:border-slate-700 p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand-primary/20 transition-all duration-200 text-center"
+          class="snap-start shrink-0 w-[260px] bg-landing-cream rounded-xl border border-landing-border p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand-primary/20 transition-all duration-200 text-center"
         >
           <div :class="`w-16 h-16 mx-auto mb-4 rounded-full ${avatarColors[idx % avatarColors.length]} text-white text-xl font-bold flex items-center justify-center`">
             {{ initial(doc.name) }}
           </div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">{{ doc.name }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">{{ doc.specialization }}</p>
-          <div class="flex items-center justify-center gap-3 text-sm text-slate-600 dark:text-slate-400 mb-3">
+          <h3 class="text-base font-bold text-slate-900 mb-1 dark:text-white">{{ doc.name }}</h3>
+          <p class="text-sm text-slate-500 mb-3 dark:text-slate-400">{{ doc.specialization }}</p>
+          <div class="flex items-center justify-center gap-3 text-sm text-slate-600 mb-3 dark:text-slate-400">
             <span class="flex items-center gap-1">
               <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
               {{ doc.experience }} yrs

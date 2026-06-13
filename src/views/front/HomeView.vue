@@ -31,7 +31,7 @@ const {
 </script>
 
 <template>
-  <div class="min-h-screen bg-landing-cream dark:bg-slate-900 font-sans antialiased text-landing-dark">
+  <div class="min-h-screen bg-landing-cream font-sans antialiased text-landing-dark">
     <AppNavbar variant="landing" />
 
     <main>

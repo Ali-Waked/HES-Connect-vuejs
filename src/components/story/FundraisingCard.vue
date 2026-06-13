@@ -25,16 +25,16 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <template v-if="story.isFundraising">
         <div class="flex items-baseline gap-2">
           <span class="material-symbols-outlined text-2xl text-brand-primary">redeem</span>
-          <span class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ fmt(story.collectedAmount) }}</span>
-          <span class="text-sm text-slate-500 dark:text-slate-400">raised of {{ fmt(story.targetAmount) }}</span>
+          <span class="text-2xl font-bold text-slate-900">{{ fmt(story.collectedAmount) }}</span>
+          <span class="text-sm text-slate-500">raised of {{ fmt(story.targetAmount) }}</span>
         </div>
 
         <div class="mt-4">
-          <div class="h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+          <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
             <div class="h-2.5 rounded-full bg-gradient-to-r from-teal-400 to-teal-600 transition-all duration-1000 ease-out"
               :style="{ width: animated ? progress + '%' : '0%' }"></div>
           </div>
@@ -43,12 +43,12 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-4 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+        <div class="mt-4 flex items-center justify-between text-sm text-slate-500">
           <span class="flex items-center gap-1">
             <span class="material-symbols-outlined text-[18px]">group</span>
             {{ story.donorCount }} donors
           </span>
-          <span class="flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-bold text-green-700 dark:text-green-400">
+          <span class="flex items-center gap-1 rounded-full bg-green-100/30 px-2.5 py-0.5 text-xs font-bold text-green-700">
             <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
             Active
           </span>
@@ -60,22 +60,22 @@ onMounted(() => {
           Donate Now
         </button>
         <button
-          class="mt-2 w-full rounded-lg border border-slate-200 dark:border-slate-700 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
+          class="mt-2 w-full rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
           @click="showShare = true">
           Share This Story
         </button>
 
-        <div class="mt-5 border-t border-slate-100 dark:border-slate-700 pt-4 text-center">
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+        <div class="mt-5 border-t border-slate-100 pt-4 text-center">
+          <p class="text-sm text-slate-500">
             <span class="text-brand-primary">💚</span> Be the reason she smiles
           </p>
         </div>
       </template>
       <template v-else>
         <div class="text-center py-4">
-          <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">visibility</span>
-          <p class="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-300">This story is shared for awareness</p>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Read and share to support the cause.</p>
+          <span class="material-symbols-outlined text-4xl text-slate-300">visibility</span>
+          <p class="mt-2 text-sm font-semibold text-slate-700">This story is shared for awareness</p>
+          <p class="mt-1 text-xs text-slate-500">Read and share to support the cause.</p>
         </div>
       </template>
     </div>

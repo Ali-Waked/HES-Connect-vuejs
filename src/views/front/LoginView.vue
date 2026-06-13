@@ -1,125 +1,122 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '../../stores/auth';
-import AuthLayout from '../../components/auth/AuthLayout.vue';
-import GoogleSignInButton from '../../components/auth/GoogleSignInButton.vue';
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter();
-const route = useRoute();
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
-const email = ref('');
-const password = ref('');
-const showPassword = ref(false);
-const loading = ref(false);
-const error = ref('');
+const form = reactive({
+  email: '',
+  password: '',
+})
 
-const redirectTo = computed(() => route.query.redirect || '/admin/dashboard');
+const showPassword = ref(false)
 
-async function handleSubmit() {
-  error.value = '';
-
-  if (!email.value.trim() || !password.value) {
-    error.value = 'Please enter your email and password.';
-    return;
-  }
-
-  loading.value = true;
-  try {
-    authStore.loginWithEmail({
-      email: email.value.trim(),
-      password: password.value
-    });
-    router.push(redirectTo.value);
-  } catch (err) {
-    error.value = err.message;
-  } finally {
-    loading.value = false;
+async function handleLogin() {
+  const result = await authStore.login(form)
+  if (result.success) {
+    const role = authStore.user?.role?.name
+    if (role === 'admin') {
+      router.push('/admin/dashboard')
+    } else if (['doctor', 'nurse', 'hospital_manager', 'pharmacist'].includes(role)) {
+      router.push('/staff/dashboard')
+    } else {
+      router.push('/')
+    }
   }
 }
 </script>
 
 <template>
-  <AuthLayout title="Sign in" subtitle="Access your healthcare management workspace.">
-    <form class="space-y-5" @submit.prevent="handleSubmit">
-      <div
-        v-if="error"
-        class="flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700"
-      >
-        <svg class="w-4 h-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-        </svg>
-        {{ error }}
+  <div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
+    <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
+
+      <div class="text-center mb-8">
+        <div class="w-12 h-12 bg-brand-primary rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-brand-primary/25">
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Welcome Back</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Sign in to your account</p>
       </div>
 
-      <GoogleSignInButton :redirect-to="redirectTo" @error="error = $event" />
+      <form @submit.prevent="handleLogin" class="space-y-4">
 
-      <div class="relative flex items-center py-1">
-        <div class="grow border-t border-slate-200 dark:border-slate-700"></div>
-        <span class="shrink-0 px-4 text-xs font-semibold uppercase text-slate-400 dark:text-slate-500">or</span>
-        <div class="grow border-t border-slate-200 dark:border-slate-700"></div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label for="email" class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Email address</label>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Email Address
+          </label>
           <input
-            id="email"
-            v-model="email"
+            v-model="form.email"
             type="email"
+            required
             autocomplete="email"
             placeholder="you@example.com"
-            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
+            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border rounded-lg text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-brand-primary/10 transition"
+            :class="authStore.errors.email ? 'border-red-400 dark:border-red-500' : 'border-slate-200 dark:border-slate-600 focus:border-brand-primary'"
           />
+          <p v-if="authStore.errors.email" class="text-xs text-red-500 mt-1">{{ authStore.errors.email[0] }}</p>
         </div>
 
-        <div>
-          <div class="mb-1.5 flex items-center justify-between gap-3">
-            <label for="password" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
-            <button type="button" class="text-xs font-semibold text-slate-500 dark:text-slate-400 transition hover:text-brand-primary">Forgot password?</button>
-          </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Password
+          </label>
           <div class="relative">
             <input
-              id="password"
-              v-model="password"
+              v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
+              required
               autocomplete="current-password"
-              placeholder="Enter your password"
-              class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 pr-11 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder-slate-500 "
+              placeholder="••••••••"
+              class="w-full px-4 py-2.5 pr-11 bg-slate-50 dark:bg-slate-700 border rounded-lg text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-brand-primary/10 transition"
+              :class="authStore.errors.password ? 'border-red-400 dark:border-red-500' : 'border-slate-200 dark:border-slate-600 focus:border-brand-primary'"
             />
             <button
               type="button"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
-              :title="showPassword ? 'Hide password' : 'Show password'"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               @click="showPassword = !showPassword"
             >
-              <svg v-if="showPassword" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+              <svg v-if="!showPassword" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
-              <svg v-else class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M9.879 9.879a3 3 0 104.243 4.243M7.05 7.05C5.68 8.42 4.5 10.1 4.5 12c1.274 4.057 5.064 7 9.542 7 1.606 0 3.12-.372 4.473-1.034"/>
               </svg>
             </button>
           </div>
+          <p v-if="authStore.errors.password" class="text-xs text-red-500 mt-1">{{ authStore.errors.password[0] }}</p>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        :disabled="loading"
-        class="flex h-11 w-full items-center justify-center rounded-lg bg-brand-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {{ loading ? 'Signing in...' : 'Sign in' }}
-      </button>
-    </form>
+        <div
+          v-if="authStore.errors.general"
+          class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+        >
+          <p class="text-xs text-red-600 dark:text-red-400">{{ authStore.errors.general }}</p>
+        </div>
 
-    <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-      Don't have an account?
-      <router-link to="/register" class="font-semibold text-brand-primary transition hover:text-brand-primary-hover">
-        Create one
-      </router-link>
-    </p>
-  </AuthLayout>
+        <button
+          type="submit"
+          :disabled="authStore.loading"
+          class="w-full py-2.5 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-60 text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/20 transition cursor-pointer flex items-center justify-center gap-2"
+        >
+          <svg v-if="authStore.loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          {{ authStore.loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+
+      </form>
+
+      <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+        Don't have an account?
+        <router-link to="/register" class="text-brand-primary font-semibold hover:underline">
+          Register
+        </router-link>
+      </p>
+    </div>
+  </div>
 </template>

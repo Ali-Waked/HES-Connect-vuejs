@@ -46,19 +46,19 @@ function submit() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-landing-cream dark:bg-slate-900 font-sans antialiased text-landing-dark dark:text-slate-100">
+  <div class="min-h-screen bg-landing-cream font-sans antialiased text-landing-dark">
     <AppNavbar variant="landing" />
 
     <main class="pt-28 lg:pt-32">
-      <section class="border-b border-landing-border dark:border-slate-700 bg-white/60 dark:bg-slate-900/60">
+      <section class="border-b border-landing-border bg-white/60/60">
         <div class="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8 lg:pb-16 lg:pt-14">
           <span class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1.5 text-xs font-bold uppercase text-brand-primary">
             Contact Us
           </span>
-          <h1 class="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 dark:text-slate-100 sm:text-5xl">
+          <h1 class="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
             Talk to the Health Garagantam team.
           </h1>
-          <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400">
+          <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
             Send a message for support, partnerships, facility updates, or questions about using the healthcare platform.
           </p>
         </div>
@@ -70,21 +70,21 @@ function submit() {
             <article
               v-for="card in contactCards"
               :key="card.label"
-              class="flex items-start gap-4 rounded-2xl border border-landing-border dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm"
+              class="flex items-start gap-4 rounded-2xl border border-landing-border bg-white p-5 shadow-sm"
             >
               <span class="material-symbols-outlined flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary" style="display:flex;">
                 {{ card.icon }}
               </span>
               <div>
-                <p class="text-sm font-bold text-slate-950 dark:text-slate-100">{{ card.label }}</p>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ card.value }}</p>
+                <p class="text-sm font-bold text-slate-950">{{ card.label }}</p>
+                <p class="mt-1 text-sm text-slate-500">{{ card.value }}</p>
               </div>
             </article>
           </aside>
 
-          <section class="rounded-2xl border border-landing-border dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm sm:p-8">
-            <h2 class="text-xl font-bold text-slate-950 dark:text-slate-100">Send a message</h2>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">We will review your message and follow up as soon as possible.</p>
+          <section class="rounded-2xl border border-landing-border bg-white p-6 shadow-sm sm:p-8">
+            <h2 class="text-xl font-bold text-slate-950">Send a message</h2>
+            <p class="mt-2 text-sm text-slate-500">We will review your message and follow up as soon as possible.</p>
 
             <div v-if="submitted" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">
               Your message was prepared successfully.
@@ -92,26 +92,26 @@ function submit() {
 
             <form class="mt-6 grid gap-5 sm:grid-cols-2" @submit.prevent="submit">
               <label class="space-y-2">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Full name</span>
-                <input v-model="form.name" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 dark:focus:border-slate-700 focus:ring-4 focus:ring-brand-primary/10" />
+                <span class="text-sm font-semibold text-slate-700">Full name</span>
+                <input v-model="form.name" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
                 <span v-if="errors.name" class="text-xs font-semibold text-rose-600">{{ errors.name }}</span>
               </label>
 
               <label class="space-y-2">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Email address</span>
-                <input v-model="form.email" type="email" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 dark:focus:border-slate-700 focus:ring-4 focus:ring-brand-primary/10" />
+                <span class="text-sm font-semibold text-slate-700">Email address</span>
+                <input v-model="form.email" type="email" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
                 <span v-if="errors.email" class="text-xs font-semibold text-rose-600">{{ errors.email }}</span>
               </label>
 
               <label class="space-y-2 sm:col-span-2">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Subject</span>
-                <input v-model="form.subject" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 dark:focus:border-slate-700 focus:ring-4 focus:ring-brand-primary/10" />
+                <span class="text-sm font-semibold text-slate-700">Subject</span>
+                <input v-model="form.subject" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
                 <span v-if="errors.subject" class="text-xs font-semibold text-rose-600">{{ errors.subject }}</span>
               </label>
 
               <label class="space-y-2 sm:col-span-2">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Message</span>
-                <textarea v-model="form.message" rows="5" class="w-full resize-none rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 dark:focus:border-slate-700 focus:ring-4 focus:ring-brand-primary/10"></textarea>
+                <span class="text-sm font-semibold text-slate-700">Message</span>
+                <textarea v-model="form.message" rows="5" class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10"></textarea>
                 <span v-if="errors.message" class="text-xs font-semibold text-rose-600">{{ errors.message }}</span>
               </label>
 

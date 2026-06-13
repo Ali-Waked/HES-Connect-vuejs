@@ -31,20 +31,20 @@ function openShare(platform) {
 </script>
 
 <template>
-  <div v-if="show" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 dark:bg-slate-900/60 p-4 backdrop-blur-xs" @click.self="$emit('close')">
-    <div class="w-full max-w-md rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 px-5 py-4">
-        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Share This Story</h2>
-        <button class="rounded-lg p-1 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-300" @click="$emit('close')">
+  <div v-if="show" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40/60 p-4 backdrop-blur-xs" @click.self="$emit('close')">
+    <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <h2 class="text-base font-bold text-slate-900">Share This Story</h2>
+        <button class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" @click="$emit('close')">
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
       <div class="space-y-5 p-5">
-        <div class="rounded-lg border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3">
-          <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">{{ story?.title }}</p>
+        <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
+          <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ story?.title }}</p>
         </div>
         <div>
-          <p class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Share via</p>
+          <p class="mb-3 text-sm font-semibold text-slate-700">Share via</p>
           <div class="grid grid-cols-2 gap-3">
             <button class="flex items-center gap-2 rounded-lg border border-green-200 px-4 py-3 text-sm font-semibold text-green-700 transition hover:bg-green-50" @click="openShare('whatsapp')">
               <span class="text-lg">🟢</span> WhatsApp
@@ -52,15 +52,15 @@ function openShare(platform) {
             <button class="flex items-center gap-2 rounded-lg border border-blue-200 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50" @click="openShare('facebook')">
               <span class="text-lg">🔵</span> Facebook
             </button>
-            <button class="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700" @click="openShare('twitter')">
+            <button class="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="openShare('twitter')">
               <span class="text-lg">🐦</span> Twitter / X
             </button>
-            <button class="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700" @click="copyLink">
+            <button class="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="copyLink">
               <span class="text-lg">📋</span> {{ copied ? '✓ Copied!' : 'Copy Link' }}
             </button>
           </div>
         </div>
-        <button class="w-full rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700" @click="$emit('close')">Close</button>
+        <button class="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="$emit('close')">Close</button>
       </div>
     </div>
   </div>
