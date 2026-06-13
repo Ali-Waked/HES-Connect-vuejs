@@ -1,168 +1,245 @@
-﻿<script setup>
+<script setup>
 import { ref, watch } from 'vue';
-import { useDashboardStore } from '../../../stores/dashboard';
-import { useTagsStore } from '../../../stores/tags';
+import { useI18n } from 'vue-i18n';
+import { useLocaleField } from '../../../composables/useLocaleField';
+import { useArticles } from '../../../composables/useArticles';
+import { getCategories } from '../../../services/articleService';
+import { getTags } from '../../../services/articleService';
+import ImageUploader from '../global/ImageUploader.vue';
+import MultipleImageUploader from '../global/MultipleImageUploader.vue';
 import TagSelector from '../global/TagSelector.vue';
+import TipTapEditor from '../global/TipTapEditor.vue';
 
 const props = defineProps({
-  show: Boolean,
-  article: Object,
-  mode: { type: String, default: 'add' }
+  show: { type: Boolean, required: true },
+  article: { type: Object, default: null }
 });
 
 const emit = defineEmits(['close']);
 
-const store = useDashboardStore();
-const tagsStore = useTagsStore();
+const { t } = useI18n();
+const { localField } = useLocaleField();
+const { createArticle, updateArticle, fetchArticle, saving } = useArticles();
 
-const categories = ['Medical', 'Pediatrics', 'Surgery', 'Health Policy', 'Obstetrics', 'General'];
+const contentTab = ref('en');
 
-const defaultForm = () => ({
-  title: '',
-  author: '',
-  category: 'Medical',
-  status: 'draft',
-  content: '',
-  tags: []
-});
+const title_en = ref('');
+const title_ar = ref('');
+const content_en = ref('');
+const content_ar = ref('');
+const category_id = ref('');
+const status = ref('draft');
+const cover_image = ref(null);
+const gallery_images = ref([]);
+const tags = ref([]);
+const loadingArticle = ref(false);
 
-const formData = ref(defaultForm());
+const categories = ref([]);
+const allTags = ref([]);
 
-watch(() => props.show, (isShowing) => {
-  if (isShowing) {
-    formData.value = props.mode === 'edit' && props.article
-      ? { ...props.article, tags: props.article.tags ? [...props.article.tags] : [] }
-      : defaultForm();
+watch(() => props.show, async (val) => {
+  if (val) {
+    if (categories.value.length === 0) {
+      try {
+        const { data } = await getCategories()
+        categories.value = data.data || data
+      } catch (e) {
+        // silently fail
+      }
+    }
+    if (allTags.value.length === 0) {
+      try {
+        const { data } = await getTags()
+        allTags.value = data.data || data
+      } catch (e) {
+        // silently fail
+      }
+    }
   }
 });
 
-const handleCreateTag = (tagName) => {
-  tagsStore.addTag(tagName);
-};
+watch(
+  () => props.article,
+  async (newArticle) => {
+    loadingArticle.value = false;
+    if (newArticle && newArticle.uuid) {
+      loadingArticle.value = true;
+      try {
+        const data = await fetchArticle(newArticle.uuid);
+        title_en.value = data.title?.en || '';
+        title_ar.value = data.title?.ar || '';
+        content_en.value = data.content?.en || '';
+        content_ar.value = data.content?.ar || '';
+        category_id.value = data.category?.uuid || data.category_id || '';
+        status.value = data.status || 'draft';
+        cover_image.value = data.cover_image || data.image || null;
+        gallery_images.value = data.gallery_images || [];
+        tags.value = data.tags?.map(t => t.uuid || t.id) || [];
+      } catch (err) {
+        resetForm();
+      } finally {
+        loadingArticle.value = false;
+      }
+    } else {
+      resetForm();
+    }
+  },
+  { immediate: true }
+);
 
-const handleSubmit = () => {
-  if (props.mode === 'edit') {
-    store.updateArticle(props.article.id, formData.value);
+function resetForm() {
+  title_en.value = '';
+  title_ar.value = '';
+  content_en.value = '';
+  content_ar.value = '';
+  category_id.value = '';
+  status.value = 'draft';
+  cover_image.value = null;
+  gallery_images.value = [];
+  tags.value = [];
+  contentTab.value = 'en';
+}
+
+const submitForm = async () => {
+  const data = {
+    title_en: title_en.value,
+    title_ar: title_ar.value,
+    content_en: content_en.value,
+    content_ar: content_ar.value,
+    category_id: category_id.value,
+    status: status.value,
+    cover_image: cover_image.value,
+    gallery_images: gallery_images.value,
+    tags: tags.value,
+  };
+
+  let result;
+  if (props.article && props.article.uuid) {
+    result = await updateArticle(props.article.uuid, data);
   } else {
-    store.addArticle(formData.value);
+    result = await createArticle(data);
   }
-  emit('close');
+
+  if (result.success) {
+    emit('close');
+  }
 };
 </script>
 
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="$emit('close')"></div>
-
-    <!-- Modal -->
-    <div class="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-modal-in">
-
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-          {{ mode === 'edit' ? 'Edit Article' : 'New Article' }}
+  <div
+    v-if="show"
+    class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
+    @click.self="$emit('close')"
+  >
+    <div class="bg-white dark:bg-slate-900 rounded-xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] border border-slate-200 dark:border-slate-700 animate-slide-up">
+      <div class="p-5 px-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+          {{ article && article.uuid ? $t('articles.editArticle') : $t('articles.newArticle') }}
         </h3>
         <button
+          class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition"
           @click="$emit('close')"
-          class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition cursor-pointer"
         >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form @submit.prevent="submitForm" class="flex flex-col flex-1 overflow-hidden">
+        <div v-if="loadingArticle" class="flex items-center justify-center py-12">
+          <svg class="w-6 h-6 text-brand-primary animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+        </div>
+        <div v-else class="p-6 flex flex-col gap-6 overflow-y-auto flex-1">
 
-          <!-- Title -->
-          <div class="sm:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Title</label>
-            <input
-              v-model="formData.title"
-              type="text"
-              required
-              placeholder="Article title"
-              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition"
-            />
+          <div>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Basic Information
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.title_en') }} *</label>
+                <input type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition" required dir="ltr" v-model="title_en" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.title_ar') }} *</label>
+                <input type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition text-right" required dir="rtl" v-model="title_ar" />
+              </div>
+            </div>
           </div>
 
-          <!-- Author -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Author</label>
-            <input
-              v-model="formData.author"
-              type="text"
-              required
-              placeholder="Author name"
-              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition"
-            />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.category') }} *</label>
+              <select class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition cursor-pointer" required v-model="category_id">
+                <option value="" disabled>Select category</option>
+                <option v-for="cat in categories" :key="cat.uuid" :value="cat.uuid">{{ localField(cat, 'name') }}</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.status') }}</label>
+              <select class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition cursor-pointer" v-model="status">
+                <option value="draft">{{ $t('statuses.draft') }}</option>
+                <option value="pending_review">{{ $t('statuses.pending_review') }}</option>
+                <option value="published">{{ $t('statuses.published') }}</option>
+                <option value="archived">{{ $t('statuses.archived') }}</option>
+                <option value="rejected">{{ $t('statuses.rejected') }}</option>
+              </select>
+            </div>
           </div>
 
-          <!-- Category -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Category</label>
-            <select
-              v-model="formData.category"
-              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition cursor-pointer"
-            >
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-            </select>
+          <div>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              Article Content
+            </h4>
+            <div class="flex gap-1 mb-3">
+              <button type="button" @click="contentTab = 'en'" class="px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer" :class="contentTab === 'en' ? 'bg-brand-primary text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'">English</button>
+              <button type="button" @click="contentTab = 'ar'" class="px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer" :class="contentTab === 'ar' ? 'bg-brand-primary text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'">العربية</button>
+            </div>
+            <div v-show="contentTab === 'en'">
+              <TipTapEditor v-model="content_en" placeholder="Write your article in English..." dir="ltr" />
+            </div>
+            <div v-show="contentTab === 'ar'">
+              <TipTapEditor v-model="content_ar" placeholder="اكتب مقالتك باللغة العربية..." dir="rtl" />
+            </div>
           </div>
 
-          <!-- Status -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
-            <select
-              v-model="formData.status"
-              class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition cursor-pointer"
-            >
-              <option value="draft">Draft</option>
-              <option value="pending_review">Pending Review</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-              <option value="rejected">Rejected</option>
-            </select>
+          <div>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Cover Image *
+            </h4>
+            <ImageUploader v-model="cover_image" :label="$t('articles.coverImage') || 'Upload Cover Image'" aspect-ratio="aspect-video" />
+            <p v-if="!article && !cover_image" class="text-xs text-amber-600 mt-1">Cover image is required</p>
           </div>
+
+          <div>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              Gallery Images
+            </h4>
+            <MultipleImageUploader v-model="gallery_images" :label="$t('articles.galleryImages') || 'Upload Gallery Images'" />
+          </div>
+
+          <TagSelector v-model="tags" :tags="allTags" :label="$t('articles.tags')" />
         </div>
 
-        <!-- Tags -->
-        <div class="space-y-1.5">
-          <TagSelector
-            v-model="formData.tags"
-            :tags="tagsStore.tags"
-            @create="handleCreateTag"
-          />
-        </div>
-
-        <!-- Content -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Content</label>
-          <textarea
-            v-model="formData.content"
-            required
-            rows="6"
-            placeholder="Write your article content here..."
-            class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none transition resize-none"
-          ></textarea>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="pt-4 flex justify-end gap-3">
-          <button
-            type="button"
-            @click="$emit('close')"
-            class="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
-          >
-            Cancel
+        <div v-show="!loadingArticle" class="p-4 px-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+          <button type="button" class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer" @click="$emit('close')">
+            {{ $t('common.cancel') }}
           </button>
-          <button
-            type="submit"
-            class="px-6 py-2.5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-bold rounded-lg shadow-lg shadow-brand-primary/20 transition cursor-pointer"
-          >
-            {{ mode === 'edit' ? 'Update Article' : 'Create Article' }}
+          <button type="submit" :disabled="saving" class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold text-white shadow-md shadow-brand-primary/15 transition cursor-pointer">
+            <svg v-if="saving" class="w-4 h-4 mr-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            {{ article && article.uuid ? $t('common.save') : $t('articles.newArticle') }}
           </button>
         </div>
       </form>
@@ -171,11 +248,11 @@ const handleSubmit = () => {
 </template>
 
 <style scoped>
-.animate-modal-in {
-  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.animate-slide-up {
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);     }
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 </style>
