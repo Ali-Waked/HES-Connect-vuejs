@@ -93,7 +93,7 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
     <!-- Not found -->
     <div v-if="!story" class="flex flex-col items-center justify-center py-24 gap-4">
       <div class="text-5xl">📖</div>
-      <h2 class="text-xl font-bold text-slate-700">Story not found</h2>
+      <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300">Story not found</h2>
       <button
         class="inline-flex items-center gap-2 py-2 px-4 text-sm font-semibold rounded-lg bg-brand-primary text-white hover:bg-brand-primary-hover transition cursor-pointer"
         @click="router.push('/admin/stories')"
@@ -103,7 +103,7 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
     <template v-else>
       <!-- ── Back link ─────────────────────────────────────────────── -->
       <button
-        class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition cursor-pointer group"
+        class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer group"
         @click="router.push('/admin/stories')"
       >
         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -136,14 +136,14 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
 
           <div
             v-if="showStatusMenu"
-            class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-20"
+            class="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20"
             @click.stop
           >
             <button
               v-for="option in statusOptions"
               :key="option"
-              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-              :class="story.status === option ? 'bg-slate-50 text-brand-primary' : ''"
+              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              :class="story.status === option ? 'bg-slate-50 dark:bg-slate-700 text-brand-primary' : ''"
               @click="changeStatus(option)"
             >
               <span
@@ -187,60 +187,60 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
       </div>
 
       <!-- ── Fundraising Campaign ───────────────────────────────────── -->
-      <div v-if="story.fundraising" class="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-4">
+      <div v-if="story.fundraising" class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 space-y-4 transition-colors">
         <div class="flex items-center gap-2">
           <!-- Trend icon -->
           <svg class="w-4 h-4 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
           </svg>
-          <h3 class="text-sm font-bold text-slate-900">Fundraising Campaign</h3>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Fundraising Campaign</h3>
         </div>
 
         <div class="flex justify-between items-start">
           <div>
-            <p class="text-3xl font-extrabold text-slate-900 leading-none">{{ fmt(story.raised) }}</p>
-            <p class="text-xs text-slate-400 mt-1 font-medium">collected</p>
+            <p class="text-3xl font-extrabold text-slate-900 dark:text-white leading-none">{{ fmt(story.raised) }}</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">collected</p>
           </div>
           <div class="text-right">
-            <p class="text-lg font-bold text-slate-500 leading-none">{{ fmt(story.goal) }}</p>
-            <p class="text-xs text-slate-400 mt-1 font-medium">target</p>
+            <p class="text-lg font-bold text-slate-500 dark:text-slate-400 leading-none">{{ fmt(story.goal) }}</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">target</p>
           </div>
         </div>
 
         <!-- Progress bar -->
-        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
           <div
             class="h-2.5 rounded-full bg-gradient-to-r from-teal-400 to-emerald-500 transition-all duration-700"
             :style="`width:${progress}%`"
           ></div>
         </div>
 
-        <p class="text-xs text-slate-400 text-right font-semibold">{{ progress }}% funded</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500 text-right font-semibold">{{ progress }}% funded</p>
       </div>
 
       <!-- ── Story Content ──────────────────────────────────────────── -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 transition-colors">
         <div class="flex items-center gap-2 mb-4">
           <div class="w-1 h-5 rounded-full bg-teal-500"></div>
-          <h3 class="text-sm font-bold text-slate-900">Story</h3>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Story</h3>
         </div>
-        <p class="text-sm text-slate-600 leading-relaxed" style="font-size:0.9rem">
+        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed" style="font-size:0.9rem">
           {{ story.content || 'No story content provided yet.' }}
         </p>
       </div>
 
       <!-- ── Gallery ───────────────────────────────────────────────── -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 transition-colors">
         <!-- Header -->
         <div class="flex items-center justify-between mb-5">
           <div class="flex items-center gap-2">
             <div class="w-1 h-5 rounded-full bg-teal-500"></div>
-            <h3 class="text-sm font-bold text-slate-900">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">
               Gallery
-              <span class="text-slate-400 font-medium ml-1">({{ galleryItems.length }} {{ galleryItems.length === 1 ? 'image' : 'images' }})</span>
+              <span class="text-slate-400 dark:text-slate-500 font-medium ml-1">({{ galleryItems.length }} {{ galleryItems.length === 1 ? 'image' : 'images' }})</span>
             </h3>
           </div>
-          <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 py-1.5 px-3 rounded-lg transition cursor-pointer border border-slate-200">
+          <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 py-1.5 px-3 rounded-lg transition cursor-pointer border border-slate-200 dark:border-slate-700">
             <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
@@ -273,19 +273,19 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
           </div>
 
           <!-- Add placeholder slot -->
-          <div class="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-brand-primary hover:bg-slate-50/60 transition-all group">
-            <div class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-brand-primary/10 flex items-center justify-center transition-colors">
-              <svg class="w-4 h-4 text-slate-400 group-hover:text-brand-primary transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <div class="aspect-square rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-brand-primary hover:bg-slate-50/60 dark:hover:bg-slate-800/60 transition-all group">
+            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-brand-primary/10 flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-brand-primary transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
               </svg>
             </div>
-            <span class="text-xs font-semibold text-slate-400 group-hover:text-brand-primary transition-colors">Add</span>
+            <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 group-hover:text-brand-primary transition-colors">Add</span>
           </div>
         </div>
 
         <!-- Empty gallery message -->
         <div v-if="galleryItems.length === 0" class="mt-3">
-          <p class="text-xs text-slate-400 text-center py-2">No images uploaded yet. Click "Add image" to get started.</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500 text-center py-2">No images uploaded yet. Click "Add image" to get started.</p>
         </div>
       </div>
 
