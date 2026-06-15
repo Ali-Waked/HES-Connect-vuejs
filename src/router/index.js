@@ -32,6 +32,45 @@ const routes = [
     meta: { requiresGuest: true }
   },
   {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('../views/front/ForgotPasswordView.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('../views/front/ResetPasswordView.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    component: () => import('../views/front/EmailVerificationView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/email/verify',
+    name: 'verify-email-success',
+    component: () => import('../views/front/VerifyEmailSuccessView.vue'),
+  },
+  {
+    path: '/password-reset-success',
+    name: 'password-reset-success',
+    component: () => import('../views/front/PasswordResetSuccessView.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/access-denied',
+    name: 'access-denied',
+    component: () => import('../views/front/AccessDeniedView.vue'),
+  },
+  {
+    path: '/account-pending',
+    name: 'account-pending',
+    component: () => import('../views/front/AccountPendingView.vue'),
+  },
+  {
     path: '/facilities',
     name: 'facilities-browse',
     component: FacilitiesBrowseView
@@ -66,6 +105,17 @@ const routes = [
     path: '/doctors/:id',
     name: 'public-doctor-detail',
     component: () => import('../views/front/DoctorDetailView.vue'),
+    props: true
+  },
+  {
+    path: '/articles',
+    name: 'public-articles',
+    component: () => import('../views/front/ArticlesView.vue')
+  },
+  {
+    path: '/articles/:id',
+    name: 'public-article-detail',
+    component: () => import('../views/front/ArticleDetailView.vue'),
     props: true
   },
   {
@@ -125,6 +175,22 @@ const routes = [
         path: 'organization-users',
         name: 'organization-users',
         component: () => import('../views/dashboard/OrganizationUsersView.vue')
+      },
+      {
+        path: 'cities',
+        name: 'cities',
+        component: () => import('../views/dashboard/cities/index.vue')
+      },
+      {
+        path: 'cities/create',
+        name: 'cities.create',
+        component: () => import('../views/dashboard/cities/create.vue')
+      },
+      {
+        path: 'cities/:uuid/edit',
+        name: 'cities.edit',
+        component: () => import('../views/dashboard/cities/_uuid/edit.vue'),
+        props: true
       },
       {
         path: 'facilities',
@@ -216,7 +282,7 @@ const routes = [
         props: true
       },
       {
-        path: 'staff/:id',
+        path: 'staff/:uuid',
         name: 'staff-detail',
         component: () => import('../views/dashboard/StaffDetailView.vue'),
         props: true
@@ -250,6 +316,17 @@ const routes = [
         path: 'medicines',
         name: 'medicines',
         component: () => import('../views/dashboard/MedicinesView.vue')
+      },
+      {
+        path: 'positions',
+        name: 'positions',
+        component: () => import('../views/dashboard/positions/index.vue')
+      },
+      {
+        path: 'positions/:uuid',
+        name: 'positions.show',
+        component: () => import('../views/dashboard/positions/_uuid/index.vue'),
+        props: true
       }
     ]
   },
