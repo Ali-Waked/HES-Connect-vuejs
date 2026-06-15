@@ -100,7 +100,7 @@ const handleMarkRead = (n) => {
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-sm font-bold text-slate-900 leading-snug">{{ n.title }}</p>
+                <p class="text-sm font-bold text-slate-900 leading-snug">{{ resolveTranslatedValue(n.title) }}</p>
                 <p class="text-sm text-slate-500 mt-0.5 leading-relaxed">{{ n.message }}</p>
               </div>
               <!-- Time + unread dot -->

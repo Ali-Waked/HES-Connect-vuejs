@@ -5,6 +5,7 @@ import { useAuthStore } from '../../../stores/auth';
 import { useNotificationsStore } from '../../../stores/notifications';
 import NotificationsDropdown from './NotificationsDropdown.vue';
 import UserProfileDropdown from './UserProfileDropdown.vue';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 defineEmits(['toggleMobile']);
 
@@ -95,7 +96,7 @@ const closeProfileMenu = () => {
             {{ authStore.user.initials }}
           </div>
           <div class="hidden sm:flex flex-col text-left">
-            <span class="text-xs font-semibold text-slate-800 leading-none mb-0.5">{{ authStore.user.name }}</span>
+            <span class="text-xs font-semibold text-slate-800 leading-none mb-0.5">{{ resolveTranslatedValue(authStore.user?.name) }}</span>
             <span class="text-[10px] text-slate-400 leading-none">{{ authStore.user.email }}</span>
           </div>
           <svg

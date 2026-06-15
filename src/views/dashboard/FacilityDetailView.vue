@@ -11,6 +11,9 @@ import { useLocaleField } from '../../composables/useLocaleField';
 import { useFacilities } from '../../composables/useFacilities';
 import { useDashboardHelpers } from '../../composables/useDashboardHelpers';
 import { useI18n } from 'vue-i18n';
+import { resolveTranslatedValue } from '../../utils/locale';
+
+
 
 const route = useRoute();
 const router = useRouter();
@@ -18,7 +21,7 @@ const reviewStore = useEntityReviewsStore();
 
 const { fetchFacility } = useFacilities();
 const { getTypeClass } = useDashboardHelpers();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const facility = ref(null);
 const loading = ref(true);
 
@@ -186,9 +189,9 @@ const goBack = () => router.push('/admin/facilities');
           <div class="space-y-4">
             <div v-for="user in reviewStore.favorites.recent" :key="user.id" class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">
-                {{ user.name.charAt(0) }}
+                {{ resolveTranslatedValue(user.name, locale.value).charAt(0) || '?' }}
               </div>
-              <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ user.name }}</span>
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ resolveTranslatedValue(user.name, locale.value) }}</span>
             </div>
             <button class="w-full py-2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-brand-primary transition uppercase tracking-widest">View all users</button>
           </div>

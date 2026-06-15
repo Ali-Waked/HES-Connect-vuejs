@@ -1,5 +1,6 @@
 <script setup>
 import { useDashboardStore } from '../stores/dashboard';
+import HesLogo from './global/HesLogo.vue';
 
 defineProps({
   mobileOpen: { type: Boolean, required: true }
@@ -40,16 +41,7 @@ const navigateTo = (tabId) => {
     >
       <!-- Brand Logo Section -->
       <div class="flex items-center gap-3 pb-9 px-2">
-        <div class="w-9 h-9 bg-brand-primary rounded-full flex items-center justify-center text-white">
-          <!-- Hospital/Health Medical Cross Icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-white tracking-tight">Health Ecosystem</span>
-          <span class="text-[9px] font-semibold text-slate-400 tracking-wider">GAZA STRIP</span>
-        </div>
+        <HesLogo variant="full" :height="32" theme="dark" />
       </div>
 
       <!-- Menu Navigation -->

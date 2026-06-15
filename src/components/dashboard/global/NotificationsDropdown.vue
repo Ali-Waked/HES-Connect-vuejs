@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useNotificationsStore } from '../../../stores/notifications';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 const emit  = defineEmits(['close']);
 const store  = useNotificationsStore();
@@ -65,7 +66,7 @@ const handleClick = (n) => {
         <!-- Content -->
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white leading-snug">{{ n.title }}</p>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white leading-snug">{{ resolveTranslatedValue(n.title) }}</p>
             <!-- Unread dot -->
             <span v-if="!n.read" class="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full bg-brand-primary"></span>
           </div>

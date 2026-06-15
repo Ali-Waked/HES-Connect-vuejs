@@ -31,6 +31,11 @@ export const getPlatformOverview = () =>
 export const getFacilitiesTop = (limit = 6) =>
   fetchApi(`/facilities/top?limit=${limit}`, () => mockPublicData.facilitiesTop(limit));
 
+export const getFacilities = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return fetchApi(`/facilities?${query}`, () => mockPublicData.facilitiesListing(params));
+};
+
 export const getStories = () =>
   fetchApi('/stories', mockPublicData.storiesAll);
 
@@ -49,6 +54,11 @@ export const getDoctorsTop = (limit = 4) =>
 export const getAllDoctors = () =>
   fetchApi('/doctors', mockPublicData.doctorsAll);
 
+export const getDoctors = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return fetchApi(`/doctors/list?${query}`, () => mockPublicData.doctorsListing(params));
+};
+
 export const getAnnouncementsActive = () =>
   fetchApi('/announcements/active', mockPublicData.announcementsActive);
 
@@ -66,3 +76,27 @@ export const getFeaturedReviews = () =>
 
 export const getPlatformStats = () =>
   fetchApi('/platform-stats', mockPublicData.platformStats);
+
+export const getArticlesPublic = (params = {}) =>
+  fetchApi(`/articles?${new URLSearchParams(params)}`, () => mockPublicData.articlesAll(params));
+
+export const getArticleDetail = (id) =>
+  fetchApi(`/articles/${id}`, () => mockPublicData.articleDetail(id));
+
+export const getFeaturedArticles = (limit = 5) =>
+  fetchApi(`/articles/featured?limit=${limit}`, () => mockPublicData.articlesFeatured(limit));
+
+export const getPopularArticles = (limit = 5) =>
+  fetchApi(`/articles/popular?limit=${limit}`, () => mockPublicData.articlesPopular(limit));
+
+export const getCategoriesPublic = () =>
+  fetchApi('/categories', mockPublicData.categoriesAll);
+
+export const getTagsPublic = () =>
+  fetchApi('/tags', mockPublicData.tagsAll);
+
+export const getArticleComments = (articleId, params = {}) =>
+  fetchApi(`/articles/${articleId}/comments?${new URLSearchParams(params)}`, () => {
+    const detail = mockPublicData.articleDetail(articleId);
+    return detail?.comments || [];
+  });

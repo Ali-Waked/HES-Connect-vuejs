@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
 import StoryModal from './StoryModal.vue';
 import ConfirmModal from '../global/ConfirmModal.vue';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 const store = useDashboardStore();
 const router = useRouter();
@@ -166,9 +167,9 @@ const handleDelete = () => {
                   <div class="min-w-0">
                     <button
                       class="text-sm font-semibold text-slate-900 dark:text-white leading-snug truncate max-w-[200px] hover:text-brand-primary transition cursor-pointer text-left"
-                      :title="story.title"
+                      :title="resolveTranslatedValue(story.title)"
                       @click="openView(story)"
-                    >{{ story.title }}</button>
+                    >{{ resolveTranslatedValue(story.title) }}</button>
                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ story.images }} {{ story.images === 1 ? 'image' : 'images' }}</p>
                   </div>
                 </div>
@@ -234,7 +235,7 @@ const handleDelete = () => {
     </div>
 
     <StoryModal :show="showFormModal" :story="selectedStory" :mode="modalMode" @close="showFormModal = false"/>
-    <ConfirmModal :show="showDeleteModal" title="Delete Story" :message="`Are you sure you want to delete <strong>${selectedStory?.title}</strong>?`" confirm-text="Delete" @confirm="handleDelete" @close="showDeleteModal = false"/>
+    <ConfirmModal :show="showDeleteModal" title="Delete Story" :message="`Are you sure you want to delete <strong>${resolveTranslatedValue(selectedStory?.title)}</strong>?`" confirm-text="Delete" @confirm="handleDelete" @close="showDeleteModal = false"/>
   </div>
 </template>
 

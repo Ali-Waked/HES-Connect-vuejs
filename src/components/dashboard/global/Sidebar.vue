@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import HesLogo from '@/components/global/HesLogo.vue';
 
 defineProps({
   mobileOpen: { type: Boolean, required: true }
@@ -33,6 +34,7 @@ const menuGroups = [
       { id: 'organizations', label: () => t('sidebar.organizations'), icon: 'corporate_fare' },
       { id: 'organization-users', label: () => t('sidebar.organizationUsers'), icon: 'group_add' },
       { id: 'facilities', label: () => t('sidebar.facilities'), icon: 'home_health' },
+      { id: 'cities', label: () => t('sidebar.cities'), icon: 'location_city' },
       { id: 'departments', label: () => t('sidebar.departments'), icon: 'lan' }
     ]
   },
@@ -64,6 +66,7 @@ const menuGroups = [
   {
     title: () => t('sidebar.system'),
     items: [
+      { id: 'positions', label: () => t('sidebar.positions'), icon: 'badge' },
       { id: 'jobs', label: () => t('sidebar.jobBoard'), icon: 'work' },
       { id: 'settings', label: () => t('sidebar.settings'), icon: 'settings' }
     ]
@@ -90,13 +93,7 @@ const menuGroups = [
     >
       <!-- Brand Logo Section -->
       <div class="flex items-center gap-3 pb-8 px-2 border-b border-white/5 dark:border-white/10 mb-6">
-        <div class="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white  font-bold">
-          <span class="material-symbols-outlined text-2xl font-bold">clinical_notes</span>
-        </div>
-        <div class="flex flex-col min-w-0">
-          <span class="text-sm font-black text-white tracking-tight truncate">{{ t('sidebar.heSAdmin') }}</span>
-          <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('sidebar.platformOwner') }}</span>
-        </div>
+        <HesLogo variant="full" :height="32" theme="dark" />
       </div>
 
       <!-- Menu Navigation -->

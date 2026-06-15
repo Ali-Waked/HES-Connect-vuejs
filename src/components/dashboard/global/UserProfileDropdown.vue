@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../../stores/auth';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 const emit = defineEmits(['close']);
 const router = useRouter();
@@ -30,7 +31,7 @@ const handleLogout = async () => {
 
   <div class="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 z-[100] overflow-hidden animate-drop-in transition-colors">
     <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-      <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">{{ authStore.user?.name }}</p>
+      <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">{{ resolveTranslatedValue(authStore.user?.name) }}</p>
       <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ authStore.user?.email }}</p>
     </div>
 

@@ -44,3 +44,7 @@ export function deleteDepartment(id) {
 export function getDepartmentStats() {
   return axiosClient.get('/dashboard/departments/stats')
 }
+
+export function getDepartmentsLookup(params = {}) {
+  return axiosClient.get('/dashboard/departments/lookup', { params })
+}

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 const route  = useRoute();
 const router = useRouter();
@@ -176,7 +177,7 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
 
           <!-- Title + patient + date -->
           <div class="min-w-0">
-            <h1 class="text-xl font-extrabold text-white leading-snug mb-1 drop-shadow">{{ story.title }}</h1>
+            <h1 class="text-xl font-extrabold text-white leading-snug mb-1 drop-shadow">{{ resolveTranslatedValue(story.title) }}</h1>
             <div class="flex items-center gap-2 text-sm text-white/80">
               <span class="font-semibold">{{ story.patient }}</span>
               <span class="text-white/40">·</span>

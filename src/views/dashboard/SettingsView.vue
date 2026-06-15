@@ -4,13 +4,14 @@ import { useAuthStore } from '../../stores/auth';
 import { useDashboardStore } from '../../stores/dashboard';
 import { useThemeStore } from '../../stores/useThemeStore';
 import { useI18n } from 'vue-i18n'
+import { resolveTranslatedValue } from '../../utils/locale'
 
 const { t } = useI18n()
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
 const themeStore = useThemeStore();
 
-const name = ref(authStore.user?.name || '');
+const name = ref(resolveTranslatedValue(authStore.user?.name) || '');
 const saving = ref(false);
 
 function handleSave() {
@@ -36,7 +37,7 @@ function handleSave() {
           {{ authStore.user?.initials }}
         </div>
         <div>
-          <p class="text-base font-bold text-slate-900 dark:text-slate-100">{{ authStore.user?.name }}</p>
+          <p class="text-base font-bold text-slate-900 dark:text-slate-100">{{ resolveTranslatedValue(authStore.user?.name) }}</p>
           <p class="text-sm text-slate-500 dark:text-slate-400">{{ authStore.user?.role }}</p>
         </div>
       </div>

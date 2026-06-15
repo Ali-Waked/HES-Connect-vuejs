@@ -9,6 +9,7 @@ function toFormData(formData) {
   payload.append('description[ar]', formData.description_ar || '')
   payload.append('facility_type', formData.type)
   payload.append('organization_id', formData.organization_id)
+  payload.append('city_id', formData.city_id || '')
   payload.append('parent_id', formData.parent_id || '')
 
   const [latitude, longitude] = (formData.location || '')
@@ -74,3 +75,5 @@ export function deleteFacility(id) {
 export function getFacilityStats() {
   return axiosClient.get('/dashboard/facilities/stats')
 }
+
+

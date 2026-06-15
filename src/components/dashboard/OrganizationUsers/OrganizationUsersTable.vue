@@ -225,7 +225,7 @@ const handleDelete = async () => {
               class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
             >
               <td class="px-6 py-4.5">
-                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ assignment.user?.name }}</span>
+                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ localField(assignment.user, 'name') }}</span>
               </td>
               <td class="px-6 py-4.5">
                 <span class="text-sm text-slate-600 dark:text-slate-400">{{ assignment.user?.email }}</span>
