@@ -74,10 +74,10 @@ onUnmounted(() => {
     <div ref="mapContainer" class="absolute inset-0 z-0"></div>
     <div class="absolute bottom-3 left-3 z-[400] bg-white/95/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 text-slate-700">
       <div class="flex flex-wrap gap-x-3 gap-y-1">
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Hospital</span>
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Clinic</span>
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Pharmacy</span>
-        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Medical Point</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-danger"></span> Hospital</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-brand-accent"></span> Clinic</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-success"></span> Pharmacy</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-warning"></span> Medical Point</span>
       </div>
     </div>
   </div>
