@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" fill="none" role="img" aria-label="HES Connect">
+  <title>HES Connect</title>
+
+  <!-- Icon: HC Monogram — same icon, same tile color (teal stays vibrant on dark) -->
+  <rect width="48" height="48" rx="11" fill="#027A75"/>
+
+  <!-- H left stem -->
+  <path d="M13 12 L13 36" stroke="white" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- H right stem -->
+  <path d="M27 12 L27 36" stroke="white" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- H crossbar -->
+  <path d="M13 24 L27 24" stroke="white" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- C top arm — amber -->
+  <path d="M27 12 L36 12" stroke="#D97706" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- C bottom arm — amber -->
+  <path d="M27 36 L36 36" stroke="#D97706" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- C back vertical — amber -->
+  <path d="M36 12 L36 36" stroke="#D97706" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Network node — secondary cyan -->
+  <circle cx="27" cy="24" r="3.5" fill="#0891B2"/>
+
+  <!-- Wordmark: "HES" — white for dark bg -->
+  <text
+    x="60"
+    y="34"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="22"
+    font-weight="800"
+    letter-spacing="-0.8"
+    fill="#FFFFFF"
+  >HES</text>
+
+  <!-- Wordmark: "Connect" — lighter teal for dark bg -->
+  <text
+    x="106"
+    y="34"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="22"
+    font-weight="400"
+    letter-spacing="-0.3"
+    fill="#5EEAD4"
+  >Connect</text>
+</svg>
