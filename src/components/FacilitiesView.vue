@@ -297,6 +297,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { resolveTranslatedValue } from '../utils/locale';
 
 // Initial Mock Dataset matching the requirements and image mock exactly
 const initialFacilities = [
@@ -454,7 +455,7 @@ const filteredFacilities = computed(() => {
     // Search Query
     const query = searchQuery.value.toLowerCase().trim();
     const matchesSearch = !query || 
-      fac.name.toLowerCase().includes(query) || 
+      resolveTranslatedValue(fac.name).toLowerCase().includes(query) || 
       fac.organization.toLowerCase().includes(query) ||
       (fac.parent && fac.parent.toLowerCase().includes(query)) ||
       (fac.location && fac.location.toLowerCase().includes(query));

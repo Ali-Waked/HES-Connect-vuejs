@@ -8,6 +8,7 @@ import ImageUploader from '../global/ImageUploader.vue';
 import MultipleImageUploader from '../global/MultipleImageUploader.vue';
 import FileUploader from '../global/FileUploader.vue';
 import { getFacilities } from '../../../services/facilityService';
+import { getCitiesLookup } from '../../../services/cityService';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -32,6 +33,7 @@ const location = ref('');
 const status = ref('pending');
 const approval_status = ref('pending');
 const cover_image = ref(null);
+const city_id = ref('');
 const gallery_images = ref([]);
 const files = ref([]);
 const loadingFac = ref(false);
@@ -52,6 +54,7 @@ watch(
         type.value = data.type || 'medical_point';
         organization_id.value = data.organization_id || '';
         parent_id.value = data.parent_id || '';
+        city_id.value = data.city_id || '';
         const lat = data.latitude ?? data.lat;
         const lng = data.longitude ?? data.lng;
         location.value = data.location || (lat != null && lng != null ? `${lat}, ${lng}` : '');
@@ -80,6 +83,7 @@ function resetForm() {
   type.value = 'medical_point';
   organization_id.value = '';
   parent_id.value = '';
+  city_id.value = '';
   location.value = '';
   status.value = 'pending';
   approval_status.value = 'pending';
@@ -90,6 +94,7 @@ function resetForm() {
 }
 
 const parentFacilities = ref([]);
+const citiesList = ref([]);
 
 watch(() => props.show, async (val) => {
   if (val) {
@@ -104,6 +109,14 @@ watch(() => props.show, async (val) => {
         // silently fail for dropdown
       }
     }
+    if (citiesList.value.length === 0) {
+      try {
+        const { data } = await getCitiesLookup()
+        citiesList.value = data.data || data
+      } catch (e) {
+        // silently fail for dropdown
+      }
+    }
   }
 });
 
@@ -114,9 +127,10 @@ const submitForm = async () => {
       name_ar: name_ar.value,
       description_en: description_en.value,
       description_ar: description_ar.value,
-      type: type.value,
-      organization_id: organization_id.value,
-      parent_id: parent_id.value || null,
+        type: type.value,
+        organization_id: organization_id.value,
+        parent_id: parent_id.value || null,
+        city_id: city_id.value || null,
       location: location.value,
       status: status.value,
       approval_status: approval_status.value,
@@ -260,6 +274,20 @@ function coverValidation() {
               <option value="" disabled>Select Organization</option>
               <option v-for="org in organizations" :key="org.uuid" :value="org.uuid">
                 {{ localField(org, 'name') }}
+              </option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facCity">{{ $t('facilities.city') || 'City' }}</label>
+            <select
+              id="facCity"
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer"
+              v-model="city_id"
+            >
+              <option value="">{{ $t('common.select') || 'Select' }} {{ $t('facilities.city') || 'City' }}</option>
+              <option v-for="c in citiesList" :key="c.uuid || c.id" :value="c.uuid || c.id">
+                {{ c.name?.en || c.name_en || c.name }}
               </option>
             </select>
           </div>

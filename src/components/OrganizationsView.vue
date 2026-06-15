@@ -62,8 +62,8 @@
             <tr v-for="org in filteredOrgs" :key="org.id">
               <td>
                 <div class="org-info">
-                  <span class="org-name">{{ org.name }}</span>
-                  <span class="org-description">{{ org.description }}</span>
+                  <span class="org-name">{{ resolveTranslatedValue(org.name) }}</span>
+                  <span class="org-description">{{ resolveTranslatedValue(org.description) }}</span>
                 </div>
               </td>
               <td>
@@ -191,6 +191,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { resolveTranslatedValue } from '../utils/locale';
 
 // Initial Mock Dataset matching the requirements and image mock exactly
 const initialOrganizations = [
@@ -304,8 +305,8 @@ const filteredOrgs = computed(() => {
     // Search Query
     const query = searchQuery.value.toLowerCase().trim();
     const matchesSearch = !query || 
-      org.name.toLowerCase().includes(query) || 
-      org.description.toLowerCase().includes(query);
+      resolveTranslatedValue(org.name).toLowerCase().includes(query) || 
+      resolveTranslatedValue(org.description).toLowerCase().includes(query);
       
     return matchesType && matchesSearch;
   });
@@ -422,7 +423,7 @@ const deleteOrganization = () => {
   if (selectedOrg.value) {
     organizations.value = organizations.value.filter(o => o.id !== selectedOrg.value.id);
     saveToLocalStorage();
-    addToast(`Deleted "${selectedOrg.value.name}"`, 'error');
+    addToast(`Deleted "${resolveTranslatedValue(selectedOrg.value.name)}"`, 'error');
     closeDeleteModal();
   }
 };
