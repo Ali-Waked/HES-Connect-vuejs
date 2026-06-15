@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { resolveTranslatedValue } from '@/utils/locale';
 
 const props = defineProps({ show: Boolean, story: Object });
 const emit = defineEmits(['close']);
@@ -8,7 +9,7 @@ const store = useStoriesStore();
 const copied = ref(false);
 
 const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-const shareText = props.story ? `Support ${props.story.patientFirstName}'s story on Health Garagantam: ${props.story.title}` : '';
+const shareText = props.story ? `Support ${props.story.patientFirstName}'s story on HES Connect: ${resolveTranslatedValue(props.story.title)}` : '';
 
 const shareLinks = {
   whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
@@ -41,7 +42,7 @@ function openShare(platform) {
       </div>
       <div class="space-y-5 p-5">
         <div class="rounded-lg border border-slate-100 bg-slate-50 p-3">
-          <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ story?.title }}</p>
+          <p class="text-sm font-semibold text-slate-900 line-clamp-2">{{ resolveTranslatedValue(story?.title) }}</p>
         </div>
         <div>
           <p class="mb-3 text-sm font-semibold text-slate-700">Share via</p>

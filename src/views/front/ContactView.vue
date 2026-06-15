@@ -1,127 +1,276 @@
 <script setup>
-import { reactive, ref } from 'vue';
-import AppNavbar from '../../components/global/AppNavbar.vue';
-import LandingFooter from '../../components/landing/LandingFooter.vue';
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import AppNavbar from '../../components/global/AppNavbar.vue'
+import LandingFooter from '../../components/landing/LandingFooter.vue'
+import PageHero from '../../components/shared/PageHero.vue'
+import { useContactForm } from '../../composables/useContactForm'
 
-const form = reactive({
-  name: '',
-  email: '',
-  subject: '',
-  message: ''
-});
+const { t } = useI18n()
+const {
+  form,
+  errors,
+  apiError,
+  submitting,
+  success,
+  clearFieldError,
+  submit,
+  NAME_MAX,
+  EMAIL_MAX,
+  MESSAGE_MAX,
+} = useContactForm()
 
-const errors = ref({});
-const submitted = ref(false);
+const openFaq = ref(null)
 
-const contactCards = [
-  { label: 'Email', value: 'info@healthgaragantam.ps', icon: 'mail' },
-  { label: 'Phone', value: '+970 59 000 0000', icon: 'call' },
-  { label: 'Location', value: 'Gaza, Palestine', icon: 'location_on' }
-];
+const contactMethods = [
+  { key: 'email', icon: 'mail', label: t('contactPage.emailLabel'), value: 'info@hesconnect.ps' },
+  { key: 'phone', icon: 'call', label: t('contactPage.phoneLabel'), value: '+970 59 000 0000' },
+  { key: 'address', icon: 'location_on', label: t('contactPage.addressLabel'), value: t('contactPage.addressValue') },
+  { key: 'hours', icon: 'schedule', label: t('contactPage.hoursLabel'), value: t('contactPage.hoursValue') },
+]
 
-function validate() {
-  const next = {};
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const faqs = [
+  { q: t('contactPage.faq1.q'), a: t('contactPage.faq1.a') },
+  { q: t('contactPage.faq2.q'), a: t('contactPage.faq2.a') },
+  { q: t('contactPage.faq3.q'), a: t('contactPage.faq3.a') },
+  { q: t('contactPage.faq4.q'), a: t('contactPage.faq4.a') },
+  { q: t('contactPage.faq5.q'), a: t('contactPage.faq5.a') },
+]
 
-  if (!form.name.trim()) next.name = 'Name is required.';
-  if (!form.email.trim()) next.email = 'Email is required.';
-  else if (!emailPattern.test(form.email)) next.email = 'Enter a valid email address.';
-  if (!form.subject.trim()) next.subject = 'Subject is required.';
-  if (!form.message.trim()) next.message = 'Message is required.';
+const socialLinks = [
+  { name: 'Facebook', icon: 'facebook' },
+  { name: 'Twitter', icon: 'x' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'LinkedIn', icon: 'linkedin' },
+]
 
-  errors.value = next;
-  return Object.keys(next).length === 0;
-}
-
-function submit() {
-  submitted.value = false;
-  if (!validate()) return;
-
-  submitted.value = true;
-  form.name = '';
-  form.email = '';
-  form.subject = '';
-  form.message = '';
+function toggleFaq(index) {
+  openFaq.value = openFaq.value === index ? null : index
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-landing-cream font-sans antialiased text-landing-dark">
+  <div class="min-h-screen bg-surface-secondary dark:bg-slate-900">
     <AppNavbar variant="landing" />
 
-    <main class="pt-28 lg:pt-32">
-      <section class="border-b border-landing-border bg-white/60/60">
-        <div class="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6 lg:px-8 lg:pb-16 lg:pt-14">
-          <span class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1.5 text-xs font-bold uppercase text-brand-primary">
-            Contact Us
-          </span>
-          <h1 class="mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-            Talk to the Health Garagantam team.
-          </h1>
-          <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-            Send a message for support, partnerships, facility updates, or questions about using the healthcare platform.
-          </p>
+    <PageHero
+      :title="t('contactPage.title')"
+      :description="t('contactPage.description')"
+      :breadcrumbs="[
+        { label: t('nav.home'), to: '/' },
+        { label: t('contactPage.title') }
+      ]"
+    />
+
+    <main>
+      <!-- Contact Info + Form -->
+      <section class="section-padding">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+            <!-- Contact Info Cards 2x2 -->
+            <div class="grid sm:grid-cols-2 gap-4 content-start">
+              <article
+                v-for="method in contactMethods"
+                :key="method.key"
+                class="card-hover p-5"
+              >
+                <div class="icon-box mb-3">
+                  <span class="material-symbols-outlined text-xl">{{ method.icon }}</span>
+                </div>
+                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ method.label }}</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{{ method.value }}</p>
+              </article>
+            </div>
+
+            <!-- Form -->
+            <div class="card-base p-6 sm:p-8">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ t('contactPage.formTitle') }}</h2>
+              <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ t('contactPage.formDescription') }}</p>
+
+              <div
+                v-if="success"
+                class="mt-6 flex items-start gap-3 rounded-xl border border-success-light bg-success-light dark:bg-success/10 dark:border-success/30 p-4"
+              >
+                <span class="material-symbols-outlined mt-0.5 text-success dark:text-success">check_circle</span>
+                <div>
+                  <p class="text-sm font-bold text-success dark:text-success">{{ t('contactPage.successTitle') }}</p>
+                  <p class="mt-0.5 text-sm text-success dark:text-success/80">{{ t('contactPage.successMessage') }}</p>
+                </div>
+              </div>
+
+              <div
+                v-if="apiError"
+                class="mt-6 flex items-start gap-3 rounded-xl border border-danger-light bg-danger-light dark:bg-danger/10 dark:border-danger/30 p-4"
+              >
+                <span class="material-symbols-outlined mt-0.5 text-danger dark:text-danger">error</span>
+                <p class="text-sm font-semibold text-danger dark:text-danger">{{ apiError }}</p>
+              </div>
+
+              <form class="mt-6 grid gap-5" @submit.prevent="submit" novalidate>
+                <label class="space-y-1.5">
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('contactPage.formName') }}</span>
+                  <input
+                    v-model="form.name"
+                    :maxlength="NAME_MAX"
+                    :placeholder="t('contactPage.formNamePlaceholder')"
+                    class="input-base"
+                    :class="errors.name ? 'border-danger' : ''"
+                    @input="clearFieldError('name')"
+                  />
+                  <p v-if="errors.name" class="text-xs font-semibold text-danger">{{ errors.name }}</p>
+                </label>
+
+                <label class="space-y-1.5">
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('contactPage.formEmail') }}</span>
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    :maxlength="EMAIL_MAX"
+                    :placeholder="t('contactPage.formEmailPlaceholder')"
+                    class="input-base"
+                    :class="errors.email ? 'border-danger' : ''"
+                    @input="clearFieldError('email')"
+                  />
+                  <p v-if="errors.email" class="text-xs font-semibold text-danger">{{ errors.email }}</p>
+                </label>
+
+                <label class="space-y-1.5">
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('contactPage.formMessage') }}</span>
+                  <textarea
+                    v-model="form.message"
+                    rows="5"
+                    :maxlength="MESSAGE_MAX"
+                    :placeholder="t('contactPage.formMessagePlaceholder')"
+                    class="input-base resize-none"
+                    :class="errors.message ? 'border-danger' : ''"
+                    @input="clearFieldError('message')"
+                  ></textarea>
+                  <div class="flex items-center justify-between">
+                    <p v-if="errors.message" class="text-xs font-semibold text-danger">{{ errors.message }}</p>
+                    <p v-else class="text-xs text-slate-400 dark:text-slate-500">{{ form.message.length }}/{{ MESSAGE_MAX }}</p>
+                  </div>
+                </label>
+
+                <button
+                  type="submit"
+                  :disabled="submitting"
+                  class="btn-primary w-full"
+                >
+                  <svg
+                    v-if="submitting"
+                    class="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4" stroke="currentColor" fill="none" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  <span v-if="submitting">{{ t('contactPage.sending') }}</span>
+                  <span v-else>{{ t('contactPage.sendButton') }}</span>
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="py-14 lg:py-16">
-        <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-          <aside class="space-y-4">
+      <!-- FAQ -->
+      <section class="bg-white dark:bg-slate-800/50 section-padding">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-10 lg:mb-12">
+            <span class="eyebrow-badge mb-4">
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
+              {{ t('contactPage.faqEyebrow') }}
+            </span>
+            <h2 class="section-heading-center">
+              {{ t('contactPage.faqTitle') }}
+            </h2>
+            <p class="mt-3 text-base text-slate-500 dark:text-slate-400">
+              {{ t('contactPage.faqDescription') }}
+            </p>
+          </div>
+
+          <div class="space-y-3">
             <article
-              v-for="card in contactCards"
-              :key="card.label"
-              class="flex items-start gap-4 rounded-2xl border border-landing-border bg-white p-5 shadow-sm"
+              v-for="(faq, idx) in faqs"
+              :key="idx"
+              class="card-base overflow-hidden transition-all duration-300"
+              :class="openFaq === idx ? 'shadow-card-hover' : ''"
             >
-              <span class="material-symbols-outlined flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary" style="display:flex;">
-                {{ card.icon }}
-              </span>
-              <div>
-                <p class="text-sm font-bold text-slate-950">{{ card.label }}</p>
-                <p class="mt-1 text-sm text-slate-500">{{ card.value }}</p>
+              <button
+                type="button"
+                class="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition cursor-pointer"
+                :class="openFaq === idx ? 'bg-brand-primary/5 dark:bg-brand-primary/10' : ''"
+                @click="toggleFaq(idx)"
+              >
+                <span class="text-sm font-bold text-slate-900 dark:text-white">{{ faq.q }}</span>
+                <svg
+                  class="w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200"
+                  :class="openFaq === idx ? 'rotate-180' : ''"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                >
+                  <path stroke-linecap="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                </svg>
+              </button>
+              <div
+                v-show="openFaq === idx"
+                class="border-t border-slate-200 dark:border-slate-700 px-6 pb-4 pt-3"
+              >
+                <p class="text-sm leading-7 text-slate-600 dark:text-slate-400">{{ faq.a }}</p>
               </div>
             </article>
-          </aside>
+          </div>
+        </div>
+      </section>
 
-          <section class="rounded-2xl border border-landing-border bg-white p-6 shadow-sm sm:p-8">
-            <h2 class="text-xl font-bold text-slate-950">Send a message</h2>
-            <p class="mt-2 text-sm text-slate-500">We will review your message and follow up as soon as possible.</p>
-
-            <div v-if="submitted" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">
-              Your message was prepared successfully.
+      <!-- Map + Social -->
+      <section class="section-padding">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid gap-8 lg:grid-cols-2">
+            <!-- Map -->
+            <div class="card-base p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="icon-box">
+                  <span class="material-symbols-outlined text-xl">map</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ t('contactPage.mapTitle') }}</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('contactPage.mapDescription') }}</p>
+                </div>
+              </div>
+              <div class="flex h-56 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 sm:h-64">
+                <div class="text-center">
+                  <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">map</span>
+                  <p class="mt-2 text-sm font-medium text-slate-400 dark:text-slate-500">{{ t('contactPage.mapPlaceholder') }}</p>
+                </div>
+              </div>
             </div>
 
-            <form class="mt-6 grid gap-5 sm:grid-cols-2" @submit.prevent="submit">
-              <label class="space-y-2">
-                <span class="text-sm font-semibold text-slate-700">Full name</span>
-                <input v-model="form.name" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
-                <span v-if="errors.name" class="text-xs font-semibold text-rose-600">{{ errors.name }}</span>
-              </label>
-
-              <label class="space-y-2">
-                <span class="text-sm font-semibold text-slate-700">Email address</span>
-                <input v-model="form.email" type="email" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
-                <span v-if="errors.email" class="text-xs font-semibold text-rose-600">{{ errors.email }}</span>
-              </label>
-
-              <label class="space-y-2 sm:col-span-2">
-                <span class="text-sm font-semibold text-slate-700">Subject</span>
-                <input v-model="form.subject" class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10" />
-                <span v-if="errors.subject" class="text-xs font-semibold text-rose-600">{{ errors.subject }}</span>
-              </label>
-
-              <label class="space-y-2 sm:col-span-2">
-                <span class="text-sm font-semibold text-slate-700">Message</span>
-                <textarea v-model="form.message" rows="5" class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-slate-200 focus:ring-4 focus:ring-brand-primary/10"></textarea>
-                <span v-if="errors.message" class="text-xs font-semibold text-rose-600">{{ errors.message }}</span>
-              </label>
-
-              <div class="sm:col-span-2">
-                <button type="submit" class="inline-flex h-11 items-center justify-center rounded-lg bg-brand-primary px-6 text-sm font-bold text-white shadow-sm transition hover:bg-brand-primary-hover">
-                  Send Message
-                </button>
+            <!-- Social -->
+            <div class="card-base p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="icon-box">
+                  <span class="material-symbols-outlined text-xl">public</span>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ t('contactPage.socialTitle') }}</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('contactPage.socialDescription') }}</p>
+                </div>
               </div>
-            </form>
-          </section>
+              <div class="flex flex-wrap gap-3">
+                <div
+                  v-for="link in socialLinks"
+                  :key="link.name"
+                  class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 transition hover:border-brand-primary/30 hover:text-brand-primary cursor-pointer"
+                >
+                  <span class="material-symbols-outlined text-lg">public</span>
+                  {{ link.name }}
+                </div>
+              </div>
+              <p class="mt-4 text-xs text-slate-400 dark:text-slate-500">{{ t('contactPage.socialNote') }}</p>
+            </div>
+          </div>
         </div>
       </section>
     </main>

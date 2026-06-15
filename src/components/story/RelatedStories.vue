@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { resolveTranslatedValue } from '@/utils/locale';
 
 const props = defineProps({
   story: { type: Object, required: true }
@@ -31,7 +32,7 @@ function go(id) { router.push('/stories/' + id); }
       <div v-for="item in related" :key="item.id"
         class="min-w-[260px] flex-shrink-0 rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md snap-start">
         <div class="h-36 overflow-hidden rounded-t-xl bg-slate-100">
-          <img v-if="item.images?.[0]" :src="item.images[0]" :alt="item.title" class="h-full w-full object-cover transition hover:scale-105 duration-300" />
+          <img v-if="item.images?.[0]" :src="item.images[0]" :alt="resolveTranslatedValue(item.title)" class="h-full w-full object-cover transition hover:scale-105 duration-300" />
           <div v-else class="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-50 to-slate-100">
             <span class="material-symbols-outlined text-4xl text-brand-primary/30">favorite</span>
           </div>

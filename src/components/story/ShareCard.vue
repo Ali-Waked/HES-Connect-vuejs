@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { resolveTranslatedValue } from '@/utils/locale';
 
 const props = defineProps({
   story: { type: Object, required: true }
@@ -10,7 +11,7 @@ const store = useStoriesStore();
 const copied = ref(false);
 
 const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-const shareText = `Support ${props.story.patientFirstName}'s story on Health Garagantam: ${props.story.title}`;
+const shareText = `Support ${props.story.patientFirstName}'s story on HES Connect: ${resolveTranslatedValue(props.story.title)}`;
 
 const shares = [
   { icon: '🟢', label: 'WhatsApp', color: 'hover:bg-green-50 text-green-600', url: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}` },
