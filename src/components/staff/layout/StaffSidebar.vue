@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { useStaffStore } from '../../../stores/useStaffStore';
 import AvatarInitial from '../shared/AvatarInitial.vue';
 import StatusBadge from '../shared/StatusBadge.vue';
+import HesLogo from '../../global/HesLogo.vue';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 defineProps({
   mobileOpen: { type: Boolean, default: false }
@@ -51,14 +53,8 @@ function navigate(to) {
       mobileOpen ? 'translate-x-0' : ($i18n.locale === 'ar' ? 'translate-x-full' : '-translate-x-full')
     ]"
   >
-    <div class="flex h-[70px] items-center gap-3 border-b border-slate-100 px-5">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary text-white shadow-md shadow-brand-primary/20">
-        <span class="material-symbols-outlined">health_and_safety</span>
-      </div>
-      <div>
-        <p class="text-sm font-bold text-slate-900">{{ t('staffSidebar.healthGaragantam') }}</p>
-        <p class="text-xs text-slate-500">{{ t('staffSidebar.staffPortal') }}</p>
-      </div>
+    <div class="flex h-[70px] items-center border-b border-slate-100 px-5">
+      <HesLogo variant="full" :height="32" theme="light" />
     </div>
 
     <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -76,11 +72,11 @@ function navigate(to) {
 
     <div class="border-t border-slate-100 p-4">
       <div class="flex items-center gap-3">
-        <AvatarInitial :name="store.currentUser.name" />
-        <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-bold text-slate-900">{{ store.currentUser.name }}</p>
-          <StatusBadge :status="store.currentUser.role === 'hospital_manager' ? 'approved' : 'published'" />
-        </div>
+            <AvatarInitial :name="resolveTranslatedValue(store.currentUser.name)" />
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold text-slate-900 truncate">{{ resolveTranslatedValue(store.currentUser.name) }}</p>
+              <p class="text-xs text-slate-500 truncate">{{ store.currentUser.role }}</p>
+            </div>
       </div>
       <button class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50" @click="router.push('/')">
         <span class="material-symbols-outlined text-[18px]">logout</span>

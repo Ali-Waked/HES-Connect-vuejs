@@ -1,8 +1,8 @@
 <template>
   <StaffModalShell :show="show" :title="$t('pageTitles.prescriptions')" width="max-w-lg" @close="$emit('close')">
     <div v-if="prescription" class="space-y-4" id="print-section">
-      <div class="border-b border-slate-100 pb-4 text-center">
-        <p class="text-xl font-bold text-slate-900">Health Garagantam</p>
+      <div class="border-b border-slate-100 pb-4 flex flex-col items-center gap-1">
+        <HesLogo variant="full" :height="32" theme="light" />
         <p class="text-sm text-slate-500">{{ $t('pageTitles.prescriptions') }}</p>
       </div>
       <div class="text-sm space-y-1">
@@ -27,6 +27,7 @@
 import { computed } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
 import StaffModalShell from './StaffModalShell.vue'
+import HesLogo from '../../global/HesLogo.vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({ show: Boolean, prescriptionId: Number })

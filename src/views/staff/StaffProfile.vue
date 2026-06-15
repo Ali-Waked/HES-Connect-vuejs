@@ -14,7 +14,7 @@
         <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 class="text-lg font-bold text-slate-900 mb-4">Personal Info</h3>
           <div class="flex flex-col items-center mb-6">
-            <AvatarInitial :name="store.currentUser.name" size="lg" />
+            <AvatarInitial :name="userName" size="lg" />
             <button class="mt-2 text-sm text-brand-primary font-semibold" @click="mockPhoto">Change Photo</button>
           </div>
           <div class="space-y-4">
@@ -111,21 +111,24 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)
 
 const isDoctorOrNurse = computed(() => ['doctor', 'nurse'].includes(store.currentUser.role))
 
+const userName = computed(() => resolveTranslatedValue(store.currentUser.name))
+
 const form = reactive({
-  name: store.currentUser.name,
+  name: resolveTranslatedValue(store.currentUser.name),
   phone: store.currentUser.phone || '',
   gender: store.currentUser.gender || 'male',
   birthDate: store.currentUser.birthDate || '',
-  address: store.currentUser.address || '',
-  specialization: store.currentUser.specialization || '',
+  address: resolveTranslatedValue(store.currentUser.address),
+  specialization: resolveTranslatedValue(store.currentUser.specialization),
   experience: store.currentUser.experience || 0,
-  bio: store.currentUser.bio || '',
+  bio: resolveTranslatedValue(store.currentUser.bio),
   fee: store.currentUser.fee || 0
 })
 

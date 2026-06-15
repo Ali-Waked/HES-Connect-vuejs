@@ -67,6 +67,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)
@@ -107,7 +108,7 @@ const donutSegments = computed(() => {
 
 const specBars = computed(() => {
   const map = {}
-  store.facilityStaff.forEach(s => { map[s.specialization] = (map[s.specialization] || 0) + 1 })
+  store.facilityStaff.forEach(s => { const sp = resolveTranslatedValue(s.specialization); map[sp] = (map[sp] || 0) + 1 })
   const total = Object.values(map).reduce((s, c) => s + c, 0) || 1
   return Object.entries(map).map(([label, count]) => ({ label, count, percent: (count / total) * 100 }))
 })

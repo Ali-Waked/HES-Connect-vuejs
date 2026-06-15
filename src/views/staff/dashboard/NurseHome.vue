@@ -38,8 +38,8 @@
                     <td class="px-4 py-3 text-sm text-slate-500">{{ i + 1 }}</td>
                     <td class="px-4 py-3">
                       <div class="flex items-center gap-2">
-                        <AvatarInitial :name="appt.patientName" size="sm" />
-                        <span class="font-semibold text-slate-900">{{ appt.patientName }}</span>
+                        <AvatarInitial :name="resolveTranslatedValue(appt.patientName)" size="sm" />
+                        <span class="font-semibold text-slate-900">{{ resolveTranslatedValue(appt.patientName) }}</span>
                       </div>
                     </td>
                     <td class="px-4 py-3 text-sm text-slate-700">{{ appt.doctorName }}</td>
@@ -68,10 +68,10 @@
             <div class="h-16 w-full animate-pulse rounded bg-slate-100"></div>
           </div>
           <div v-else v-for="doc in activeDoctorsList" :key="doc.id" class="flex items-center gap-3 rounded-lg border border-slate-100 p-3">
-            <AvatarInitial :name="doc.name" />
+            <AvatarInitial :name="resolveTranslatedValue(doc.name)" />
             <div class="min-w-0 flex-1">
-              <p class="font-semibold text-slate-900">{{ doc.name }}</p>
-              <p class="text-xs text-slate-500">{{ doc.specialization }}</p>
+              <p class="font-semibold text-slate-900">{{ resolveTranslatedValue(doc.name) }}</p>
+              <p class="text-xs text-slate-500">{{ resolveTranslatedValue(doc.specialization) }}</p>
             </div>
             <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700">Available</span>
           </div>
@@ -88,6 +88,7 @@ import { useStaffStore } from '@/stores/useStaffStore'
 import StatsCard from '@/components/staff/shared/StatsCard.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)
@@ -97,7 +98,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 600) })
 const todayAppts = computed(() => store.todayAppointments)
 const sorted = computed(() => [...todayAppts.value].sort((a, b) => a.time.localeCompare(b.time)))
 const patientsSeen = computed(() => store.appointments.filter(a => a.status === 'completed').length)
-const activeDoctors = computed(() => store.facilityStaff.filter(s => s.position.includes('Consultant') || s.position.includes('Specialist')).length)
+const activeDoctors = computed(() => store.facilityStaff.filter(s => resolveTranslatedValue(s.position).includes('Consultant') || resolveTranslatedValue(s.position).includes('Specialist')).length)
 const pendingAppts = computed(() => store.bookedAppointments.length)
-const activeDoctorsList = computed(() => store.facilityStaff.filter(s => s.specialization !== 'Nursing' && s.specialization !== 'Pharmacy'))
+const activeDoctorsList = computed(() => store.facilityStaff.filter(s => resolveTranslatedValue(s.specialization) !== 'Nursing' && resolveTranslatedValue(s.specialization) !== 'Pharmacy'))
 </script>

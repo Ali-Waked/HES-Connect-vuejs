@@ -16,9 +16,9 @@
       <div v-if="filtered.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="patient in filtered" :key="patient.id" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
           <div class="flex items-center gap-3">
-            <AvatarInitial :name="patient.name" />
+            <AvatarInitial :name="resolveTranslatedValue(patient.name)" />
             <div class="min-w-0 flex-1">
-              <p class="font-bold text-slate-900 truncate">{{ patient.name }}</p>
+              <p class="font-bold text-slate-900 truncate">{{ resolveTranslatedValue(patient.name) }}</p>
               <p class="text-xs text-slate-500 truncate">{{ patient.email }}</p>
             </div>
           </div>
@@ -44,6 +44,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
 import PatientDetailModal from '@/components/staff/modals/PatientDetailModal.vue'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)
@@ -54,7 +55,7 @@ const selectedId = ref(null)
 const filtered = computed(() => {
   if (!search.value) return store.patients
   const q = search.value.toLowerCase()
-  return store.patients.filter(p => p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
+  return store.patients.filter(p => resolveTranslatedValue(p.name).toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
 })
 
 function openDetail(id) { selectedId.value = id; detailModal.value = true }

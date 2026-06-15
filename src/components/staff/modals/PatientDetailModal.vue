@@ -1,10 +1,10 @@
 <template>
-  <StaffModalShell :show="show" :title="'Patient: ' + (patient?.name || '')" width="max-w-2xl" @close="$emit('close')">
+  <StaffModalShell :show="show" :title="'Patient: ' + resolveTranslatedValue(patient?.name)" width="max-w-2xl" @close="$emit('close')">
     <div v-if="patient">
       <div class="flex items-center gap-4 mb-6">
-        <AvatarInitial :name="patient.name" size="lg" />
+        <AvatarInitial :name="resolveTranslatedValue(patient.name)" size="lg" />
         <div>
-          <h3 class="text-xl font-bold text-slate-900">{{ patient.name }}</h3>
+          <h3 class="text-xl font-bold text-slate-900">{{ resolveTranslatedValue(patient.name) }}</h3>
           <p class="text-sm text-slate-500">{{ patient.email }}</p>
         </div>
       </div>
@@ -48,12 +48,14 @@ import StaffModalShell from './StaffModalShell.vue'
 import AvatarInitial from '../shared/AvatarInitial.vue'
 import StatusBadge from '../shared/StatusBadge.vue'
 
+import { resolveTranslatedValue } from '@/utils/locale'
+
 const props = defineProps({ show: Boolean, patientId: Number })
 defineEmits(['close'])
 const store = useStaffStore()
 const activeTab = ref('info')
 const tabs = [{ key: 'info', label: 'Info' }, { key: 'appointments', label: 'Appointments' }, { key: 'prescriptions', label: 'Prescriptions' }]
 const patient = computed(() => store.patients.find(p => p.id === props.patientId))
-const patientAppts = computed(() => store.appointments.filter(a => a.patientName === patient.value?.name))
-const patientPrescriptions = computed(() => store.prescriptions.filter(p => p.patientName === patient.value?.name))
+const patientAppts = computed(() => store.appointments.filter(a => a.patientName === resolveTranslatedValue(patient.value?.name)))
+const patientPrescriptions = computed(() => store.prescriptions.filter(p => p.patientName === resolveTranslatedValue(patient.value?.name)))
 </script>

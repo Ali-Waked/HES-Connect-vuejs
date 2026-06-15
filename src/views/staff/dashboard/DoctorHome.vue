@@ -105,7 +105,7 @@
           <div class="mt-4 space-y-2">
             <div v-for="art in recentArticles" :key="art.id" class="flex items-center justify-between rounded-md p-2 hover:bg-slate-50 transition">
               <div>
-                <div class="font-semibold text-slate-900">{{ art.title }}</div>
+                <div class="font-semibold text-slate-900">{{ resolveTranslatedValue(art.title) }}</div>
                 <div class="text-xs text-slate-500">{{ art.category }} • {{ art.date }}</div>
               </div>
               <div class="flex items-center gap-2">
@@ -159,6 +159,7 @@ import { useStaffStore } from '@/stores/useStaffStore'
 import StatsCard from '@/components/staff/shared/StatsCard.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)

@@ -46,7 +46,7 @@
           <div class="mt-4 space-y-3">
             <div v-for="dept in store.departments" :key="dept.id" class="flex items-center justify-between rounded-lg border border-slate-100 p-3">
               <div>
-                <p class="font-semibold text-slate-900">{{ dept.name }}</p>
+                <p class="font-semibold text-slate-900">{{ resolveTranslatedValue(dept.name) }}</p>
                 <p class="text-xs text-slate-500">{{ dept.headDoctor }}</p>
               </div>
               <div class="flex items-center gap-3">
@@ -100,7 +100,7 @@
         </div>
         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div v-for="post in recentJobs" :key="post.id" class="rounded-lg border border-slate-100 p-4">
-            <p class="font-bold text-slate-900">{{ post.title }}</p>
+            <p class="font-bold text-slate-900">{{ resolveTranslatedValue(post.title) }}</p>
             <p class="mt-1 text-xs text-slate-500">Ends: {{ post.endDate }}</p>
             <div class="mt-2 flex items-center gap-2">
               <StatusBadge :status="post.status" />
@@ -118,6 +118,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
 import StatsCard from '@/components/staff/shared/StatsCard.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const store = useStaffStore()
 const loading = ref(true)

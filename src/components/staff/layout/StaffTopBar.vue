@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useStaffStore } from '../../../stores/useStaffStore';
 import AvatarInitial from '../shared/AvatarInitial.vue';
 import { useI18n } from 'vue-i18n';
+import { resolveTranslatedValue } from '../../../utils/locale';
 
 defineProps({
   title: { type: String, required: true }
@@ -35,8 +36,8 @@ const open = ref(false);
 
       <div class="relative">
         <button class="flex items-center gap-2 rounded-lg p-1.5 transition hover:bg-slate-50" @click="open = !open">
-          <AvatarInitial :name="store.currentUser.name" size="sm" />
-          <span class="hidden text-sm font-semibold text-slate-700 sm:block">{{ store.currentUser.name }}</span>
+          <AvatarInitial :name="resolveTranslatedValue(store.currentUser.name)" size="sm" />
+          <span class="hidden text-sm font-semibold text-slate-700 sm:block">{{ resolveTranslatedValue(store.currentUser.name) }}</span>
           <span class="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
         </button>
         <div v-if="open" class="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
