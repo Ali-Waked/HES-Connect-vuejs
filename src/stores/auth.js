@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axiosClient, { csrfCookie } from '@/axiosClient'
+import { resolveTranslatedValue, getInitials } from '../utils/locale'
 
 export const useAuthStore = defineStore('auth', () => {
   const user    = ref(null)
@@ -8,17 +9,38 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
 
   const isAuthenticated = computed(() => !!user.value)
+  const initCalled = ref(false)
 
   async function fetchUser() {
     try {
       const { data } = await axiosClient.get('/user')
-      user.value = {
-        ...data,
-        initials: data.name
-          ? data.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-          : '?'
+      
+      const userResource = data && data.user ? data.user : data
+      if (!userResource) {
+        user.value = null
+        return
       }
-    } catch {
+
+      const roles = data && Array.isArray(data.roles) ? data.roles : (userResource.role ? [userResource.role.name] : [])
+      const permissions = data && Array.isArray(data.permissions) ? data.permissions : []
+
+      const primaryRole = roles[0] || null
+      const roleObj = primaryRole ? {
+        name: primaryRole,
+        toString() {
+          return this.name
+        }
+      } : null
+
+      user.value = {
+        ...userResource,
+        roles,
+        permissions,
+        role: roleObj,
+        initials: getInitials(userResource.name)
+      }
+    } catch (err) {
+      console.error('Failed to fetch user:', err)
       user.value = null
     }
   }
@@ -27,19 +49,17 @@ export const useAuthStore = defineStore('auth', () => {
     errors.value  = {}
     loading.value = true
     try {
-      console.log(credentials);
       await csrfCookie()
       await axiosClient.post('/login', credentials)
       await fetchUser()
       return { success: true }
     } catch (err) {
-      console.log(err);
       if (err.response?.status === 422) {
         errors.value = err.response.data.errors ?? {}
       } else if (err.response?.status === 429) {
         errors.value = { email: ['Too many attempts. Please wait and try again.'] }
       } else {
-        errors.value = { email: ['Invalid credentials. Please try again.'] }
+        errors.value = { general: 'Invalid credentials. Please try again.' }
       }
       return { success: false }
     } finally {
@@ -59,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (err.response?.status === 422) {
         errors.value = err.response.data.errors ?? {}
       } else {
-        errors.value = { email: ['Registration failed. Please try again.'] }
+        errors.value = { general: 'Registration failed. Please try again.' }
       }
       return { success: false }
     } finally {
@@ -80,18 +100,19 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = {
         ...user.value,
         name,
-        initials: name
-          .split(' ')
-          .map(w => w[0])
-          .join('')
-          .toUpperCase()
-          .slice(0, 2)
+        initials: getInitials(name)
       }
     }
   }
 
+  function clearErrors() {
+    errors.value = {}
+  }
+
   async function init() {
+    if (initCalled.value) return
     await fetchUser()
+    initCalled.value = true
   }
 
   return {
@@ -99,11 +120,13 @@ export const useAuthStore = defineStore('auth', () => {
     errors,
     loading,
     isAuthenticated,
+    initCalled,
     login,
     register,
     logout,
     fetchUser,
     updateProfile,
+    clearErrors,
     init,
   }
 })

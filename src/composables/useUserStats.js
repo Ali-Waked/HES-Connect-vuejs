@@ -14,7 +14,7 @@ export function useUserStats() {
     error.value = null
     try {
       const { data } = await userService.getUserStats()
-      stats.value = data
+      stats.value = data.data;
       store.userStats = {
         total: data.total_users,
         staff: data.total_staff,

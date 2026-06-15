@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { resolveTranslatedValue } from '../utils/locale';
 
 export const useTagsStore = defineStore('tags', () => {
   const tags = ref([
@@ -17,7 +18,7 @@ export const useTagsStore = defineStore('tags', () => {
   }));
 
   const addTag = (name) => {
-    const existing = tags.value.find(t => t.name.toLowerCase() === name.toLowerCase());
+    const existing = tags.value.find(t => resolveTranslatedValue(t.name).toLowerCase() === name.toLowerCase());
     if (existing) return existing.id;
 
     const newId = tags.value.length > 0 ? Math.max(...tags.value.map(t => t.id)) + 1 : 1;
