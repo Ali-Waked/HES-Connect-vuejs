@@ -36,7 +36,7 @@ watch(() => props.show, (isShowing) => {
       form.price = item.price || '';
       form.quantity = item.quantity || '';
       form.manufacturer = item.manufacturer || '';
-      form.image = item.image || null;
+      form.image = item.image_url || item.image || null;
     } else {
       form.name = { en: '', ar: '' };
       form.description = { en: '', ar: '' };
@@ -66,15 +66,15 @@ const validate = () => {
   return valid;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validate()) return;
 
   const payload = { ...form };
 
   if (props.medicine) {
-    store.updateMedicine(props.medicine.id, payload);
+    await store.updateMedicine(props.medicine.uuid, payload);
   } else {
-    store.addMedicine(payload);
+    await store.createMedicine(payload);
   }
   emit('close');
 };

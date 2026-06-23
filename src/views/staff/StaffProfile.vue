@@ -109,14 +109,17 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { useStaffStore } from '@/stores/useStaffStore'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
 import { resolveTranslatedValue } from '@/utils/locale'
 
+const authStore = useAuthStore()
 const store = useStaffStore()
 const loading = ref(true)
 
-const isDoctorOrNurse = computed(() => ['doctor', 'nurse'].includes(store.currentUser.role))
+const dashboardPath = computed(() => authStore.user?.dashboard_route?.split('/')[1] || '')
+const isDoctorOrNurse = computed(() => dashboardPath.value === 'doctor' || dashboardPath.value === 'nurse')
 
 const userName = computed(() => resolveTranslatedValue(store.currentUser.name))
 

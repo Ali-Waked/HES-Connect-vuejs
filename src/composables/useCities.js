@@ -44,6 +44,7 @@ export function useCities() {
 
   async function fetchCity(uuid) {
     const { data } = await cityService.getCity(uuid)
+    console.log(data);
     return data.data
   }
 

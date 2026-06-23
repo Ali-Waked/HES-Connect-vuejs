@@ -24,7 +24,7 @@ const menuGroups = [
     items: [
       { id: 'appointments', label: () => t('sidebar.appointments'), icon: 'calendar_month' },
       { id: 'prescriptions', label: () => t('sidebar.prescriptions'), icon: 'description' },
-      { id: 'medication-requests', label: () => t('sidebar.medRequests'), icon: 'medication_liquid' },
+      { id: 'medication-analytics', label: () => t('sidebar.medAnalytics'), icon: 'analytics' },
       { id: 'medicines', label: () => t('sidebar.medicines'), icon: 'pill' }
     ]
   },

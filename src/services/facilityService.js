@@ -12,19 +12,23 @@ function toFormData(formData) {
   payload.append('city_id', formData.city_id || '')
   payload.append('parent_id', formData.parent_id || '')
 
-  const [latitude, longitude] = (formData.location || '')
-    .split(',')
-    .map(Number)
-
-  if (!Number.isNaN(latitude)) {
-    payload.append('latitude', latitude)
+  if (formData.owner_id) {
+    payload.append('owner_id', formData.owner_id)
   }
-  if (!Number.isNaN(longitude)) {
-    payload.append('longitude', longitude)
+
+  if (formData.latitude !== undefined && formData.latitude !== '') {
+    payload.append('latitude', formData.latitude)
+  }
+  if (formData.longitude !== undefined && formData.longitude !== '') {
+    payload.append('longitude', formData.longitude)
   }
 
   payload.append('status', formData.status || 'pending')
   payload.append('approval_status', formData.approval_status || 'pending')
+
+  if (formData.is_featured !== undefined) {
+    payload.append('is_featured', formData.is_featured ? '1' : '0')
+  }
 
   if (formData.cover_image instanceof File) {
     payload.append('cover_image', formData.cover_image)
@@ -46,6 +50,18 @@ function toFormData(formData) {
     })
   }
 
+  if (formData.deleted_gallery_images && formData.deleted_gallery_images.length > 0) {
+    formData.deleted_gallery_images.forEach((uuid) => {
+      payload.append('deleted_gallery_images[]', uuid)
+    })
+  }
+
+  if (formData.deleted_files && formData.deleted_files.length > 0) {
+    formData.deleted_files.forEach((uuid) => {
+      payload.append('deleted_files[]', uuid)
+    })
+  }
+
   return payload
 }
 
@@ -54,6 +70,10 @@ export function getFacilities(params = {}) {
 }
 
 export function getFacility(id) {
+  return axiosClient.get(`/dashboard/facilities/${id}/edit`)
+}
+
+export function getFacilityShow(id) {
   return axiosClient.get(`/dashboard/facilities/${id}`)
 }
 
@@ -74,6 +94,10 @@ export function deleteFacility(id) {
 
 export function getFacilityStats() {
   return axiosClient.get('/dashboard/facilities/stats')
+}
+
+export function getFacilityReviewStats(uuid) {
+  return axiosClient.get(`/dashboard/facilities/${uuid}/review-stats`)
 }
 
 

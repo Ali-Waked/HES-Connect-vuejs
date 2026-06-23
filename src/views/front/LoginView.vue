@@ -41,16 +41,11 @@ async function handleLogin() {
 
   if (result.success) {
     const redirect = route.query.redirect
-    const role = authStore.user?.role?.name
 
     if (redirect) {
       router.push(redirect)
-    } else if (role === 'admin') {
-      router.push('/admin/dashboard')
-    } else if (['doctor', 'nurse', 'hospital_manager', 'pharmacist'].includes(role)) {
-      router.push('/staff/dashboard')
     } else {
-      router.push('/')
+      router.push(authStore.dashboardRoute || '/')
     }
   }
 }

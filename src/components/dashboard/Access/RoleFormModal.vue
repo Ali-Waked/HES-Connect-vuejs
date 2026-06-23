@@ -17,31 +17,37 @@ const { t: $t } = useI18n();
 
 const form = reactive({
   name: { en: '', ar: '' },
+  description: { en: '', ar: '' },
   permissions: []
 });
 
-const errors = reactive({ name_en: '', name_ar: '' });
+const errors = reactive({
+  'name.en': '',
+  'name.ar': '',
+});
 
 watch(() => props.show, (val) => {
   if (val) {
     if (props.role) {
       form.name = { ...(props.role.name || { en: '', ar: '' }) };
+      form.description = { ...(props.role.description || { en: '', ar: '' }) };
       form.permissions = (props.role.permissions || []).map(p => p.uuid || p);
     } else {
       form.name = { en: '', ar: '' };
+      form.description = { en: '', ar: '' };
       form.permissions = [];
     }
-    errors.name_en = '';
-    errors.name_ar = '';
+    errors['name.en'] = '';
+    errors['name.ar'] = '';
   }
 });
 
 const validate = () => {
   let valid = true;
-  errors.name_en = '';
-  errors.name_ar = '';
-  if (!form.name.en.trim()) { errors.name_en = $t('common.required'); valid = false }
-  if (!form.name.ar.trim()) { errors.name_ar = $t('common.required'); valid = false }
+  errors['name.en'] = '';
+  errors['name.ar'] = '';
+  if (!form.name.en.trim()) { errors['name.en'] = $t('common.required'); valid = false }
+  if (!form.name.ar.trim()) { errors['name.ar'] = $t('common.required'); valid = false }
   return valid;
 };
 
@@ -69,32 +75,65 @@ const handleSubmit = async () => {
     @close="$emit('close')"
   >
     <form @submit.prevent="handleSubmit" class="space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleNameEn">{{ $t('access.role_name_en') }} *</label>
-          <input
-            id="roleNameEn"
-            type="text"
-            class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition"
-            required
-            dir="ltr"
-            :placeholder="$t('access.role_name_en')"
-            v-model="form.name.en"
-          />
-          <p v-if="errors.name_en" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors.name_en }}</p>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleNameAr">{{ $t('access.role_name_ar') }} *</label>
-          <input
-            id="roleNameAr"
-            type="text"
-            class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right"
-            required
-            dir="rtl"
-            :placeholder="$t('access.role_name_ar')"
-            v-model="form.name.ar"
-          />
-          <p v-if="errors.name_ar" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors.name_ar }}</p>
+      <div>
+        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-4">
+          <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m0 4h6m-6 4h8m-8 4h4" />
+          </svg>
+          {{ $t('access.translations') }}
+        </h4>
+        <div class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleNameEn">{{ $t('access.name_en') }} *</label>
+              <input
+                id="roleNameEn"
+                type="text"
+                class="input-base"
+                required
+                dir="ltr"
+                :placeholder="$t('access.name_en')"
+                v-model="form.name.en"
+              />
+              <p v-if="errors['name.en']" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors['name.en'] }}</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleNameAr">{{ $t('access.name_ar') }} *</label>
+              <input
+                id="roleNameAr"
+                type="text"
+                class="input-base text-right"
+                required
+                dir="rtl"
+                :placeholder="$t('access.name_ar')"
+                v-model="form.name.ar"
+              />
+              <p v-if="errors['name.ar']" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors['name.ar'] }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescEn">{{ $t('access.description_en') }}</label>
+              <textarea
+                id="roleDescEn"
+                class="input-base resize-none min-h-[80px]"
+                dir="ltr"
+                :placeholder="$t('access.description_en')"
+                v-model="form.description.en"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescAr">{{ $t('access.description_ar') }}</label>
+              <textarea
+                id="roleDescAr"
+                class="input-base resize-none min-h-[80px] text-right"
+                dir="rtl"
+                :placeholder="$t('access.description_ar')"
+                v-model="form.description.ar"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -108,14 +147,14 @@ const handleSubmit = async () => {
         <button
           type="button"
           @click="$emit('close')"
-          class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-lg transition"
+          class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-lg transition cursor-pointer"
         >
           {{ $t('common.cancel') }}
         </button>
         <button
           type="submit"
           :disabled="saving"
-          class="py-2.5 px-8 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/15 transition inline-flex items-center gap-2"
+          class="py-2.5 px-8 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/15 transition inline-flex items-center gap-2 cursor-pointer"
         >
           <svg v-if="saving" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

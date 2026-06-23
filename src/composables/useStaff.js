@@ -53,11 +53,11 @@ export function useStaff() {
     checkingEmail.value = true
     try {
       const { data } = await staffService.checkStaffEmail(email)
-      return { exists: data.exists, user: data.user || null }
+      return { exists: data.exists, has_staff_profile: data.has_staff_profile, user: data.user || null, staff: data.staff || null }
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to check email'
       store.addToast(msg, 'error')
-      return { exists: false, user: null, error: msg }
+      return { exists: false, has_staff_profile: false, user: null, staff: null, error: msg }
     } finally {
       checkingEmail.value = false
     }
@@ -95,6 +95,22 @@ export function useStaff() {
     }
   }
 
+  async function terminateFacilityStaff(facilityStaffUuid) {
+    saving.value = true
+    try {
+      await staffService.terminateFacilityStaff(facilityStaffUuid)
+      store.addToast('Facility assignment terminated successfully', 'success')
+      await fetchStaff(_lastParams)
+      return { success: true }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to terminate facility assignment'
+      store.addToast(msg, 'error')
+      return { success: false, error: msg }
+    } finally {
+      saving.value = false
+    }
+  }
+
   return {
     staff,
     loading,
@@ -107,5 +123,6 @@ export function useStaff() {
     checkStaffEmail,
     createStaff,
     updateStaff,
+    terminateFacilityStaff,
   }
 }

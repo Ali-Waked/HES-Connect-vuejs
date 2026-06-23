@@ -1,56 +1,148 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { useDashboardStore } from './dashboard'
+import * as medicineService from '@/services/medicineService'
 
-export const useMedicinesStore = defineStore('medicines', () => {
-  const medicines = ref([
-    { id: 1, uuid: 'med-987-abc', name: 'Paracetamol', description: 'Pain reliever and a fever reducer.', image: '', created_at: '2026-06-01T10:00:00Z', updated_at: '2026-06-01T10:00:00Z' },
-    { id: 2, uuid: 'med-654-def', name: 'Amoxicillin', description: 'Antibiotic used to treat many different types of infection caused by bacteria.', image: '', created_at: '2026-06-02T11:30:00Z', updated_at: '2026-06-02T11:30:00Z' },
-    { id: 3, uuid: 'med-321-ghi', name: 'Ibuprofen', description: 'Nonsteroidal anti-inflammatory drug (NSAID) used for treating pain, fever, and inflammation.', image: '', created_at: '2026-06-03T09:15:00Z', updated_at: '2026-06-03T09:15:00Z' },
-    { id: 4, uuid: 'med-159-jkl', name: 'Metformin', description: 'Medication that helps the insulin your body produces work better.', image: '', created_at: '2026-06-05T14:45:00Z', updated_at: '2026-06-05T14:45:00Z' }
-  ]);
+export const useMedicinesStore = defineStore('medicine', () => {
+  const medicines = ref([])
+  const medicine = ref(null)
+  const loading = ref(false)
+  const saving = ref(false)
+  const pagination = ref({})
+  const errors = ref({})
+  const lookupResults = ref([])
+  const lookupLoading = ref(false)
 
-  const stats = computed(() => {
-    const thisMonth = new Date().getMonth();
-    const addedThisMonth = medicines.value.filter(m => new Date(m.created_at).getMonth() === thisMonth).length;
+  let _lastParams = {}
 
-    return {
-      total: medicines.value.length,
-      addedThisMonth
-    };
-  });
-
-  const addMedicine = (medicine) => {
-    const newId = medicines.value.length > 0 ? Math.max(...medicines.value.map(m => m.id)) + 1 : 1;
-    const now = new Date().toISOString();
-    medicines.value.push({
-      ...medicine,
-      id: newId,
-      uuid: `med-${Math.random().toString(36).substr(2, 9)}`,
-      created_at: now,
-      updated_at: now
-    });
-  };
-
-  const updateMedicine = (id, updatedData) => {
-    const idx = medicines.value.findIndex(m => m.id === id);
-    if (idx !== -1) {
-      medicines.value[idx] = { 
-        ...medicines.value[idx], 
-        ...updatedData, 
-        updated_at: new Date().toISOString() 
-      };
+  async function fetchMedicines(params = {}) {
+    loading.value = true
+    errors.value = {}
+    _lastParams = params
+    try {
+      const { data } = await medicineService.getMedicines(params)
+      console.log(data);
+      medicines.value = data
+      pagination.value = {
+        current_page: data.meta?.current_page,
+        last_page: data.meta?.last_page,
+        per_page: data.meta?.per_page,
+        total: data.meta?.total,
+        from: data.meta?.from,
+        to: data.meta?.to,
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to load medicines'
+      errors.value = { general: msg }
+    } finally {
+      loading.value = false
     }
-  };
+  }
 
-  const deleteMedicine = (id) => {
-    medicines.value = medicines.value.filter(m => m.id !== id);
-  };
+  async function fetchMedicine(uuid) {
+    loading.value = true
+    medicine.value = null
+    errors.value = {}
+    try {
+      const { data } = await medicineService.getMedicine(uuid)
+      medicine.value = data.data
+      console.log(data);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to load medicine'
+      errors.value = { general: msg }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function createMedicine(formData) {
+    saving.value = true
+    errors.value = {}
+    try {
+      await medicineService.createMedicine(formData)
+      const toast = useDashboardStore()
+      toast.addToast('Medicine created successfully', 'success')
+      return { success: true }
+    } catch (err) {
+      if (err.response?.status === 422) {
+        errors.value = err.response.data.errors || {}
+      } else {
+        const msg = err.response?.data?.message || 'Failed to create medicine'
+        errors.value = { general: msg }
+      }
+      return { success: false }
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function updateMedicine(uuid, formData) {
+    saving.value = true
+    errors.value = {}
+    try {
+      console.log(uuid);
+      await medicineService.updateMedicine(uuid, formData)
+      const toast = useDashboardStore()
+      toast.addToast('Medicine updated successfully', 'success')
+      return { success: true }
+    } catch (err) {
+      if (err.response?.status === 422) {
+        errors.value = err.response.data.errors || {}
+      } else {
+        const msg = err.response?.data?.message || 'Failed to update medicine'
+        errors.value = { general: msg }
+      }
+      return { success: false }
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function deleteMedicine(uuid) {
+    try {
+      await medicineService.deleteMedicine(uuid)
+      const toast = useDashboardStore()
+      toast.addToast('Medicine deleted successfully', 'success')
+      if (medicines.value.length <= 1 && (pagination.value.current_page || 1) > 1) {
+        _lastParams = { ..._lastParams, page: (pagination.value.current_page || 1) - 1 }
+      }
+      await fetchMedicines(_lastParams)
+      return { success: true }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to delete medicine'
+      errors.value = { general: msg }
+      return { success: false }
+    }
+  }
+
+  async function lookupMedicines(query = '') {
+    lookupLoading.value = true
+    try {
+      const { data } = await medicineService.lookupMedicines({ search: query })
+      lookupResults.value = data.data || data
+      return lookupResults.value
+    } catch (err) {
+      lookupResults.value = []
+      return []
+    } finally {
+      lookupLoading.value = false
+    }
+  }
 
   return {
     medicines,
-    stats,
-    addMedicine,
+    medicine,
+    loading,
+    saving,
+    pagination,
+    errors,
+    lookupResults,
+    lookupLoading,
+    fetchMedicines,
+    fetchMedicine,
+    createMedicine,
     updateMedicine,
-    deleteMedicine
-  };
-});
+    deleteMedicine,
+    lookupMedicines,
+  }
+})

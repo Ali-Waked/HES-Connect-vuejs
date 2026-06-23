@@ -788,6 +788,31 @@ export const mockPublicData = {
 
   featuredReviews: () => FEATURED_REVIEWS,
 
+  platformReviews: (params = {}) => {
+    let list = FEATURED_REVIEWS.filter(r => r.source === 'platform').map(r => ({ ...r, is_featured: true }));
+    const additional = generateReviews(12, 'platform', null, 'Platform Review').map((r, i) => ({
+      ...r,
+      id: 100 + i,
+      is_featured: false,
+      status: 'approved',
+      created_at: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
+    }));
+    list = [...list, ...additional];
+    list.sort((a, b) => {
+      if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1;
+      return new Date(b.created_at || b.date) - new Date(a.created_at || a.date);
+    });
+    const { page = 1, per_page = 20 } = params;
+    const total = list.length;
+    const lastPage = Math.ceil(total / per_page);
+    const start = (page - 1) * per_page;
+    const end = start + per_page;
+    return {
+      data: list.slice(start, end),
+      meta: { current_page: page, last_page: lastPage, per_page, total },
+    };
+  },
+
   platformStats: () => ({
     total_users: 2847,
     total_facilities: FACILITIES.length,

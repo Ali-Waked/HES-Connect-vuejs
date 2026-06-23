@@ -169,19 +169,34 @@ export const useStaffStore = defineStore('staff', () => {
     { id: 5, name_en: 'Internal Medicine', name_ar: 'الطب الباطني', headDoctor_en: 'Dr. Mona Shurrab', headDoctor_ar: 'د. منى شراب', staffCount: 11 }
   ]);
 
-  const facilityStaff = ref(Array.from({ length: 12 }, (_, index) => ({
-    id: index + 1,
-    name_en: ['Dr. Ahmed Al-Masri', 'Dr. Hala Abu Rayan', 'Dr. Samer Al-Khatib', 'Nurse Lina Barakat', 'Nurse Omar Hijazi', 'Ph. Rami Al-Najjar'][index % 6],
-    name_ar: ['د. أحمد المصري', 'د. هالة أبو ريان', 'د. سامر الخطيب', 'الممرضة لينا بركات', 'الممرض عمر حجازي', 'ص. رامي النجار'][index % 6],
-    specialization_en: ['Cardiology', 'Pediatrics', 'Emergency', 'Nursing', 'Nursing', 'Pharmacy'][index % 6],
-    specialization_ar: ['طب القلب', 'طب الأطفال', 'الطوارئ', 'التمريض', 'التمريض', 'الصيدلة'][index % 6],
-    department_en: departments.value[index % departments.value.length].name_en,
-    department_ar: departments.value[index % departments.value.length].name_ar,
-    position_en: ['Consultant', 'Specialist', 'Head Nurse', 'Nurse', 'Pharmacist'][index % 5],
-    position_ar: ['استشاري', 'أخصائي', 'رئيس ممرضين', 'ممرض', 'صيدلي'][index % 5],
-    experience: 2 + (index % 12),
-    email: `staff${index + 1}@health.ps`
-  })));
+  const facilityStaff = ref(Array.from({ length: 12 }, (_, index) => {
+    const roles = [
+      { slug: 'doctor', name_en: 'Doctor', name_ar: 'طبيب' },
+      { slug: 'doctor', name_en: 'Doctor', name_ar: 'طبيب' },
+      { slug: 'doctor', name_en: 'Doctor', name_ar: 'طبيب' },
+      { slug: 'nurse', name_en: 'Nurse', name_ar: 'ممرض' },
+      { slug: 'nurse', name_en: 'Nurse', name_ar: 'ممرض' },
+      { slug: 'pharmacist', name_en: 'Pharmacist', name_ar: 'صيدلي' },
+      { slug: 'receptionist', name_en: 'Receptionist', name_ar: 'موظف استقبال' },
+      { slug: 'doctor', name_en: 'Doctor', name_ar: 'طبيب' },
+      { slug: 'nurse', name_en: 'Nurse', name_ar: 'ممرض' },
+      { slug: 'pharmacist', name_en: 'Pharmacist', name_ar: 'صيدلي' },
+      { slug: 'doctor', name_en: 'Doctor', name_ar: 'طبيب' },
+      { slug: 'receptionist', name_en: 'Receptionist', name_ar: 'موظف استقبال' },
+    ]
+    return {
+      id: index + 1,
+      name_en: ['Dr. Ahmed Al-Masri', 'Dr. Hala Abu Rayan', 'Dr. Samer Al-Khatib', 'Nurse Lina Barakat', 'Nurse Omar Hijazi', 'Ph. Rami Al-Najjar', 'Recep. Sara Khalil', 'Dr. Mahmoud Hijazi', 'Nurse Hiba Al-Sayed', 'Ph. Anas Zaqout', 'Dr. Reem Ashour', 'Recep. Fadi Al-Ghoul'][index],
+      name_ar: ['د. أحمد المصري', 'د. هالة أبو ريان', 'د. سامر الخطيب', 'الممرضة لينا بركات', 'الممرض عمر حجازي', 'ص. رامي النجار', 'موظفة الاستقبال سارة خليل', 'د. محمود حجازي', 'الممرضة هبة السيد', 'ص. أنس زقوت', 'د. ريم عاشور', 'موظف الاستقبال فادي الغول'][index],
+      specialization_en: ['Cardiology', 'Pediatrics', 'Emergency', 'Nursing', 'Nursing', 'Pharmacy', 'Admin', 'Internal Medicine', 'Nursing', 'Pharmacy', 'Pediatrics', 'Admin'][index],
+      specialization_ar: ['طب القلب', 'طب الأطفال', 'الطوارئ', 'التمريض', 'التمريض', 'الصيدلة', 'إداري', 'طب باطني', 'التمريض', 'الصيدلة', 'طب الأطفال', 'إداري'][index],
+      department_en: departments.value[index % departments.value.length].name_en,
+      department_ar: departments.value[index % departments.value.length].name_ar,
+      role: roles[index],
+      experience: 2 + (index % 12),
+      email: `staff${index + 1}@health.ps`
+    }
+  }));
 
   const jobPosts = ref(Array.from({ length: 6 }, (_, index) => ({
     id: index + 1,

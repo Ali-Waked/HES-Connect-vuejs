@@ -2,26 +2,27 @@
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useLocaleField } from '../../../composables/useLocaleField';
 import { useFormatDate } from '../../../composables/useFormatDate';
 import { useCities } from '../../../composables/useCities';
+import CityFormModal from '../../../components/dashboard/Cities/CityFormModal.vue';
 import ConfirmModal from '../../../components/dashboard/global/ConfirmModal.vue';
 import BasePagination from '../../../components/dashboard/global/BasePagination.vue';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { localField } = useLocaleField();
 const { formatDate } = useFormatDate();
-const { cities, loading, deleteCity, pagination, fetchCities } = useCities();
+const { cities, loading, deleteCity, pagination, fetchCities, fetchCity } = useCities();
 
 const searchQuery = ref('');
 const statusFilter = ref('all');
 const pageNumber = ref(1);
 const rowsPerPage = ref(15);
 
+const showFormModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedCity = ref(null);
+const editUuid = ref(null);
 
 function parseParams(query) {
   return {
@@ -87,6 +88,24 @@ function resetFilters() {
   pushQuery({ search: undefined, status: undefined, page: undefined })
 }
 
+const openAddModal = () => {
+  selectedCity.value = null;
+  editUuid.value = null;
+  showFormModal.value = true;
+};
+
+const openEditModal = async (city) => {
+  editUuid.value = city.uuid;
+  const data = await fetchCity(city.uuid)
+  selectedCity.value = { ...data, uuid: city.uuid };
+  showFormModal.value = true;
+};
+
+const onFormModalClose = () => {
+  showFormModal.value = false;
+  fetchCities(parseParams(route.query));
+};
+
 const confirmDelete = (city) => {
   selectedCity.value = city;
   showDeleteModal.value = true;
@@ -108,15 +127,15 @@ const handleDelete = async () => {
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ $t('cities.title') }}</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ pagination.total || 0 }} {{ $t('cities.registered') }}</p>
       </div>
-      <router-link
-        to="/admin/cities/create"
+      <button
+        @click="openAddModal"
         class="inline-flex items-center justify-center gap-1.5 py-2.5 px-4.5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 transition cursor-pointer"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         {{ $t('cities.add') }}
-      </router-link>
+      </button>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3">
@@ -176,11 +195,10 @@ const handleDelete = async () => {
         <table class="w-full border-collapse text-left rtl:text-right">
           <thead>
             <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[30%]">{{ $t('cities.name_ar') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[30%]">{{ $t('cities.name_en') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[45%]">{{ $t('common.name') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[15%]">{{ $t('cities.status') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[15%]">{{ $t('cities.created') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[10%] text-right rtl:text-left">{{ $t('common.actions') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[20%]">{{ $t('cities.created') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[20%] text-right rtl:text-left">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -190,10 +208,7 @@ const handleDelete = async () => {
               class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
             >
               <td class="px-6 py-4.5">
-                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ city.name?.ar || city.name_ar || '—' }}</span>
-              </td>
-              <td class="px-6 py-4.5">
-                <span class="text-sm text-slate-600 dark:text-slate-400">{{ city.name?.en || city.name_en || '—' }}</span>
+                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ city.name || '—' }}</span>
               </td>
               <td class="px-6 py-4.5 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="{
@@ -208,15 +223,15 @@ const handleDelete = async () => {
               </td>
               <td class="px-6 py-4.5 whitespace-nowrap text-right rtl:text-left">
                 <div class="flex justify-end rtl:justify-start gap-1.5">
-                  <router-link
-                    :to="`/admin/cities/${city.uuid}/edit`"
-                    class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer inline-flex"
+                  <button
+                    @click="openEditModal(city)"
+                    class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer"
                     :title="$t('common.edit')"
                   >
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
-                  </router-link>
+                  </button>
                   <button
                     class="text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition cursor-pointer"
                     :title="$t('common.delete')"
@@ -243,10 +258,12 @@ const handleDelete = async () => {
       @change="onPageChange"
     />
 
+    <CityFormModal :show="showFormModal" :city="selectedCity" @close="onFormModalClose" />
+
     <ConfirmModal
       :show="showDeleteModal"
       :title="$t('cities.delete')"
-      :message="$t('cities.deleteConfirm', { name: `<strong>${selectedCity?.name?.ar || selectedCity?.name_ar || ''}</strong>` })"
+      :message="$t('cities.deleteConfirm', { name: `<strong>${selectedCity?.name || ''}</strong>` })"
       :confirm-text="$t('common.delete')"
       @confirm="handleDelete"
       @close="showDeleteModal = false"

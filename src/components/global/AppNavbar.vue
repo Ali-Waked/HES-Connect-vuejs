@@ -198,7 +198,7 @@ watch(() => route.path, async () => {
 
             <div class="w-px h-6 mx-1" :class="isHeroTop ? 'bg-white/15' : 'bg-slate-200 dark:bg-slate-700'"></div>
 
-            <template v-if="authStore.isAuthenticated">
+            <template v-if="authStore.authenticated">
               <button
                 class="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl transition-all duration-200 cursor-pointer"
                 :class="isHeroTop
@@ -288,7 +288,7 @@ watch(() => route.path, async () => {
                 <LanguageSwitcher />
               </div>
 
-              <template v-if="authStore.isAuthenticated">
+              <template v-if="authStore.authenticated">
                 <button
                   class="w-full py-3 text-sm font-semibold text-brand-primary border border-brand-primary/20 rounded-xl cursor-pointer hover:bg-brand-primary/5 transition"
                   @click="router.push('/profile'); mobileOpen = false"

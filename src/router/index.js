@@ -152,9 +152,9 @@ const routes = [
         component: () => import('../views/dashboard/PrescriptionsView.vue')
       },
       {
-        path: 'medication-requests',
-        name: 'medication-requests',
-        component: () => import('../views/dashboard/MedicationRequestsView.vue')
+        path: 'medication-analytics',
+        name: 'medication-analytics',
+        component: () => import('../views/dashboard/MedicationAnalyticsView.vue')
       },
       {
         path: 'audit-logs',
@@ -180,17 +180,6 @@ const routes = [
         path: 'cities',
         name: 'cities',
         component: () => import('../views/dashboard/cities/index.vue')
-      },
-      {
-        path: 'cities/create',
-        name: 'cities.create',
-        component: () => import('../views/dashboard/cities/create.vue')
-      },
-      {
-        path: 'cities/:uuid/edit',
-        name: 'cities.edit',
-        component: () => import('../views/dashboard/cities/_uuid/edit.vue'),
-        props: true
       },
       {
         path: 'facilities',
@@ -314,8 +303,12 @@ const routes = [
       },
       {
         path: 'medicines',
-        name: 'medicines',
-        component: () => import('../views/dashboard/MedicinesView.vue')
+        children: [
+          { path: '', name: 'medicines', component: () => import('../views/dashboard/MedicinesView.vue') },
+          { path: 'create', name: 'medicines.create', component: () => import('../views/dashboard/MedicinesCreateView.vue') },
+          { path: ':uuid', name: 'medicines.show', component: () => import('../views/dashboard/MedicinesShowView.vue'), props: true },
+          { path: ':uuid/edit', name: 'medicines.edit', component: () => import('../views/dashboard/MedicinesEditView.vue'), props: true },
+        ]
       },
       {
         path: 'positions',
@@ -353,6 +346,23 @@ const routes = [
     ]
   },
   {
+    path: '/facility-owner',
+    component: () => import('../views/facility-owner/FacilityOwnerLayout.vue'),
+    redirect: '/facility-owner/dashboard',
+    meta: { requiresAuth: true },
+    children: [
+      { path: 'dashboard', name: 'facility-owner-dashboard', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'appointments', name: 'facility-owner-appointments', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'doctors', name: 'facility-owner-doctors', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'patients', name: 'facility-owner-patients', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'schedule', name: 'facility-owner-schedule', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'analytics', name: 'facility-owner-analytics', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'alerts', name: 'facility-owner-alerts', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'messages', name: 'facility-owner-messages', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') },
+      { path: 'settings', name: 'facility-owner-settings', component: () => import('../views/facility-owner/FacilityOwnerDashboard.vue') }
+    ]
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }
@@ -373,13 +383,24 @@ router.beforeEach(async (to) => {
   }
 
   // Route requires authentication, but user is anonymous
-  if (to.matched.some((record) => record.meta.requiresAuth) && !authStore.isAuthenticated) {
+  if (to.matched.some((record) => record.meta.requiresAuth) && !authStore.authenticated) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
 
   // Route is for guests only, but user is signed in
-  if ((to.meta.requiresGuest || to.meta.guestOnly) && authStore.isAuthenticated) {
-    return { name: 'dashboard' };
+  if (to.meta.requiresGuest && authStore.authenticated) {
+    return authStore.dashboardRoute || '/';
+  }
+
+  // Redirect if user tries to access a dashboard they don't own
+  if (authStore.authenticated && authStore.dashboardRoute) {
+    const userBase = '/' + authStore.dashboardRoute.split('/').filter(Boolean)[0]
+    const routeBase = '/' + to.path.split('/').filter(Boolean)[0]
+
+    const knownDashboards = ['admin', 'staff', 'facility-owner']
+    if (knownDashboards.includes(routeBase.replace('/', '')) && userBase !== routeBase) {
+      return authStore.dashboardRoute
+    }
   }
 });
 

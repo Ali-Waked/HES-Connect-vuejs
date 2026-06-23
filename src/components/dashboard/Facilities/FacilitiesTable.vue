@@ -14,20 +14,23 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { localField } = useLocaleField();
-const { getTypeClass, getMapLink } = useDashboardHelpers();
+const { getTypeClass } = useDashboardHelpers();
 const { formatDate } = useFormatDate();
 const { facilities, loading, stats, deleteFacility, pagination, fetchFacilities, fetchFacilityStats } = useFacilities();
 
 const searchQuery = ref('');
 const typeFilter = ref('all');
 const statusFilter = ref('all');
-const approvalFilter = ref('all');
 const pageNumber = ref(1);
 const rowsPerPage = ref(10);
+
+const sortField = ref('');
+const sortDirection = ref('asc');
 
 const showFormModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedFacility = ref(null);
+const previewImage = ref(null);
 
 watch(() => showFormModal.value, (val) => {
   if (!val) {
@@ -59,9 +62,10 @@ function parseParams(query) {
     search: query.search || '',
     facility_type: query.facility_type && query.facility_type !== 'all' ? query.facility_type : '',
     status: query.status && query.status !== 'all' ? query.status : '',
-    approval_status: query.approval_status && query.approval_status !== 'all' ? query.approval_status : '',
     page: parseInt(query.page) || 1,
     per_page: parseInt(query.per_page) || 10,
+    sort_by: query.sort_by || '',
+    sort_order: query.sort_order || '',
   }
 }
 
@@ -72,9 +76,10 @@ watch(
     searchQuery.value = params.search
     typeFilter.value = params.facility_type || 'all'
     statusFilter.value = params.status || 'all'
-    approvalFilter.value = params.approval_status || 'all'
     pageNumber.value = params.page
     rowsPerPage.value = params.per_page
+    sortField.value = params.sort_by || ''
+    sortDirection.value = params.sort_order || 'asc'
     fetchFacilities(params)
   },
   { immediate: true }
@@ -114,11 +119,6 @@ function onStatusChange(val) {
   pushQuery({ status: val, page: undefined })
 }
 
-function onApprovalChange(val) {
-  approvalFilter.value = val
-  pushQuery({ approval_status: val, page: undefined })
-}
-
 function onPageChange(page) {
   clearTimeout(searchTimeout)
   pushQuery({ page: page > 1 ? page : undefined })
@@ -129,9 +129,24 @@ function onPerPageChange(val) {
   pushQuery({ per_page: val, page: undefined })
 }
 
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+  pushQuery({ sort_by: sortField.value, sort_order: sortDirection.value, page: undefined })
+}
+
+function sortIcon(field) {
+  if (sortField.value !== field) return '↕'
+  return sortDirection.value === 'asc' ? '↑' : '↓'
+}
+
 function resetFilters() {
   clearTimeout(searchTimeout)
-  pushQuery({ search: undefined, facility_type: undefined, status: undefined, approval_status: undefined, page: undefined })
+  pushQuery({ search: undefined, facility_type: undefined, status: undefined, page: undefined, sort_by: undefined, sort_order: undefined })
 }
 
 const openAddModal = () => {
@@ -240,7 +255,7 @@ const handleDelete = async () => {
         <option v-for="opt in facilityTypeOptions" :key="opt.value" :value="opt.value">{{ $t(opt.label) }}</option>
       </select>
       <select
-        class="min-w-[180px] p-2.5 pr-9 rtl:pr-2.5 rtl:pl-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] rtl:bg-[left_12px_center] bg-[length:16px] transition"
+        class="min-w-[160px] p-2.5 pr-9 rtl:pr-2.5 rtl:pl-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] rtl:bg-[left_12px_center] bg-[length:16px] transition"
         style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
         :value="statusFilter" @change="onStatusChange($event.target.value)"
       >
@@ -250,16 +265,6 @@ const handleDelete = async () => {
         <option value="inactive">{{ $t('statuses.inactive') }}</option>
         <option value="temporarily_closed">{{ $t('statuses.temporarily_closed') }}</option>
         <option value="permanently_closed">{{ $t('statuses.permanently_closed') }}</option>
-      </select>
-      <select
-        class="min-w-[140px] p-2.5 pr-9 rtl:pr-2.5 rtl:pl-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] rtl:bg-[left_12px_center] bg-[length:16px] transition"
-        style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
-        :value="approvalFilter" @change="onApprovalChange($event.target.value)"
-      >
-        <option value="all">{{ $t('facilities.allApproval') || 'All Approval' }}</option>
-        <option value="approved">{{ $t('statuses.approved') }}</option>
-        <option value="pending">{{ $t('statuses.pending') }}</option>
-        <option value="rejected">{{ $t('statuses.rejected') }}</option>
       </select>
       <select
         class="min-w-[100px] p-2.5 pr-9 rtl:pr-2.5 rtl:pl-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] rtl:bg-[left_12px_center] bg-[length:16px] transition"
@@ -284,7 +289,6 @@ const handleDelete = async () => {
 
     <!-- Table Card -->
     <div v-else class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-      <!-- Empty state -->
       <div v-if="facilities?.length === 0" class="flex flex-col items-center justify-center py-12 px-6 text-center gap-4">
         <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500">
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -295,27 +299,36 @@ const handleDelete = async () => {
         <button class="inline-flex items-center justify-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 transition cursor-pointer" @click="resetFilters">{{ $t('common.resetFilters') }}</button>
       </div>
 
-      <!-- Table -->
       <div v-else class="w-full overflow-x-auto">
         <table class="w-full border-collapse text-left rtl:text-right">
-            <thead>
+          <thead>
             <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[8%]">{{ $t('facilities.coverImage') || 'Cover' }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[20%]">{{ $t('common.name') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[11%]">{{ $t('facilities.type') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[15%]">{{ $t('facilities.organization') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[9%]">{{ $t('common.status') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[10%]">{{ $t('facilities.approval') || 'Approval' }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[14%]">{{ $t('facilities.location') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[6%]">{{ $t('facilities.files') }}</th>
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left w-[7%]">{{ $t('common.actions') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[22%] cursor-pointer select-none" @click="toggleSort('name')">
+                <span class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">
+                  {{ $t('common.name') }} <span class="text-[10px] opacity-60">{{ sortIcon('name') }}</span>
+                </span>
+              </th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[12%] cursor-pointer select-none" @click="toggleSort('facility_type')">
+                <span class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">
+                  {{ $t('facilities.type') }} <span class="text-[10px] opacity-60">{{ sortIcon('facility_type') }}</span>
+                </span>
+              </th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[14%]">{{ $t('facilities.owner') || 'Owner' }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[18%]">{{ $t('facilities.organization') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[10%] cursor-pointer select-none" @click="toggleSort('status')">
+                <span class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200">
+                  {{ $t('common.status') }} <span class="text-[10px] opacity-60">{{ sortIcon('status') }}</span>
+                </span>
+              </th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left w-[16%]">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
             <tr v-for="facility in facilities" :key="facility.uuid || facility.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
               <td class="px-6 py-4">
                 <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                  <img v-if="facility.cover_image" :src="facility.cover_image" class="w-full h-full object-cover" alt="Cover" />
+                  <img v-if="facility.cover_image" :src="facility.cover_image" class="w-full h-full object-cover cursor-pointer" alt="Cover" @click="previewImage = facility.cover_image" />
                   <span v-else class="material-symbols-outlined text-lg text-slate-400">image</span>
                 </div>
               </td>
@@ -323,54 +336,32 @@ const handleDelete = async () => {
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ localField(facility, 'name') }}</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="getTypeClass(facility.type)">
-                  {{ $t(facilityTypeLabel(facility.type)) }}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="getTypeClass(facility.facility_type || facility.type)">
+                  {{ $t(facilityTypeLabel(facility.facility_type || facility.type)) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">
-                {{ facility.organization ? localField(facility.organization, 'name') : (facility.organization_name || '—') }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                <template v-if="facility.owner">
+                  {{ localField(facility.owner, 'name') }}
+                </template>
+                <span v-else class="text-slate-400">—</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                {{ facility.organization ? localField(facility.organization, 'name') : '—' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
-                  'bg-amber-100 text-amber-800': facility.status === 'pending',
-                  'bg-emerald-100 text-emerald-800': facility.status === 'active',
-                  'bg-slate-100 text-slate-600': facility.status === 'inactive',
-                  'bg-orange-100 text-orange-800': facility.status === 'temporarily_closed',
-                  'bg-red-100 text-red-800': facility.status === 'permanently_closed',
+                  'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400': facility.status === 'pending',
+                  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400': facility.status === 'active',
+                  'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400': facility.status === 'inactive',
+                  'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400': facility.status === 'temporarily_closed',
+                  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': facility.status === 'permanently_closed',
                 }">
                   {{ $t(`statuses.${facility.status}`) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
-                  'bg-emerald-100 text-emerald-800': facility.approval_status === 'approved',
-                  'bg-amber-100 text-amber-800': facility.approval_status === 'pending',
-                  'bg-red-100 text-red-800': facility.approval_status === 'rejected'
-                }">
-                  {{ $t(`statuses.${facility.approval_status}`) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <template v-if="facility.location || (facility.latitude != null && facility.longitude != null)">
-                    <a
-                      :href="getMapLink(facility.location || `${facility.latitude}, ${facility.longitude}`)"
-                      target="_blank"
-                      class="inline-flex items-center gap-1 text-brand-primary font-medium hover:underline cursor-pointer"
-                    >
-                      <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {{ facility.location || `${facility.latitude}, ${facility.longitude}` }}
-                    </a>
-                  </template>
-                  <span v-else class="text-slate-400 dark:text-slate-500">—</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                {{ facility.files || '—' }}
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right rtl:text-left">
-                <div class="flex justify-end rtl:justify-start gap-1.5">
+                <div class="flex justify-end rtl:justify-start gap-1">
                   <router-link
                     :to="`/admin/facilities/${facility.uuid}`"
                     class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer inline-flex"
@@ -408,6 +399,24 @@ const handleDelete = async () => {
       :itemsPerPage="rowsPerPage"
       @change="onPageChange"
     />
+
+    <Teleport to="body">
+      <div
+        v-if="previewImage"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4"
+        @click.self="previewImage = null"
+      >
+        <div class="relative max-w-3xl w-full">
+          <button
+            class="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer z-10 transition"
+            @click="previewImage = null"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          <img :src="previewImage" class="w-full rounded-xl shadow-2xl" alt="Cover preview" />
+        </div>
+      </div>
+    </Teleport>
 
     <FacilityModal :show="showFormModal" :facility="selectedFacility" @close="showFormModal = false" />
     <ConfirmModal

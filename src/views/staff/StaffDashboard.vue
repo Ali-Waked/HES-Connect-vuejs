@@ -1,18 +1,18 @@
 <template>
-  <DoctorHome v-if="role === 'doctor'" />
-  <NurseHome v-else-if="role === 'nurse'" />
-  <ManagerHome v-else-if="role === 'hospital_manager'" />
-  <PharmacistHome v-else-if="role === 'pharmacist'" />
+  <DoctorHome v-if="view === 'doctor'" />
+  <NurseHome v-else-if="view === 'nurse'" />
+  <ManagerHome v-else-if="view === 'hospital_manager'" />
+  <PharmacistHome v-else-if="view === 'pharmacist'" />
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { useStaffStore } from '@/stores/useStaffStore'
+import { useAuthStore } from '@/stores/auth'
 import DoctorHome from './dashboard/DoctorHome.vue'
 import NurseHome from './dashboard/NurseHome.vue'
 import ManagerHome from './dashboard/ManagerHome.vue'
 import PharmacistHome from './dashboard/PharmacistHome.vue'
 
-const store = useStaffStore()
-const role = computed(() => store.currentUser.role)
+const authStore = useAuthStore()
+const view = computed(() => authStore.user?.dashboard_route?.split('/')[1] || '')
 </script>

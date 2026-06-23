@@ -182,6 +182,7 @@ const handleDelete = async () => {
             <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[5%]">#</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('common.name') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('common.description') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[14%]">{{ $t('access.permissions') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[12%]">{{ $t('access.users_count') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left w-[10%]">{{ $t('common.actions') }}</th>
@@ -192,6 +193,9 @@ const handleDelete = async () => {
               <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{{ role.id }}</td>
               <td class="px-6 py-4">
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ localField(role, 'name') }}</span>
+              </td>
+              <td class="px-6 py-4 max-w-[200px]">
+                <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ localField(role, 'description') || '—' }}</p>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-primary/10 text-brand-primary">

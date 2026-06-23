@@ -19,7 +19,7 @@ const colorClasses = {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col gap-4">
+  <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex gap-4">
     <div class="flex items-start justify-between">
       <div 
         class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"

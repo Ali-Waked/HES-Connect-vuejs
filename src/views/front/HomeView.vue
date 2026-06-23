@@ -8,6 +8,7 @@ import LandingTopFacilities from '../../components/landing/LandingTopFacilities.
 import LandingArticles from '../../components/landing/LandingArticles.vue';
 import LandingAboutPreview from '../../components/landing/LandingAboutPreview.vue';
 import LandingContactCta from '../../components/landing/LandingContactCta.vue';
+import ReviewSection from '../../components/reviews/ReviewSection.vue';
 import LandingFooter from '../../components/landing/LandingFooter.vue';
 
 const {
@@ -32,6 +33,7 @@ const {
       <LandingTopFacilities :facilities="topFacilities" :loading="loading" />
       <LandingArticles :articles="articles" :loading="loading" />
       <LandingAboutPreview :overview="overview" :loading="loading" />
+      <ReviewSection />
       <LandingContactCta />
     </main>
 

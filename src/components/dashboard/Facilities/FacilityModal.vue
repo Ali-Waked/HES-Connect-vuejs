@@ -9,6 +9,7 @@ import MultipleImageUploader from '../global/MultipleImageUploader.vue';
 import FileUploader from '../global/FileUploader.vue';
 import { getFacilities } from '../../../services/facilityService';
 import { getCitiesLookup } from '../../../services/cityService';
+import { getUserSelect } from '../../../services/userService';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -29,7 +30,8 @@ const description_ar = ref('');
 const type = ref('medical_point');
 const organization_id = ref('');
 const parent_id = ref('');
-const location = ref('');
+const latitude = ref('');
+const longitude = ref('');
 const status = ref('pending');
 const approval_status = ref('pending');
 const cover_image = ref(null);
@@ -38,6 +40,16 @@ const gallery_images = ref([]);
 const files = ref([]);
 const loadingFac = ref(false);
 const coverValidationError = ref('');
+
+const usersList = ref([]);
+const loadingUsers = ref(false);
+const owner_id = ref('');
+const is_featured = ref(false);
+
+const existingImages = ref([]);
+const existingFiles = ref([]);
+const deletedImageUuids = ref([]);
+const deletedFileUuids = ref([]);
 
 watch(
   () => props.facility,
@@ -51,18 +63,23 @@ watch(
         name_ar.value = data.name?.ar || '';
         description_en.value = data.description?.en || '';
         description_ar.value = data.description?.ar || '';
-        type.value = data.type || 'medical_point';
+        type.value = data.facility_type || data.type || 'medical_point';
         organization_id.value = data.organization_id || '';
         parent_id.value = data.parent_id || '';
-        city_id.value = data.city_id || '';
-        const lat = data.latitude ?? data.lat;
-        const lng = data.longitude ?? data.lng;
-        location.value = data.location || (lat != null && lng != null ? `${lat}, ${lng}` : '');
+        city_id.value = data.city?.uuid || data.city_id || '';
+        latitude.value = data.latitude ?? '';
+        longitude.value = data.longitude ?? '';
         status.value = data.status || 'pending';
         approval_status.value = data.approval_status || 'pending';
         cover_image.value = data.cover_image || null;
-        gallery_images.value = data.gallery_images || [];
-        files.value = data.files || [];
+        existingImages.value = data.images || data.gallery_images || [];
+        existingFiles.value = data.files || [];
+        gallery_images.value = [];
+        files.value = [];
+        deletedImageUuids.value = [];
+        deletedFileUuids.value = [];
+        owner_id.value = data.owner_id || data.owner?.uuid || '';
+        is_featured.value = data.is_featured ?? false;
       } catch (err) {
         resetForm();
       } finally {
@@ -84,13 +101,36 @@ function resetForm() {
   organization_id.value = '';
   parent_id.value = '';
   city_id.value = '';
-  location.value = '';
+  latitude.value = '';
+  longitude.value = '';
   status.value = 'pending';
   approval_status.value = 'pending';
   cover_image.value = null;
+  owner_id.value = '';
+  is_featured.value = false;
+  coverValidationError.value = '';
+  existingImages.value = [];
+  existingFiles.value = [];
+  deletedImageUuids.value = [];
+  deletedFileUuids.value = [];
   gallery_images.value = [];
   files.value = [];
-  coverValidationError.value = '';
+}
+
+function removeExistingImage(index) {
+  const item = existingImages.value[index]
+  if (item?.uuid && !deletedImageUuids.value.includes(item.uuid)) {
+    deletedImageUuids.value.push(item.uuid)
+  }
+  existingImages.value.splice(index, 1)
+}
+
+function removeExistingFile(index) {
+  const item = existingFiles.value[index]
+  if (item?.uuid && !deletedFileUuids.value.includes(item.uuid)) {
+    deletedFileUuids.value.push(item.uuid)
+  }
+  existingFiles.value.splice(index, 1)
 }
 
 const parentFacilities = ref([]);
@@ -117,6 +157,17 @@ watch(() => props.show, async (val) => {
         // silently fail for dropdown
       }
     }
+    if (usersList.value.length === 0) {
+      loadingUsers.value = true;
+      try {
+        const { data } = await getUserSelect('facility_owner');
+        usersList.value = data.data || data || [];
+      } catch (e) {
+        usersList.value = [];
+      } finally {
+        loadingUsers.value = false;
+      }
+    }
   }
 });
 
@@ -131,12 +182,17 @@ const submitForm = async () => {
         organization_id: organization_id.value,
         parent_id: parent_id.value || null,
         city_id: city_id.value || null,
-      location: location.value,
+      latitude: latitude.value,
+      longitude: longitude.value,
       status: status.value,
       approval_status: approval_status.value,
       cover_image: cover_image.value,
       gallery_images: gallery_images.value,
       files: files.value,
+      owner_id: owner_id.value || null,
+      is_featured: is_featured.value,
+      deleted_gallery_images: deletedImageUuids.value,
+      deleted_files: deletedFileUuids.value,
     };
 
     let result;
@@ -264,16 +320,30 @@ function coverValidation() {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOrg">{{ $t('facilities.organization') }} *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOrg">{{ $t('facilities.organization') }}</label>
             <select 
               id="facOrg" 
               class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" 
-              required 
               v-model="organization_id"
             >
-              <option value="" disabled>Select Organization</option>
+              <option value="">{{ $t('facilities.noOrganization') || 'No Organization' }}</option>
               <option v-for="org in organizations" :key="org.uuid" :value="org.uuid">
                 {{ localField(org, 'name') }}
+              </option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOwner">{{ $t('facilities.owner') || 'Facility Owner' }} *</label>
+            <select
+              id="facOwner"
+              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer"
+              required
+              v-model="owner_id"
+            >
+              <option value="" disabled>{{ loadingUsers ? 'Loading users...' : (usersList.length === 0 ? 'No users available' : 'Select Facility Owner') }}</option>
+              <option v-for="user in usersList" :key="user.uuid || user.id" :value="user.uuid || user.id">
+                {{ localField(user, 'name') }} {{ user.email ? `(${user.email})` : '' }}
               </option>
             </select>
           </div>
@@ -333,17 +403,36 @@ function coverValidation() {
                 <option value="rejected">{{ $t('statuses.rejected') }}</option>
               </select>
             </div>
+            <div class="flex items-center gap-3 mt-2">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" v-model="is_featured" />
+                <div class="w-9 h-5 bg-slate-200 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-primary/30 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
+              </label>
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $t('facilities.is_featured') || 'Featured' }}</span>
+            </div>
           </div>
 
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facLoc">{{ $t('facilities.location') }} (Latitude, Longitude)</label>
-            <input 
-              id="facLoc" 
-              type="text" 
-              class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
-              placeholder="e.g. 31.3478, 34.3012"
-              v-model="location"
-            />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facLat">{{ $t('facilities.latitude') || 'Latitude' }}</label>
+              <input 
+                id="facLat" 
+                type="text" 
+                class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
+                placeholder="e.g. 31.3478"
+                v-model="latitude"
+              />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facLng">{{ $t('facilities.longitude') || 'Longitude' }}</label>
+              <input 
+                id="facLng" 
+                type="text" 
+                class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" 
+                placeholder="e.g. 34.3012"
+                v-model="longitude"
+              />
+            </div>
           </div>
 
           <div>
@@ -361,7 +450,30 @@ function coverValidation() {
               <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
               {{ $t('facilities.galleryImages') }}
             </h4>
-            <MultipleImageUploader v-model="gallery_images" :label="$t('facilities.galleryImages') || 'Upload Gallery Images'" />
+            <div v-if="existingImages.length > 0" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mb-3">
+              <div
+                v-for="(img, index) in existingImages"
+                :key="img.uuid || index"
+                class="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 ring-1 ring-brand-primary/20"
+              >
+                <img :src="img.url || img.image_url || img" class="w-full h-full object-cover" alt="Existing gallery image" />
+                <div class="absolute top-1 left-1 px-1.5 py-0.5 bg-brand-primary/80 text-white text-[9px] font-semibold rounded">{{ $t('common.existing') || 'Existing' }}</div>
+                <div class="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    type="button"
+                    class="p-1.5 bg-rose-500/90 rounded-lg text-white hover:bg-rose-600 transition cursor-pointer"
+                    @click="removeExistingImage(index)"
+                    :title="$t('common.remove') || 'Remove'"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <MultipleImageUploader v-model="gallery_images" :label="$t('facilities.addNew') || 'Add New Images'" />
+            <p v-if="deletedImageUuids.length > 0" class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              {{ deletedImageUuids.length }} {{ $t('facilities.imageRemoved') || 'image(s) marked for removal' }}
+            </p>
           </div>
 
           <div>
@@ -369,7 +481,32 @@ function coverValidation() {
               <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
               {{ $t('facilities.documents') }}
             </h4>
-            <FileUploader v-model="files" :label="$t('facilities.documents') || 'Upload Documents'" />
+            <div v-if="existingFiles.length > 0" class="space-y-2 mb-3">
+              <div
+                v-for="(file, index) in existingFiles"
+                :key="file.uuid || index"
+                class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 group ring-1 ring-brand-primary/10"
+              >
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="shrink-0 px-1.5 py-0.5 bg-brand-primary/80 text-white text-[9px] font-semibold rounded">{{ $t('common.existing') || 'Existing' }}</span>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{{ file.name || file.file_name || 'File' }}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition cursor-pointer"
+                  @click="removeExistingFile(index)"
+                  :title="$t('common.remove') || 'Remove'"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+            <FileUploader v-model="files" :label="$t('facilities.addNew') || 'Add New Files'" />
+            <p v-if="deletedFileUuids.length > 0" class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              {{ deletedFileUuids.length }} {{ $t('facilities.fileRemoved') || 'file(s) marked for removal' }}
+            </p>
           </div>
         </div>
 

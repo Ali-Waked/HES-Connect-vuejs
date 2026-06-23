@@ -17,8 +17,9 @@ function toFormData(data) {
     } else if (key === 'facilities' && Array.isArray(value)) {
       value.forEach((fac, i) => {
         if (fac.facility_uuid) fd.append(`facilities[${i}][facility_uuid]`, fac.facility_uuid)
-        if (fac.position_uuid) fd.append(`facilities[${i}][position_uuid]`, fac.position_uuid)
+        if (fac.role_uuid) fd.append(`facilities[${i}][role_uuid]`, fac.role_uuid)
         if (fac.department_uuid) fd.append(`facilities[${i}][department_uuid]`, fac.department_uuid)
+        if (fac.position_uuid) fd.append(`facilities[${i}][position_uuid]`, fac.position_uuid)
       })
     } else if (value instanceof File) {
       fd.append(key, value)
@@ -63,9 +64,17 @@ export function deleteStaff(id) {
 }
 
 export function checkStaffEmail(email) {
-  return axiosClient.post('/dashboard/staff/check-email', { email })
+  return axiosClient.get('/dashboard/staff/check-email', { params: { email } })
 }
 
 export function getPublicStaffByUuid(uuid) {
   return axiosClient.get(`dashboard/staff/${uuid}`)
+}
+
+export function terminateStaff(uuid) {
+  return axiosClient.post(`/dashboard/staff/${uuid}/terminate`)
+}
+
+export function terminateFacilityStaff(facilityStaffUuid) {
+  return axiosClient.post(`/dashboard/facility-staff/${facilityStaffUuid}/terminate`)
 }

@@ -25,9 +25,9 @@ const { localField } = useLocaleField()
       </div>
     </div>
 
-    <div v-if="facility.position || facility.department" class="flex flex-wrap gap-2 pt-2 border-t border-slate-50 dark:border-slate-700">
-      <BaseBadge v-if="facility.position" variant="info">
-        {{ localField(facility.position, 'name') }}
+    <div v-if="facility.role || facility.department" class="flex flex-wrap gap-2 pt-2 border-t border-slate-50 dark:border-slate-700">
+      <BaseBadge v-if="facility.role" variant="info">
+        {{ localField(facility.role, 'name') }}
       </BaseBadge>
       <BaseBadge v-if="facility.department" variant="success">
         {{ localField(facility.department, 'name') }}

@@ -9,9 +9,9 @@ export function getRole(id) {
 }
 
 export function createRole(data) {
-  console.log(data.permissions);
   return axiosClient.post('/dashboard/roles', {
     name: data.name,
+    description: data.description || { en: '', ar: '' },
     permissions: data.permissions,
   })
 }
@@ -19,6 +19,7 @@ export function createRole(data) {
 export function updateRole(id, data) {
   return axiosClient.put(`/dashboard/roles/${id}`, {
     name: data.name,
+    description: data.description || { en: '', ar: '' },
     permissions: data.permissions,
   })
 }
@@ -31,3 +32,6 @@ export function getRoleStats() {
   return axiosClient.get('/dashboard/roles/stats')
 }
 
+export function getFacilityRoles() {
+  return axiosClient.get('/dashboard/roles/facility')
+}

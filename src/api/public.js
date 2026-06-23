@@ -95,6 +95,11 @@ export const getCategoriesPublic = () =>
 export const getTagsPublic = () =>
   fetchApi('/tags', mockPublicData.tagsAll);
 
+export const getPlatformReviews = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return fetchApi(`/platform-review?${query}`, () => mockPublicData.platformReviews(params));
+};
+
 export const getArticleComments = (articleId, params = {}) =>
   fetchApi(`/articles/${articleId}/comments?${new URLSearchParams(params)}`, () => {
     const detail = mockPublicData.articleDetail(articleId);

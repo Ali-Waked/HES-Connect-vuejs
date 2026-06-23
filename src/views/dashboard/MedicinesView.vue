@@ -1,29 +1,24 @@
 <script setup>
-import { useMedicinesStore } from '../../stores/medicines';
-import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
-import MedicinesTable from '../../components/dashboard/Medicines/MedicinesTable.vue';
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useMedicinesStore } from '@/stores/medicines'
+import MedicinesTable from '@/components/dashboard/Medicines/MedicinesTable.vue'
 
 const { t } = useI18n()
-const store = useMedicinesStore();
+const store = useMedicinesStore()
+
+onMounted(() => {
+  store.fetchMedicines({ page: 1, per_page: 10, sort_by: 'created_at', sort_order: 'desc' })
+})
 </script>
 
 <template>
-  <div class="space-y-8 animate-fade-in">
-    <!-- Header -->
-    <div class="flex justify-between items-end">
-      <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.pharmaceuticalRegistry') }}</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Platform-wide inventory of approved medical drugs and supplies</p>
+  <div class="space-y-6 animate-fade-in">
+    <div class="flex justify-between items-start">
+      <div class="space-y-1">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.pharmaceuticalRegistry') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ store.pagination.total || 0 }} registered medicines</p>
       </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatisticsCard title="Total Registry" :value="store.stats.total" icon="medication" color="primary" />
-      <StatisticsCard title="Added This Month" :value="store.stats.addedThisMonth" icon="new_releases" color="success" />
-      <StatisticsCard title="Critical Stock" value="14" icon="warning" color="danger" />
-      <StatisticsCard title="Active Facilities" value="32" icon="home_health" color="info" />
     </div>
 
     <MedicinesTable />

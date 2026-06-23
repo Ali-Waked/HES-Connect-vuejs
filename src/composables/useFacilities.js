@@ -23,6 +23,7 @@ export function useFacilities() {
     _lastParams = params
     try {
       const { data } = await facilityService.getFacilities(params)
+      console.log(data.data);
       facilities.value = data.data
       pagination.value = {
         current_page: data.meta?.current_page,

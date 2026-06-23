@@ -1,47 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axiosClient, { csrfCookie } from '@/axiosClient'
-import { resolveTranslatedValue, getInitials } from '../utils/locale'
+import { getInitials } from '../utils/locale'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user    = ref(null)
-  const errors  = ref({})
-  const loading = ref(false)
+  const user          = ref(null)
+  const loading       = ref(false)
+  const authenticated = ref(false)
+  const errors        = ref({})
+  const initCalled    = ref(false)
 
-  const isAuthenticated = computed(() => !!user.value)
-  const initCalled = ref(false)
+  const dashboardRoute = computed(() => user.value?.dashboard_route || null)
 
   async function fetchUser() {
     try {
-      const { data } = await axiosClient.get('/user')
-      
-      const userResource = data && data.user ? data.user : data
-      if (!userResource) {
-        user.value = null
-        return
-      }
-
-      const roles = data && Array.isArray(data.roles) ? data.roles : (userResource.role ? [userResource.role.name] : [])
-      const permissions = data && Array.isArray(data.permissions) ? data.permissions : []
-
-      const primaryRole = roles[0] || null
-      const roleObj = primaryRole ? {
-        name: primaryRole,
-        toString() {
-          return this.name
-        }
-      } : null
-
+      const { data } = await axiosClient.get('/profile')
       user.value = {
-        ...userResource,
-        roles,
-        permissions,
-        role: roleObj,
-        initials: getInitials(userResource.name)
+        ...data,
+        initials: getInitials(typeof data.name === 'string' ? data.name : (data.name?.en || data.name?.ar || ''))
       }
-    } catch (err) {
-      console.error('Failed to fetch user:', err)
+      authenticated.value = true
+    } catch {
       user.value = null
+      authenticated.value = false
     }
   }
 
@@ -92,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
       await axiosClient.post('/logout')
     } finally {
       user.value = null
+      authenticated.value = false
     }
   }
 
@@ -117,10 +99,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
-    errors,
     loading,
-    isAuthenticated,
+    authenticated,
+    errors,
     initCalled,
+    dashboardRoute,
     login,
     register,
     logout,

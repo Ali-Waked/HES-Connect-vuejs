@@ -3,11 +3,21 @@
  */
 
 /**
+ * @typedef {Object} StaffFacilityRole
+ * @property {string} uuid
+ * @property {Translation} name
+ * @property {string} slug
+ */
+
+/**
  * @typedef {Object} StaffFacility
  * @property {string} uuid
  * @property {Translation} name
- * @property {{ uuid: string, name: Translation }} [position]
+ * @property {StaffFacilityRole} [role]
  * @property {{ uuid: string, name: Translation }} [department]
+ * @property {{ uuid: string, name: Translation }} [position]
+ * @property {string|null} [joined_at]
+ * @property {string|null} [ended_at]
  */
 
 /**
@@ -56,8 +66,11 @@ export function staffApiToForm(data) {
     cover_image: user.cover_image || null,
     facilities: (data.facilities || []).map(f => ({
       facility_uuid: f.uuid,
-      position_uuid: f.position?.uuid || '',
+      role_uuid: f.role?.uuid || '',
       department_uuid: f.department?.uuid || '',
+      position_uuid: f.position?.uuid || '',
+      joined_at: f.joined_at || null,
+      ended_at: f.ended_at || null,
     })),
   }
 }
@@ -89,7 +102,7 @@ export function emptyForm() {
  * @returns {Object}
  */
 export function staffFormToUpdatePayload(form) {
-  return {
+  const payload = {
     specialization: {
       en: form.specialization_en,
       ar: form.specialization_ar,
@@ -100,14 +113,22 @@ export function staffFormToUpdatePayload(form) {
     },
     experience_years: form.experience_years !== '' ? Number(form.experience_years) : null,
     consultation_fee: form.consultation_fee !== '' ? Number(form.consultation_fee) : null,
-    avatar: form.avatar || null,
-    cover_image: form.cover_image || null,
     facilities: (form.facilities || []).map(f => ({
       facility_uuid: f.facility_uuid,
-      position_uuid: f.position_uuid || null,
+      role_uuid: f.role_uuid || null,
       department_uuid: f.department_uuid || null,
+      position_uuid: f.position_uuid || null,
     })),
   }
+
+  if (form.avatar instanceof File) {
+    payload.avatar = form.avatar
+  }
+  if (form.cover_image instanceof File) {
+    payload.cover_image = form.cover_image
+  }
+
+  return payload
 }
 
 /**

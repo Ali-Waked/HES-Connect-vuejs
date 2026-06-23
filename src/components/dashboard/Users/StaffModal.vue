@@ -1,13 +1,14 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useLocaleField } from '../../../composables/useLocaleField';
 import { useStaff } from '../../../composables/useStaff';
 import { useDashboardStore } from '../../../stores/dashboard';
 import { getFacilities } from '../../../services/facilityService';
-import { getPositionsLookup } from '../../../services/positionService';
+import { getFacilityRoles } from '../../../services/roleService';
 import { getDepartmentsLookup } from '../../../services/departmentService';
-import { staffApiToForm, staffFormToUpdatePayload, emptyForm } from '../../../utils/staffHelpers';
+import { getPositionsLookup } from '../../../services/positionService';
+import { staffApiToForm, staffFormToUpdatePayload } from '../../../utils/staffHelpers';
 import ImageUploader from '../global/ImageUploader.vue';
 
 const props = defineProps({
@@ -23,19 +24,34 @@ const { createStaff, updateStaff, fetchStaffById, checkStaffEmail, saving, check
 const store = useDashboardStore();
 
 const isEdit = ref(false);
-const email = ref('');
-const name_en = ref('');
-const name_ar = ref('');
-const specialization_en = ref('');
-const specialization_ar = ref('');
-const bio_en = ref('');
-const bio_ar = ref('');
-const experience_years = ref('');
-const consultation_fee = ref('');
-const avatar = ref(null);
-const cover_image = ref(null);
 const facilityRows = ref([]);
 let rowKeyCounter = 0;
+
+const form = reactive({
+  name: { en: '', ar: '' },
+  email: '',
+  avatar: null,
+  cover_image: null,
+  bio: { en: '', ar: '' },
+  specialization: { en: '', ar: '' },
+  experience_years: '',
+  consultation_fee: '',
+  staff_uuid: '',
+  mode: 'new_user',
+});
+
+const formTouched = reactive({
+  name: false,
+  email: false,
+  avatar: false,
+  cover_image: false,
+});
+
+function safeSet(key, value) {
+  if (!formTouched[key]) {
+    form[key] = value;
+  }
+}
 
 const step = ref('email');
 const existingUser = ref(null);
@@ -44,6 +60,7 @@ const loadingStaffData = ref(false);
 const submitError = ref('');
 
 const facilities = ref([]);
+const rolesList = ref([]);
 const positionsList = ref([]);
 
 const availableFacilities = computed(() => {
@@ -58,6 +75,13 @@ watch(() => props.show, async (val) => {
       try {
         const { data } = await getFacilities({ per_page: 1000 })
         facilities.value = data.data
+      } catch (e) { /* silently fail */ }
+    }
+    if (rolesList.value.length === 0) {
+      try {
+        const { data } = await getFacilityRoles()
+        console.log(data);
+        rolesList.value = data.data || data
       } catch (e) { /* silently fail */ }
     }
     if (positionsList.value.length === 0) {
@@ -79,20 +103,17 @@ watch(
       submitError.value = '';
       try {
         const data = await fetchStaffById(newMember.uuid);
-        console.log(data);
-        const form = staffApiToForm(data);
-        name_en.value = form.name_en;
-        name_ar.value = form.name_ar;
-        email.value = form.email;
-        specialization_en.value = form.specialization_en;
-        specialization_ar.value = form.specialization_ar;
-        bio_en.value = form.bio_en;
-        bio_ar.value = form.bio_ar;
-        experience_years.value = form.experience_years;
-        consultation_fee.value = form.consultation_fee;
-        avatar.value = form.avatar || null;
-        cover_image.value = form.cover_image || null;
-        facilityRows.value = form.facilities.map(f => ({ ...f, departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }));
+        const f = staffApiToForm(data);
+        form.name = { en: f.name_en, ar: f.name_ar };
+        form.email = f.email;
+        form.specialization = { en: f.specialization_en, ar: f.specialization_ar };
+        form.bio = { en: f.bio_en, ar: f.bio_ar };
+        form.experience_years = f.experience_years;
+        form.consultation_fee = f.consultation_fee;
+        form.avatar = f.avatar || null;
+        form.cover_image = f.cover_image || null;
+        form.staff_uuid = data.uuid || '';
+        facilityRows.value = f.facilities.map(f => ({ ...f, departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }));
         for (const row of facilityRows.value) {
           if (row.facility_uuid) await onFacilityChange(row);
         }
@@ -127,19 +148,22 @@ async function onFacilityChange(row) {
 }
 
 function resetForm() {
-  const f = emptyForm();
-  email.value = '';
-  name_en.value = f.name_en;
-  name_ar.value = f.name_ar;
-  specialization_en.value = f.specialization_en;
-  specialization_ar.value = f.specialization_ar;
-  bio_en.value = f.bio_en;
-  bio_ar.value = f.bio_ar;
-  experience_years.value = f.experience_years;
-  consultation_fee.value = f.consultation_fee;
-  avatar.value = null;
-  cover_image.value = null;
-  facilityRows.value = [{ facility_uuid: '', position_uuid: '', department_uuid: '', departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }];
+  isEdit.value = false;
+  form.name = { en: '', ar: '' };
+  form.email = '';
+  form.avatar = null;
+  form.cover_image = null;
+  form.bio = { en: '', ar: '' };
+  form.specialization = { en: '', ar: '' };
+  form.experience_years = '';
+  form.consultation_fee = '';
+  form.staff_uuid = '';
+  form.mode = 'new_user';
+  formTouched.name = false;
+  formTouched.email = false;
+  formTouched.avatar = false;
+  formTouched.cover_image = false;
+  facilityRows.value = [{ facility_uuid: '', role_uuid: '', department_uuid: '', position_uuid: '', departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }];
   step.value = 'email';
   existingUser.value = null;
   checkError.value = '';
@@ -147,7 +171,7 @@ function resetForm() {
 }
 
 function addFacilityRow() {
-  facilityRows.value.push({ facility_uuid: '', position_uuid: '', department_uuid: '', departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter });
+  facilityRows.value.push({ facility_uuid: '', role_uuid: '', department_uuid: '', position_uuid: '', departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter });
 }
 
 function removeFacilityRow(key) {
@@ -158,54 +182,110 @@ function removeFacilityRow(key) {
 function formFacilitiesValue() {
   return facilityRows.value
     .filter(r => r.facility_uuid)
-    .map(r => ({ facility_uuid: r.facility_uuid, position_uuid: r.position_uuid, department_uuid: r.department_uuid }))
+    .map(r => ({ facility_uuid: r.facility_uuid, role_uuid: r.role_uuid, department_uuid: r.department_uuid, position_uuid: r.position_uuid }))
 }
 
 async function handleCheckEmail() {
-  if (!email.value.trim()) return;
+  if (!form.email.trim()) return;
   checkError.value = '';
   existingUser.value = null;
-  const result = await checkStaffEmail(email.value.trim());
+
+  const result = await checkStaffEmail(form.email.trim());
   if (result.error) {
     checkError.value = result.error;
     return;
   }
-  if (result.exists) {
-    existingUser.value = result.user;
+
+  if (!result.exists) {
+    form.mode = 'new_user';
+    form.staff_uuid = '';
+    form.name = { en: '', ar: '' };
+    form.avatar = null;
+    form.cover_image = null;
+    form.bio = { en: '', ar: '' };
+    form.specialization = { en: '', ar: '' };
+    form.experience_years = '';
+    form.consultation_fee = '';
+    formTouched.name = false;
+    formTouched.email = false;
+    formTouched.avatar = false;
+    formTouched.cover_image = false;
+    facilityRows.value = [{ facility_uuid: '', role_uuid: '', department_uuid: '', position_uuid: '', departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }];
     step.value = 'form';
-  } else {
-    step.value = 'form';
+    return;
   }
+
+  existingUser.value = result.user;
+
+  safeSet('name', result.user?.name || '');
+  safeSet('email', result.user?.email || '');
+  safeSet('avatar', result.user?.avatar || null);
+  safeSet('cover_image', result.user?.cover_image || null);
+
+  if (result.has_staff_profile) {
+    form.staff_uuid = result.staff?.uuid || '';
+    form.mode = 'existing_staff';
+    isEdit.value = true;
+    loadingStaffData.value = true;
+    step.value = 'form';
+    try {
+      const data = await fetchStaffById(form.staff_uuid);
+      const f = staffApiToForm(data);
+      form.name = { en: f.name_en, ar: f.name_ar };
+      form.email = f.email;
+      form.specialization = { en: f.specialization_en, ar: f.specialization_ar };
+      form.bio = { en: f.bio_en, ar: f.bio_ar };
+      form.experience_years = f.experience_years;
+      form.consultation_fee = f.consultation_fee;
+      form.avatar = f.avatar || null;
+      form.cover_image = f.cover_image || null;
+      form.staff_uuid = data.uuid || '';
+      facilityRows.value = f.facilities.map(f => ({ ...f, departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }));
+      for (const row of facilityRows.value) {
+        if (row.facility_uuid) await onFacilityChange(row);
+      }
+    } catch (err) {
+      store.addToast('Failed to load staff data', 'error');
+      emit('close');
+    } finally {
+      loadingStaffData.value = false;
+    }
+  } else {
+    form.mode = 'existing_user';
+  }
+
+  step.value = 'form';
 }
 
 const submitForm = async () => {
   submitError.value = '';
 
-  const invalidRows = facilityRows.value.filter(r => r.facility_uuid && (!r.position_uuid || !r.department_uuid));
+  const invalidRows = facilityRows.value.filter(r => r.facility_uuid && !r.role_uuid);
   if (invalidRows.length > 0) {
-    submitError.value = 'Each facility requires a position and department.';
+    submitError.value = 'Each facility requires a role.';
     return;
   }
 
   let result;
 
   const payload = staffFormToUpdatePayload({
-    specialization_en: specialization_en.value,
-    specialization_ar: specialization_ar.value,
-    bio_en: bio_en.value,
-    bio_ar: bio_ar.value,
-    experience_years: experience_years.value,
-    consultation_fee: consultation_fee.value,
+    specialization_en: form.specialization.en,
+    specialization_ar: form.specialization.ar,
+    bio_en: form.bio.en,
+    bio_ar: form.bio.ar,
+    experience_years: form.experience_years,
+    consultation_fee: form.consultation_fee,
     facilities: formFacilitiesValue(),
-    avatar: avatar.value,
-    cover_image: cover_image.value,
+    avatar: form.avatar,
+    cover_image: form.cover_image,
   });
 
-  if (isEdit.value && props.staffMember?.uuid) {
-    result = await updateStaff(props.staffMember.uuid, payload);
+  const staffUuid = props.staffMember?.uuid || form.staff_uuid;
+  if (staffUuid) {
+    result = await updateStaff(staffUuid, payload);
   } else {
-    payload.name = { en: name_en.value, ar: name_ar.value };
-    payload.email = email.value;
+    payload.name = { en: form.name.en, ar: form.name.ar };
+    payload.email = form.email;
     if (existingUser.value) {
       payload.user_uuid = existingUser.value.uuid;
     }
@@ -260,11 +340,12 @@ const submitForm = async () => {
       </div>
 
       <form @submit.prevent="submitForm" class="flex flex-col flex-1 overflow-hidden">
-        <div v-if="loadingStaffData" class="flex items-center justify-center py-12">
+        <div v-if="loadingStaffData" class="flex flex-col items-center justify-center py-12 gap-3">
           <svg class="w-6 h-6 text-brand-primary animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
           </svg>
+          <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ $t('common.loading') }}</p>
         </div>
 
         <div v-else class="p-6 flex flex-col gap-4 overflow-y-auto flex-1">
@@ -282,7 +363,7 @@ const submitForm = async () => {
                 required
                 dir="ltr"
                 placeholder="e.g. doctor@example.com"
-                v-model="email"
+                v-model="form.email"
                 @keydown.enter.prevent="handleCheckEmail"
               />
             </div>
@@ -290,7 +371,7 @@ const submitForm = async () => {
             <div class="flex justify-end">
               <button
                 type="button"
-                :disabled="checkingEmail || !email.trim()"
+                :disabled="checkingEmail || !form.email.trim()"
                 class="inline-flex items-center justify-center gap-1.5 py-2.5 px-5 rounded-lg bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold text-white shadow-md shadow-brand-primary/15 transition cursor-pointer"
                 @click="handleCheckEmail"
               >
@@ -341,16 +422,16 @@ const submitForm = async () => {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffNameEn">{{ $t('staff.name_en') }} *</label>
-                  <input id="staffNameEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="name_en" />
+                  <input id="staffNameEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="form.name.en" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffNameAr">{{ $t('staff.name_ar') }} *</label>
-                  <input id="staffNameAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" required dir="rtl" v-model="name_ar" />
+                  <input id="staffNameAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" required dir="rtl" v-model="form.name.ar" />
                 </div>
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffNewEmail">{{ $t('staff.email') }} *</label>
-                <input id="staffNewEmail" type="email" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="email" readonly />
+                <input id="staffNewEmail" type="email" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="form.email" readonly />
               </div>
             </template>
 
@@ -359,38 +440,51 @@ const submitForm = async () => {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="editStaffNameEn">{{ $t('staff.name_en') }} *</label>
-                  <input id="editStaffNameEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="name_en" />
+                  <input id="editStaffNameEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" required dir="ltr" v-model="form.name.en" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="editStaffNameAr">{{ $t('staff.name_ar') }} *</label>
-                  <input id="editStaffNameAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" required dir="rtl" v-model="name_ar" />
+                  <input id="editStaffNameAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" required dir="rtl" v-model="form.name.ar" />
                 </div>
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="editStaffEmail">{{ $t('staff.email') }} *</label>
-                <input id="editStaffEmail" type="email" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 focus:outline-none transition cursor-not-allowed" required dir="ltr" v-model="email" readonly />
+                <input id="editStaffEmail" type="email" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 focus:outline-none transition cursor-not-allowed" required dir="ltr" v-model="form.email" readonly />
               </div>
             </template>
 
-            <!-- Avatar & Cover -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <ImageUploader v-model="avatar" label="Avatar" aspect-ratio="aspect-square" />
-              <ImageUploader v-model="cover_image" label="Cover Image" aspect-ratio="aspect-video" />
+            <!-- User Information section -->
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-2">
+              <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">{{ $t('staff.userInformation') || 'User Information' }}</p>
             </div>
 
-            <div class="border-t border-slate-100 dark:border-slate-800 pt-2">
-              <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">{{ $t('staff.specialization') }}</p>
+            <!-- Avatar & Cover -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ImageUploader v-model="form.avatar" label="Avatar" aspect-ratio="aspect-square" />
+              <ImageUploader v-model="form.cover_image" label="Cover Image" aspect-ratio="aspect-video" />
+            </div>
+
+            <!-- Bio -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffBioEn">{{ $t('staff.bio') }} (English)</label>
+                <textarea id="staffBioEn" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none min-h-[80px] resize-none transition" dir="ltr" v-model="form.bio.en"></textarea>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffBioAr">{{ $t('staff.bio') }} (Arabic)</label>
+                <textarea id="staffBioAr" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none min-h-[80px] resize-none transition text-right" dir="rtl" v-model="form.bio.ar"></textarea>
+              </div>
             </div>
 
             <!-- Specialization -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffSpecEn">{{ $t('staff.specialization_en') }}</label>
-                <input id="staffSpecEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" dir="ltr" v-model="specialization_en" />
+                <input id="staffSpecEn" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" dir="ltr" v-model="form.specialization.en" />
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffSpecAr">{{ $t('staff.specialization_ar') }}</label>
-                <input id="staffSpecAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" dir="rtl" v-model="specialization_ar" />
+                <input id="staffSpecAr" type="text" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition text-right" dir="rtl" v-model="form.specialization.ar" />
               </div>
             </div>
 
@@ -398,72 +492,76 @@ const submitForm = async () => {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffExp">{{ $t('staff.yearsOfExperience') }}</label>
-                <input id="staffExp" type="number" min="0" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" v-model="experience_years" />
+                <input id="staffExp" type="number" min="0" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" v-model="form.experience_years" />
               </div>
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffFee">{{ $t('staff.consultationFee') }}</label>
-                <input id="staffFee" type="number" min="0" step="0.01" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" v-model="consultation_fee" />
+                <input id="staffFee" type="number" min="0" step="0.01" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition" v-model="form.consultation_fee" />
               </div>
             </div>
 
-            <!-- Bio -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffBioEn">{{ $t('staff.bio') }} (English)</label>
-                <textarea id="staffBioEn" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none min-h-[80px] resize-none transition" dir="ltr" v-model="bio_en"></textarea>
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="staffBioAr">{{ $t('staff.bio') }} (Arabic)</label>
-                <textarea id="staffBioAr" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none min-h-[80px] resize-none transition text-right" dir="rtl" v-model="bio_ar"></textarea>
-              </div>
+            <!-- Assignment Information section -->
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-2">
+              <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">{{ $t('staff.assignmentInformation') || 'Assignment Information' }}</p>
             </div>
 
-            <!-- Facilities & Positions (dynamic rows) -->
+            <!-- Facilities & Roles (dynamic rows) -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('staff.facility') }}</p>
-                <button type="button" class="text-xs font-semibold text-brand-primary hover:text-brand-primary-hover transition cursor-pointer" @click="addFacilityRow">+ Add Facility</button>
+                <button type="button" class="text-xs font-semibold text-brand-primary hover:text-brand-primary-hover transition cursor-pointer" @click="addFacilityRow">+ {{ $t('staff.addFacility') || 'Add Facility' }}</button>
               </div>
               <div class="space-y-3">
-                <div v-for="(row, idx) in facilityRows" :key="row.key" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Facility *</label>
-                    <select class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" v-model="row.facility_uuid" @change="onFacilityChange(row)">
-                      <option value="">Select Facility</option>
-                      <option v-for="fac in facilities" :key="fac.uuid" :value="fac.uuid" :disabled="facilityRows.some(r => r.facility_uuid === fac.uuid && r.key !== row.key)">{{ localField(fac, 'name') }}</option>
-                    </select>
-                  </div>
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Position *</label>
-                    <select class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" v-model="row.position_uuid">
-                      <option value="">Select Position</option>
-                      <option v-for="pos in positionsList" :key="pos.uuid" :value="pos.uuid">{{ localField(pos, 'name') }}</option>
-                    </select>
-                  </div>
-                  <div class="flex flex-col gap-1.5">
-                    <div class="flex items-center gap-1.5">
-                      <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Department *</label>
+                <div v-for="(row, idx) in facilityRows" :key="row.key" class="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Facility *</label>
+                      <select class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" v-model="row.facility_uuid" @change="onFacilityChange(row)">
+                        <option value="">Select Facility</option>
+                        <option v-for="fac in facilities" :key="fac.uuid" :value="fac.uuid" :disabled="facilityRows.some(r => r.facility_uuid === fac.uuid && r.key !== row.key)">{{ localField(fac, 'name') }}</option>
+                      </select>
                     </div>
-                    <div class="flex gap-2">
-                      <div class="flex-1 relative">
-                        <select
-                          class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          v-model="row.department_uuid"
-                          :disabled="!row.facility_uuid || row.loadingDepartments"
-                        >
-                          <option value="">
-                            {{ !row.facility_uuid ? 'Select Facility first' : row.loadingDepartments ? 'Loading...' : row.departmentsOptions.length === 0 ? 'No departments available' : 'Select Department' }}
-                          </option>
-                          <option v-for="dept in row.departmentsOptions" :key="dept.uuid" :value="dept.uuid">{{ localField(dept, 'name') }}</option>
-                        </select>
-                        <svg v-if="row.loadingDepartments" class="w-4 h-4 text-brand-primary animate-spin absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-                        </svg>
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{{ $t('staff.role') }} *</label>
+                      <select class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" v-model="row.role_uuid">
+                        <option value="">Select Role</option>
+                        <option v-for="role in rolesList" :key="role.uuid" :value="role.uuid">{{ localField(role, 'name') }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start mt-3">
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{{ $t('staff.position') }}</label>
+                      <select class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer" v-model="row.position_uuid">
+                        <option value="">Select Position</option>
+                        <option v-for="pos in positionsList" :key="pos.uuid" :value="pos.uuid">{{ localField(pos, 'name') }}</option>
+                      </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                      <div class="flex items-center gap-1.5">
+                        <label class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">Department</label>
+                        <button v-if="facilityRows.length > 1" type="button" class="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition cursor-pointer ml-auto" title="Remove" @click="removeFacilityRow(row.key)">
+                          <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                       </div>
-                      <button v-if="facilityRows.length > 1" type="button" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition cursor-pointer shrink-0 self-end" title="Remove" @click="removeFacilityRow(row.key)">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                      </button>
+                      <div class="flex gap-2">
+                        <div class="flex-1 relative">
+                          <select
+                            class="w-full p-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            v-model="row.department_uuid"
+                            :disabled="!row.facility_uuid || row.loadingDepartments"
+                          >
+                            <option value="">
+                              {{ !row.facility_uuid ? 'Select Facility first' : row.loadingDepartments ? 'Loading...' : row.departmentsOptions.length === 0 ? 'No departments available' : 'Select Department' }}
+                            </option>
+                            <option v-for="dept in row.departmentsOptions" :key="dept.uuid" :value="dept.uuid">{{ localField(dept, 'name') }}</option>
+                          </select>
+                          <svg v-if="row.loadingDepartments" class="w-4 h-4 text-brand-primary animate-spin absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

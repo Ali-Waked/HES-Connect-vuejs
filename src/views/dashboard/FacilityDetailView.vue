@@ -1,213 +1,114 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useEntityReviewsStore } from '../../stores/entityReviews';
-import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
-import ReviewSummary from '../../components/dashboard/global/ReviewSummary.vue';
-import ReviewCard from '../../components/dashboard/global/ReviewCard.vue';
-import InfiniteScroll from '../../components/dashboard/global/InfiniteScroll.vue';
-import BaseBadge from '../../components/dashboard/global/BaseBadge.vue';
-import { useLocaleField } from '../../composables/useLocaleField';
-import { useFacilities } from '../../composables/useFacilities';
-import { useDashboardHelpers } from '../../composables/useDashboardHelpers';
 import { useI18n } from 'vue-i18n';
-import { resolveTranslatedValue } from '../../utils/locale';
-
-
+import { useFacilityDetailStore } from '../../stores/facilityDetail';
+import FacilityHeader from '../../components/dashboard/FacilityDetail/FacilityHeader.vue';
+import FacilityStatsCards from '../../components/dashboard/FacilityDetail/FacilityStatsCards.vue';
+import FacilityInfoSection from '../../components/dashboard/FacilityDetail/FacilityInfoSection.vue';
+import FacilityDepartments from '../../components/dashboard/FacilityDetail/FacilityDepartments.vue';
+import FacilityChildFacilities from '../../components/dashboard/FacilityDetail/FacilityChildFacilities.vue';
+import FacilityGallery from '../../components/dashboard/FacilityDetail/FacilityGallery.vue';
+import FacilityDocuments from '../../components/dashboard/FacilityDetail/FacilityDocuments.vue';
+import FacilityReviewSummary from '../../components/dashboard/FacilityDetail/FacilityReviewSummary.vue';
+import FacilityReviewsSection from '../../components/dashboard/FacilityDetail/FacilityReviewsSection.vue';
+import LoadingSkeleton from '../../components/dashboard/global/LoadingSkeleton.vue';
 
 const route = useRoute();
 const router = useRouter();
-const reviewStore = useEntityReviewsStore();
+const { t } = useI18n();
+const store = useFacilityDetailStore();
 
-const { fetchFacility } = useFacilities();
-const { getTypeClass } = useDashboardHelpers();
-const { t, locale } = useI18n();
-const facility = ref(null);
-const loading = ref(true);
-
-const facilityTypeLabels = {
-  hospital: 'categories.hospital',
-  clinic: 'categories.clinic',
-  pharmacy: 'categories.pharmacy',
-  medical_point: 'categories.medicalPoint',
-}
+const goBack = () => router.push('/admin/facilities');
 
 onMounted(async () => {
-  const id = route.params.id;
+  const uuid = route.params.id;
   try {
-    facility.value = await fetchFacility(id);
-    reviewStore.reset();
-    reviewStore.fetchReviews(id, 'facility');
-  } catch (err) {
+    await Promise.all([
+      store.fetchFacility(uuid),
+      store.fetchReviewStats(uuid),
+    ]);
+  } catch {
     router.push('/admin/facilities');
-  } finally {
-    loading.value = false;
   }
 });
 
-const { localField } = useLocaleField();
-
-const loadMore = () => {
-  reviewStore.fetchReviews(route.params.id, 'facility');
-};
-
-const goBack = () => router.push('/admin/facilities');
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    store.resetReviews();
+    try {
+      await Promise.all([
+        store.fetchFacility(newId),
+        store.fetchReviewStats(newId),
+      ]);
+    } catch {
+      router.push('/admin/facilities');
+    }
+  }
+});
 </script>
 
 <template>
-  <div v-if="facility && !loading" class="space-y-8 animate-fade-in">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div class="space-y-1">
-        <nav class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-          <button @click="goBack" class="hover:text-brand-primary transition">Facilities</button>
-          <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="text-slate-600 dark:text-slate-400">{{ localField(facility, 'name') }}</span>
-        </nav>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ localField(facility, 'name') }}</h1>
-        <div class="flex items-center gap-3">
-          <BaseBadge variant="primary" :class="getTypeClass(facility.type)">{{ t(facilityTypeLabels[facility.type] || 'categories.hospital') }}</BaseBadge>
-          <span class="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">corporate_fare</span>
-            {{ facility.organization ? localField(facility.organization, 'name') : '—' }}
-          </span>
-        </div>
+  <div class="space-y-6 animate-fade-in">
+    <div v-if="store.loading && !store.facility" class="space-y-6">
+      <LoadingSkeleton card :lines="2" :widths="['70%', '40%']" height="18px" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <LoadingSkeleton v-for="n in 4" :key="n" card :lines="2" :widths="['50%', '80%']" height="12px" />
       </div>
-      <div class="flex gap-2">
-        <router-link
-          :to="`/admin/facilities?edit=${facility.uuid}`"
-          class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2"
-        >
-          <span class="material-symbols-outlined text-lg">edit</span>
-          Edit Facility
-        </router-link>
-        <button class="px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white text-sm font-bold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition flex items-center gap-2 shadow-lg shadow-slate-900/10 dark:shadow-none">
-          <span class="material-symbols-outlined text-lg">share</span>
-          Share
-        </button>
-      </div>
+      <LoadingSkeleton card :lines="4" :widths="['30%', '60%', '30%', '60%']" height="14px" />
     </div>
 
-    <!-- Statistics -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <StatisticsCard title="Total Patients" value="1,240" icon="group" color="primary" />
-      <StatisticsCard title="Total Staff" value="48" icon="medical_information" color="info" />
-      <StatisticsCard title="Favorites" :value="reviewStore.favorites.count" icon="favorite" color="danger" />
-      <StatisticsCard title="Avg Rating" :value="reviewStore.stats.average" icon="star" color="warning" />
-      <StatisticsCard title="Reviews" :value="reviewStore.stats.total" icon="reviews" color="success" />
+    <div v-else-if="store.error && !store.facility" class="flex flex-col items-center justify-center py-16 text-center gap-4">
+      <div class="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-500">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('facilityDetail.notFoundTitle') || 'Failed to Load Facility' }}</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md">{{ store.error }}</p>
+      <button
+        class="inline-flex items-center gap-1.5 py-2.5 px-5 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary-hover shadow-md shadow-brand-primary/15 transition cursor-pointer"
+        @click="store.fetchFacility(route.params.id)"
+      >
+        {{ t('reviews.retry') || 'Retry' }}
+      </button>
     </div>
 
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-brand-primary text-lg">trending_up</span>
-          Reviews Trend (6 Months)
-        </h3>
-        <div class="flex-grow bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Growth Analytics Placeholder</p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm h-72 flex flex-col">
-        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-brand-primary text-lg">event_note</span>
-          Appointments Volume
-        </h3>
-        <div class="flex-grow bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
-          <p class="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Operational Throughput Placeholder</p>
-        </div>
-      </div>
-    </div>
+    <template v-else-if="store.facility">
+      <FacilityHeader :facility="store.facility" @back="goBack" />
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Left Column: Reviews -->
-      <div class="lg:col-span-2 space-y-6">
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span class="material-symbols-outlined text-brand-primary">rate_review</span>
-          Patient Reviews
-        </h3>
-        
-        <ReviewSummary :stats="reviewStore.stats" />
+      <FacilityStatsCards
+        :departments-count="store.departments.length"
+        :children-count="store.children.length"
+        :images-count="store.images.length"
+        :documents-count="store.files.length"
+      />
 
-        <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
-          <InfiniteScroll 
-            :loading="reviewStore.loading" 
-            :disabled="!reviewStore.hasMore"
-            @load="loadMore"
-          >
-            <div class="grid grid-cols-1 gap-4">
-              <ReviewCard 
-                v-for="review in reviewStore.reviews" 
-                :key="review.id" 
-                :review="review"
-              />
-            </div>
-            
-            <div v-if="!reviewStore.hasMore" class="py-8 text-center">
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">No more reviews to show</p>
-            </div>
-          </InfiniteScroll>
-        </div>
-      </div>
+      <FacilityInfoSection :facility="store.facility" />
 
-      <!-- Right Column: Info & Favorites -->
-      <div class="space-y-6">
-        <!-- Facility Info Card -->
-        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Facility Information</h3>
-          
-          <div class="space-y-4">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
-                <span class="material-symbols-outlined text-lg">location_on</span>
-              </div>
-              <div>
-                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Coordinates</p>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.location || 'Not provided' }}</p>
-              </div>
-            </div>
+      <FacilityDepartments :departments="store.departments" />
 
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-400 dark:text-slate-500">
-                <span class="material-symbols-outlined text-lg">account_tree</span>
-              </div>
-              <div>
-                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Parent Facility</p>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ facility.parent ? localField(facility.parent, 'name') : 'Main Facility' }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <FacilityGallery :images="store.images" :cover-image="store.facility.cover_image" />
 
-        <!-- Recent Favorites -->
-        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Favorites</h3>
-            <span class="text-xs font-black text-rose-500 bg-rose-50/30 dark:bg-rose-900/20 px-2 py-0.5 rounded-full">{{ reviewStore.favorites.count }}</span>
-          </div>
-          
-          <div class="space-y-4">
-            <div v-for="user in reviewStore.favorites.recent" :key="user.id" class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">
-                {{ resolveTranslatedValue(user.name, locale.value).charAt(0) || '?' }}
-              </div>
-              <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ resolveTranslatedValue(user.name, locale.value) }}</span>
-            </div>
-            <button class="w-full py-2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-brand-primary transition uppercase tracking-widest">View all users</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Loading State -->
-  <div v-else class="flex flex-col items-center justify-center py-24 text-slate-400 dark:text-slate-500 space-y-4">
-    <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-brand-primary rounded-full animate-spin"></div>
-    <p class="font-medium uppercase tracking-widest text-xs">Loading facility details...</p>
+      <FacilityDocuments :files="store.files" />
+
+      <FacilityChildFacilities :children="store.children" />
+
+      <FacilityReviewSummary
+        :average-rating="store.reviewStats.average_rating"
+        :total-reviews="store.reviewStats.total_reviews"
+        :rating-breakdown="store.reviewStats.rating_breakdown"
+        :loading="store.reviewStatsLoading"
+        :error="store.reviewStatsError"
+        @retry="store.fetchReviewStats(store.facility.uuid)"
+      />
+
+      <FacilityReviewsSection :facility-uuid="store.facility.uuid" />
+    </template>
   </div>
 </template>
 
 <style scoped>
 .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
