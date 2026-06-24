@@ -4,10 +4,19 @@
       <div>
         <h2 class="text-xl font-bold text-slate-900">Appointments</h2>
         <p class="text-sm text-slate-500">Manage all patient appointments</p>
+        <div v-if="workspaceStore.currentWorkspace" class="flex items-center gap-2 mt-1">
+          <span class="inline-flex items-center gap-1 rounded-full bg-brand-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-brand-primary">
+            {{ workspaceStore.currentFacility?.name }}
+          </span>
+          <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+            {{ workspaceStore.currentRole?.name }}
+          </span>
+        </div>
       </div>
       <div class="flex gap-2">
         <input v-model="search" placeholder="Search patient..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm w-48" />
         <input type="date" v-model="dateFilter" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+        <button class="rounded-md bg-brand-primary px-4 py-2 text-sm text-white" @click="bookModal = true">Book Appointment</button>
       </div>
     </div>
 
@@ -43,21 +52,24 @@
 
     <AppointmentDetailModal :show="detailModal" :appointment-id="selectedId" @close="detailModal = false" />
     <RescheduleModal :show="rescheduleModal" :appointment="selectedAppt" @close="rescheduleModal = false" />
+    <BookAppointmentModal :show="bookModal" @close="bookModal = false" @booked="onBooked" />
     <ConfirmModal v-model:modelValue="confirm.visible" :title="confirm.title" :message="confirm.message" :confirmText="confirm.confirmText" @confirm="onConfirm" @cancel="confirm.visible = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useStaffStore } from '@/stores/useStaffStore'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useWorkspaceStore } from '@/stores/workspace'
 import DataTable from '@/components/staff/shared/DataTable.vue'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
 import AppointmentDetailModal from '@/components/staff/modals/AppointmentDetailModal.vue'
 import RescheduleModal from '@/components/staff/modals/RescheduleModal.vue'
+import BookAppointmentModal from '@/components/staff/modals/BookAppointmentModal.vue'
 import ConfirmModal from '@/components/staff/modals/ConfirmModal.vue'
+import { getAppointments, cancelAppointment as apiCancelAppointment, forceCompleteAppointment } from '@/services/appointmentService'
 
-const store = useStaffStore()
+const workspaceStore = useWorkspaceStore()
 const loading = ref(true)
 const search = ref('')
 const dateFilter = ref('')
@@ -66,8 +78,10 @@ const page = ref(1)
 const perPage = 10
 const detailModal = ref(false)
 const rescheduleModal = ref(false)
+const bookModal = ref(false)
 const selectedId = ref(null)
 const selectedAppt = ref(null)
+const serverAppointments = ref([])
 
 const tabs = [
   { key: 'all', label: 'All' },
@@ -86,23 +100,50 @@ const columns = [
   { key: 'actions', label: 'Actions' }
 ]
 
-const filtered = computed(() => {
-  let items = store.appointments
-  if (activeTab.value !== 'all') items = items.filter(a => a.status === activeTab.value)
-  if (search.value) items = items.filter(a => a.patientName.toLowerCase().includes(search.value.toLowerCase()))
-  if (dateFilter.value) items = items.filter(a => a.date === dateFilter.value)
-  return items
+async function fetchServerAppointments() {
+  loading.value = true
+  try {
+    const params = { page: page.value, per_page: perPage }
+    if (activeTab.value !== 'all') params.status = activeTab.value
+    if (search.value) params.search = search.value
+    if (dateFilter.value) params.date_from = dateFilter.value
+
+    const { data } = await getAppointments(params)
+    serverAppointments.value = (data.data || data || []).map(a => ({
+      id: a.id || a.uuid,
+      patientName: a.patient?.full_name || a.patient?.name || a.patient_name || '—',
+      doctorName: a.doctor?.full_name || a.doctor?.name || a.doctor_name || '—',
+      facilityName: a.facility?.name || a.facility_name || '—',
+      date: a.start_at ? a.start_at.slice(0, 10) : '',
+      time: a.start_at ? new Date(a.start_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '',
+      status: a.status,
+      uuid: a.uuid || a.id,
+      raw: a,
+    }))
+  } catch {
+    serverAppointments.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+const filtered = computed(() => serverAppointments.value)
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage)))
+const paginated = computed(() => filtered.value)
+
+const confirm = ref({ visible: false, appt: null, action: null, title: '', message: '', confirmText: '' })
+
+watch([search, dateFilter, activeTab], () => { page.value = 1; fetchServerAppointments() })
+watch(() => workspaceStore.currentWorkspaceId, () => {
+  page.value = 1
+  activeTab.value = 'all'
+  search.value = ''
+  dateFilter.value = ''
+  fetchServerAppointments()
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage)))
-const paginated = computed(() => filtered.value.slice((page.value - 1) * perPage, page.value * perPage))
-
-import { watch } from 'vue'
-const confirm = ref({ visible: false, appt: null, action: null, title: '', message: '', confirmText: '' })
-watch([search, dateFilter], () => { page.value = 1 })
-
 function viewAppt(item) { selectedId.value = item.id; detailModal.value = true }
-function openReschedule(item) { selectedAppt.value = item; rescheduleModal.value = true }
+function openReschedule(item) { selectedAppt.value = item.raw; rescheduleModal.value = true }
 
 function confirmAction(action, appt) {
   confirm.value.appt = appt; confirm.value.action = action
@@ -111,13 +152,25 @@ function confirmAction(action, appt) {
   confirm.value.visible = true
 }
 
-function onConfirm() {
+async function onConfirm() {
   const appt = confirm.value.appt; const action = confirm.value.action
   if (!appt || !action) return
-  if (action === 'complete') { store.updateAppointmentStatus(appt.id, 'completed'); store.showToast('Appointment completed', 'success') }
-  else if (action === 'cancel') { store.updateAppointmentStatus(appt.id, 'cancelled'); store.showToast('Appointment cancelled', 'success') }
+  try {
+    if (action === 'complete') {
+      await forceCompleteAppointment(appt.uuid)
+    } else if (action === 'cancel') {
+      await apiCancelAppointment(appt.uuid)
+    }
+    fetchServerAppointments()
+  } catch {
+    // error handled by service
+  }
   confirm.value.visible = false
 }
 
-onMounted(() => { setTimeout(() => { loading.value = false }, 600) })
+function onBooked() {
+  fetchServerAppointments()
+}
+
+onMounted(fetchServerAppointments)
 </script>
