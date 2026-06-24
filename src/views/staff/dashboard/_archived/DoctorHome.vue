@@ -99,7 +99,7 @@
               <h3 class="text-lg font-bold text-slate-900">My Articles</h3>
               <p class="text-sm text-slate-500">Latest articles</p>
             </div>
-            <button class="rounded-md border border-slate-200 px-3 py-2 text-sm" @click="$router.push('/admin/articles')">Write New Article</button>
+            <button class="rounded-md border border-slate-200 px-3 py-2 text-sm" @click="$router.push('/platform/articles')">Write New Article</button>
           </div>
 
           <div class="mt-4 space-y-2">
