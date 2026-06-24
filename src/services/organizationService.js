@@ -34,3 +34,7 @@ export function updateOrganization(id, data) {
 export function deleteOrganization(id) {
   return axiosClient.delete(`/dashboard/organizations/${id}`)
 }
+
+export function getOrganizationStats() {
+  return axiosClient.get('/dashboard/organizations/stats')
+}
