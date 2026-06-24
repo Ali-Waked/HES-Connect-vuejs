@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocaleField } from '../../../composables/useLocaleField';
 import { useFormatDate } from '../../../composables/useFormatDate';
 import { useReviewsStore } from '../../../stores/reviews';
+import { useAuthPermissions } from '../../../composables/useAuthPermissions';
 import ConfirmModal from '../global/ConfirmModal.vue';
 import BasePagination from '../global/BasePagination.vue';
 import ReviewDetailDialog from './ReviewDetailDialog.vue';
@@ -15,6 +16,7 @@ const { t } = useI18n();
 const { localField } = useLocaleField();
 const { formatDate } = useFormatDate();
 const store = useReviewsStore();
+const { can } = useAuthPermissions();
 
 const searchQuery = ref('');
 const ratingFilter = ref('all');
@@ -124,6 +126,7 @@ function viewReview(review) {
 }
 
 function confirmToggleVisibility(review) {
+  if (!can('reviews.manage')) return
   selectedReview.value = review
   toggleAction.value = review.is_visible ? 'hide' : 'show'
   showToggleConfirm.value = true
@@ -142,6 +145,7 @@ async function handleToggleVisibility() {
 }
 
 function confirmDelete(review) {
+  if (!can('reviews.manage')) return
   selectedReview.value = review
   showDeleteConfirm.value = true
 }
@@ -312,17 +316,26 @@ function statusLabel(review) {
                 </div>
               </td>
               <td class="px-5 py-3.5 whitespace-nowrap">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
-                  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400': review.is_visible,
-                  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': !review.is_visible,
-                }">
-                  {{ statusLabel(review) }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
+                    'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400': review.is_visible,
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': !review.is_visible,
+                  }">
+                    {{ statusLabel(review) }}
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': review.is_replied,
+                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': !review.is_replied,
+                  }">
+                    {{ review.is_replied ? t('reviews.replied') || 'Replied' : t('reviews.awaitingReply') || 'Awaiting Reply' }}
+                  </span>
+                </div>
               </td>
               <td class="px-5 py-3.5 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{{ formatDate(review.created_at) }}</td>
               <td class="px-5 py-3.5 whitespace-nowrap text-right rtl:text-left">
                 <div class="flex justify-end rtl:justify-start gap-1">
                   <button
+                    v-permission="'reviews.view'"
                     class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
                     :title="t('reviews.viewDetails')"
                     @click="viewReview(review)"
@@ -333,6 +346,7 @@ function statusLabel(review) {
                     </svg>
                   </button>
                   <button
+                    v-permission="'reviews.manage'"
                     class="p-1.5 rounded-lg transition cursor-pointer"
                     :class="review.is_visible
                       ? 'text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
@@ -349,6 +363,7 @@ function statusLabel(review) {
                     </svg>
                   </button>
                   <button
+                    v-permission="'reviews.manage'"
                     class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition cursor-pointer"
                     :title="t('reviews.deleteAction')"
                     :disabled="store.actionLoading"

@@ -85,7 +85,7 @@ const approvalVariant = (status) => {
               {{ t('common.back') }}
             </button>
             <router-link
-              :to="`/admin/facilities?edit=${facility.uuid}`"
+              :to="`/platform/facilities?edit=${facility.uuid}`"
               class="px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-bold rounded-lg hover:bg-white/20 transition flex items-center gap-2 cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -132,7 +132,7 @@ const approvalVariant = (status) => {
             {{ t('common.back') }}
           </button>
           <router-link
-            :to="`/admin/facilities?edit=${facility.uuid}`"
+            :to="`/platform/facilities?edit=${facility.uuid}`"
             class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

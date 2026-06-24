@@ -13,7 +13,7 @@ const job = computed(() => store.jobs.find(j => j.id === jobId.value));
 
 const { localField } = useLocaleField();
 
-const goBack = () => router.push('/admin/jobs');
+const goBack = () => router.push('/platform/jobs');
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
 const statusClass = (s) => ({

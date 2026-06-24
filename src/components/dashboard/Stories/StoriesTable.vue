@@ -63,7 +63,7 @@ const filtered = computed(() => {
 // ─── Actions ─────────────────────────────────────────────────────────────────
 const openAdd = () => { selectedStory.value = null; modalMode.value = 'add'; showFormModal.value = true; };
 const openEdit = (s) => { selectedStory.value = s; modalMode.value = 'edit'; showFormModal.value = true; };
-const openView = (s) => { router.push(`/admin/stories/${s.id}`); };
+const openView = (s) => { router.push(`/platform/stories/${s.id}`); };
 const confirmDel = (s) => { selectedStory.value = s; showDeleteModal.value = true; };
 const handleDelete = () => {
   if (selectedStory.value) { store.deleteStory(selectedStory.value.id); showDeleteModal.value = false; selectedStory.value = null; }

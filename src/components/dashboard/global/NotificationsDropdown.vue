@@ -11,7 +11,7 @@ const { t } = useI18n();
 
 const goToAll = () => {
   emit('close');
-  router.push('/admin/notifications');
+  router.push('/platform/notifications');
 };
 
 const handleClick = (n) => {

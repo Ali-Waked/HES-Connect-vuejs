@@ -97,7 +97,7 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
       <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300">Story not found</h2>
       <button
         class="inline-flex items-center gap-2 py-2 px-4 text-sm font-semibold rounded-lg bg-brand-primary text-white hover:bg-brand-primary-hover transition cursor-pointer"
-        @click="router.push('/admin/stories')"
+        @click="router.push('/platform/stories')"
       >← Back to Stories</button>
     </div>
 
@@ -105,7 +105,7 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
       <!-- ── Back link ─────────────────────────────────────────────── -->
       <button
         class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition cursor-pointer group"
-        @click="router.push('/admin/stories')"
+        @click="router.push('/platform/stories')"
       >
         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>

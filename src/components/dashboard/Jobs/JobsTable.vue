@@ -50,7 +50,7 @@ const filtered = computed(() => {
 // ── Actions ────────────────────────────────────────────────────────────────
 const openAdd = () => { selectedJob.value = null; modalMode.value = 'add'; showFormModal.value = true; };
 const openEdit = (j) => { selectedJob.value = j; modalMode.value = 'edit'; showFormModal.value = true; };
-const openView = (j) => { router.push(`/admin/jobs/${j.id}`); };
+const openView = (j) => { router.push(`/platform/jobs/${j.id}`); };
 const confirmDel = (j) => { selectedJob.value = j; showDeleteModal.value = true; };
 const handleDelete = () => {
   if (selectedJob.value) { store.deleteJob(selectedJob.value.id); showDeleteModal.value = false; selectedJob.value = null; }

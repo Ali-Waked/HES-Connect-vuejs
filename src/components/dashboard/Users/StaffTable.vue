@@ -241,7 +241,7 @@ const filteredStaff = computed(() => {
         <button
           class="mt-1 p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
           :title="t('common.back')"
-          @click="router.push('/admin/users')"
+          @click="router.push('/platform/users')"
         >
           <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
@@ -441,7 +441,7 @@ const filteredStaff = computed(() => {
                     <button
                       class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer"
                       :title="t('common.view')"
-                      @click.stop="router.push(`/admin/staff/${member.uuid}`)"
+                      @click.stop="router.push(`/platform/staff/${member.uuid}`)"
                     >
                       <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -562,7 +562,7 @@ const filteredStaff = computed(() => {
     <StaffModal
       :show="showFormModal"
       :staff-member="selectedMember"
-      @close="showFormModal = false"
+      @close="showFormModal = false; fetchStaff(parseParams(route.query))"
     />
 
   </div>

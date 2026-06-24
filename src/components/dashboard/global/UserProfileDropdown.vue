@@ -21,7 +21,7 @@ const goToProfile = () => {
 
 const goToSettings = () => {
   emit('close');
-  router.push('/admin/settings');
+  router.push('/platform/settings');
 };
 
 const handleLogout = async () => {

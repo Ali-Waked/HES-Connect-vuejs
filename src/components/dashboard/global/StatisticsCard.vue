@@ -14,7 +14,8 @@ const colorClasses = {
   success: 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30',
   warning: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/30',
   danger: 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30',
-  info: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30'
+  info: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30',
+  neutral: 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-700/50',
 };
 </script>
 

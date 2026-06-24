@@ -162,7 +162,7 @@ const truncate = (text, length = 80) => {
       <template #cell(name)="{ item }">
         <div class="flex items-center gap-3">
           <button
-            @click="router.push(`/admin/medicines/${item.uuid}`)"
+            @click="router.push(`/platform/medicines/${item.uuid}`)"
             class="text-sm font-semibold text-slate-900 dark:text-white hover:text-brand-primary transition text-left cursor-pointer"
           >
             {{ localField(item, 'name') }}

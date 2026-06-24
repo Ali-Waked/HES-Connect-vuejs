@@ -24,6 +24,8 @@ const form = reactive({
 const errors = reactive({
   'name.en': '',
   'name.ar': '',
+  'description.en': '',
+  'description.ar': '',
 });
 
 watch(() => props.show, (val) => {
@@ -39,6 +41,8 @@ watch(() => props.show, (val) => {
     }
     errors['name.en'] = '';
     errors['name.ar'] = '';
+    errors['description.en'] = '';
+    errors['description.ar'] = '';
   }
 });
 
@@ -46,8 +50,12 @@ const validate = () => {
   let valid = true;
   errors['name.en'] = '';
   errors['name.ar'] = '';
+  errors['description.en'] = '';
+  errors['description.ar'] = '';
   if (!form.name.en.trim()) { errors['name.en'] = $t('common.required'); valid = false }
   if (!form.name.ar.trim()) { errors['name.ar'] = $t('common.required'); valid = false }
+  if (!form.description.en.trim()) { errors['description.en'] = $t('common.required'); valid = false }
+  if (!form.description.ar.trim()) { errors['description.ar'] = $t('common.required'); valid = false }
   return valid;
 };
 
@@ -114,24 +122,28 @@ const handleSubmit = async () => {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescEn">{{ $t('access.description_en') }}</label>
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescEn">{{ $t('access.description_en') }} *</label>
               <textarea
                 id="roleDescEn"
                 class="input-base resize-none min-h-[80px]"
                 dir="ltr"
+                required
                 :placeholder="$t('access.description_en')"
                 v-model="form.description.en"
               />
+              <p v-if="errors['description.en']" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors['description.en'] }}</p>
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescAr">{{ $t('access.description_ar') }}</label>
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="roleDescAr">{{ $t('access.description_ar') }} *</label>
               <textarea
                 id="roleDescAr"
                 class="input-base resize-none min-h-[80px] text-right"
                 dir="rtl"
+                required
                 :placeholder="$t('access.description_ar')"
                 v-model="form.description.ar"
               />
+              <p v-if="errors['description.ar']" class="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{{ errors['description.ar'] }}</p>
             </div>
           </div>
         </div>

@@ -334,14 +334,13 @@ function coverValidation() {
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOwner">{{ $t('facilities.owner') || 'Facility Owner' }} *</label>
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="facOwner">{{ $t('facilities.owner') || 'Facility Owner' }}</label>
             <select
               id="facOwner"
               class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer"
-              required
               v-model="owner_id"
             >
-              <option value="" disabled>{{ loadingUsers ? 'Loading users...' : (usersList.length === 0 ? 'No users available' : 'Select Facility Owner') }}</option>
+              <option value="">{{ loadingUsers ? 'Loading users...' : (usersList.length === 0 ? 'No users available' : 'Select Facility Owner') }}</option>
               <option v-for="user in usersList" :key="user.uuid || user.id" :value="user.uuid || user.id">
                 {{ localField(user, 'name') }} {{ user.email ? `(${user.email})` : '' }}
               </option>

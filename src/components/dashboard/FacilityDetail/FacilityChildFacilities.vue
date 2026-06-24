@@ -19,7 +19,7 @@ const facilityTypeLabels = {
 };
 
 function goToFacility(uuid) {
-  router.push(`/admin/facilities/${uuid}`);
+  router.push(`/platform/facilities/${uuid}`);
 }
 
 const statusVariant = (status) => {

@@ -1,5 +1,7 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth';
 import HesLogo from '@/components/global/HesLogo.vue';
 
 defineProps({
@@ -9,69 +11,84 @@ defineProps({
 defineEmits(['closeMobile']);
 
 const { t } = useI18n();
+const authStore = useAuthStore();
 
-const menuGroups = [
-  {
-    title: () => t('sidebar.platformOverview'),
-    items: [
-      { id: 'dashboard', label: () => t('sidebar.dashboard'), icon: 'grid_view' },
-      { id: 'audit-logs', label: () => t('sidebar.auditLogs'), icon: 'history' },
-      { id: 'reports', label: () => t('sidebar.reports'), icon: 'assessment' }
-    ]
-  },
-  {
-    title: () => t('sidebar.medicalOperations'),
-    items: [
-      { id: 'appointments', label: () => t('sidebar.appointments'), icon: 'calendar_month' },
-      { id: 'prescriptions', label: () => t('sidebar.prescriptions'), icon: 'description' },
-      { id: 'medication-analytics', label: () => t('sidebar.medAnalytics'), icon: 'analytics' },
-      { id: 'medicines', label: () => t('sidebar.medicines'), icon: 'pill' }
-    ]
-  },
-  {
-    title: () => t('sidebar.directory'),
-    items: [
-      { id: 'organizations', label: () => t('sidebar.organizations'), icon: 'corporate_fare' },
-      { id: 'organization-users', label: () => t('sidebar.organizationUsers'), icon: 'group_add' },
-      { id: 'facilities', label: () => t('sidebar.facilities'), icon: 'home_health' },
-      { id: 'cities', label: () => t('sidebar.cities'), icon: 'location_city' },
-      { id: 'departments', label: () => t('sidebar.departments'), icon: 'lan' }
-    ]
-  },
-  {
-    title: () => t('sidebar.usersAccess'),
-    items: [
-      { id: 'users', label: () => t('sidebar.allUsers'), icon: 'group' },
-      { id: 'roles', label: () => t('sidebar.roles'), icon: 'shield_person' },
-      { id: 'permissions', label: () => t('sidebar.permissions'), icon: 'vpn_key' },
-      { id: 'tags', label: () => t('sidebar.tags'), icon: 'tag' }
-    ]
-  },
-  {
-    title: () => t('sidebar.contentCommunity'),
-    items: [
-      { id: 'categories', label: () => t('sidebar.categories'), icon: 'category' },
-      { id: 'articles', label: () => t('sidebar.articles'), icon: 'article' },
-      { id: 'stories', label: () => t('sidebar.stories'), icon: 'auto_stories' },
-      { id: 'reviews', label: () => t('sidebar.reviews'), icon: 'star' }
-    ]
-  },
-  {
-    title: () => t('sidebar.communications'),
-    items: [
-      { id: 'messages', label: () => t('sidebar.contactInbox'), icon: 'mail' },
-      { id: 'conversations', label: () => t('sidebar.conversations'), icon: 'forum' }
-    ]
-  },
-  {
-    title: () => t('sidebar.system'),
-    items: [
-      { id: 'positions', label: () => t('sidebar.positions'), icon: 'badge' },
-      { id: 'jobs', label: () => t('sidebar.jobBoard'), icon: 'work' },
-      { id: 'settings', label: () => t('sidebar.settings'), icon: 'settings' }
-    ]
-  }
-];
+function can(permission) {
+  return authStore.can(permission)
+}
+
+const menuGroups = computed(() => {
+  const groups = [
+    {
+      title: () => t('sidebar.platformOverview'),
+      items: [
+        { id: 'dashboard', label: () => t('sidebar.dashboard'), icon: 'grid_view', permission: null },
+        { id: 'audit-logs', label: () => t('sidebar.auditLogs'), icon: 'history', permission: 'activity_logs.view' },
+        { id: 'reports', label: () => t('sidebar.reports'), icon: 'assessment', permission: 'reports.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.medicalOperations'),
+      items: [
+        { id: 'appointments', label: () => t('sidebar.appointments'), icon: 'calendar_month', permission: 'appointments.view' },
+        { id: 'prescriptions', label: () => t('sidebar.prescriptions'), icon: 'description', permission: 'prescriptions.view' },
+        { id: 'medication-requests', label: () => t('sidebar.medicationRequests', 'Medication Requests'), icon: 'medication', permission: 'medication_requests.view' },
+        { id: 'medication-request-analytics', label: () => t('sidebar.medAnalytics'), icon: 'analytics', permission: 'analytics.view' },
+        { id: 'medicines', label: () => t('sidebar.medicines'), icon: 'pill', permission: 'medicines.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.directory'),
+      items: [
+        { id: 'organizations', label: () => t('sidebar.organizations'), icon: 'corporate_fare', permission: 'organizations.view' },
+        { id: 'organization-users', label: () => t('sidebar.organizationUsers'), icon: 'group_add', permission: 'organization_users.view' },
+        { id: 'facilities', label: () => t('sidebar.facilities'), icon: 'home_health', permission: 'facilities.view' },
+        { id: 'cities', label: () => t('sidebar.cities'), icon: 'location_city', permission: 'cities.view' },
+        { id: 'departments', label: () => t('sidebar.departments'), icon: 'lan', permission: 'departments.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.usersAccess'),
+      items: [
+        { id: 'users', label: () => t('sidebar.allUsers'), icon: 'group', permission: 'users.view' },
+        { id: 'roles', label: () => t('sidebar.roles'), icon: 'shield_person', permission: 'roles.view' },
+        { id: 'permissions', label: () => t('sidebar.permissions'), icon: 'vpn_key', permission: 'permissions.view' },
+        { id: 'tags', label: () => t('sidebar.tags'), icon: 'tag', permission: 'tags.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.contentCommunity'),
+      items: [
+        { id: 'categories', label: () => t('sidebar.categories'), icon: 'category', permission: 'categories.view' },
+        { id: 'articles', label: () => t('sidebar.articles'), icon: 'article', permission: 'articles.view' },
+        { id: 'stories', label: () => t('sidebar.stories'), icon: 'auto_stories', permission: 'stories.view' },
+        { id: 'reviews', label: () => t('sidebar.reviews'), icon: 'star', permission: 'reviews.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.communications'),
+      items: [
+        { id: 'messages', label: () => t('sidebar.contactInbox'), icon: 'mail', permission: 'messages.view' },
+        { id: 'conversations', label: () => t('sidebar.conversations'), icon: 'forum', permission: 'messages.view' }
+      ]
+    },
+    {
+      title: () => t('sidebar.system'),
+      items: [
+        { id: 'positions', label: () => t('sidebar.positions'), icon: 'badge', permission: 'positions.view' },
+        { id: 'jobs', label: () => t('sidebar.jobBoard'), icon: 'work', permission: 'jobs.view' },
+        { id: 'settings', label: () => t('sidebar.settings'), icon: 'settings', permission: 'settings.view' }
+      ]
+    }
+  ]
+
+  return groups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => !item.permission || can(item.permission))
+    }))
+    .filter(group => group.items.length > 0)
+})
 </script>
 
 <template>
@@ -103,7 +120,7 @@ const menuGroups = [
           <ul class="space-y-1 list-none m-0">
             <li v-for="item in group.items" :key="item.id" class="w-full">
               <router-link 
-                :to="`/admin/${item.id}`"
+                :to="`/platform/${item.id}`"
                 class="flex items-center gap-3 py-2.5 px-4 text-[13px] font-bold rounded-xl text-slate-400 hover:bg-white/5 dark:hover:bg-white/10 hover:text-white transition-all duration-200 cursor-pointer group" 
                 active-class="bg-brand-primary! text-white! "
                 @click="$emit('closeMobile')"

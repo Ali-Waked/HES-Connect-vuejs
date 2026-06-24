@@ -1,8 +1,11 @@
 <script setup>
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useLocaleField } from '../../../composables/useLocaleField';
 import { useFormatDate } from '../../../composables/useFormatDate';
 import { useReviewsStore } from '../../../stores/reviews';
+import { useDashboardStore } from '../../../stores/dashboard';
+import { replyToReview } from '@/services/reviewService';
 
 const { t } = useI18n();
 const { localField } = useLocaleField();
@@ -15,6 +18,13 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 const store = useReviewsStore();
+const dashboardStore = useDashboardStore();
+
+const replyText = ref('');
+const submitting = ref(false);
+const maxReplyLength = 5000
+
+const replyCharCount = computed(() => replyText.value.length)
 
 async function toggleVisibility() {
   const uuid = props.review.uuid || props.review.id;
@@ -24,6 +34,24 @@ async function toggleVisibility() {
     await store.showReview(uuid);
   }
   emit('close');
+}
+
+async function submitReply() {
+  if (!replyText.value.trim() || submitting.value) return
+  const uuid = props.review.uuid || props.review.id
+  submitting.value = true
+  try {
+    const { data } = await replyToReview(uuid, { reply: replyText.value.trim() })
+    const replyData = data.data?.reply || data.reply
+    props.review.is_replied = true
+    props.review.reply = replyData || { reply: replyText.value.trim(), created_at: new Date().toISOString() }
+    dashboardStore.addToast('Reply submitted successfully', 'success')
+    replyText.value = ''
+  } catch (err) {
+    dashboardStore.addToast(err.response?.data?.message || 'Failed to submit reply', 'error')
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -90,6 +118,29 @@ async function toggleVisibility() {
           <span class="font-medium">{{ t('reviews.reviewDate') }}:</span>
           {{ formatDate(review.created_at) }}
         </div>
+
+        <div v-if="review.is_replied && review.reply" class="bg-brand-primary/5 dark:bg-brand-primary/10 rounded-xl p-4 border border-brand-primary/10 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-brand-primary text-base">support_agent</span>
+            <span class="text-xs font-bold text-brand-primary uppercase tracking-wider">{{ t('reviews.staffReply') || 'Staff Reply' }}</span>
+          </div>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ review.reply.reply }}</p>
+          <p v-if="review.reply.created_at" class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">schedule</span>
+            {{ formatDate(review.reply.created_at) }}
+          </p>
+        </div>
+
+        <div v-else class="space-y-3">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('reviews.replyToReview') || 'Reply to Review' }}</label>
+          <div class="relative">
+            <textarea v-model="replyText"
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-600 px-4 py-3 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-primary/20 outline-none transition min-h-[100px] resize-none"
+              :placeholder="t('reviews.replyPlaceholder') || 'Write your reply to this review...'"
+              :maxlength="maxReplyLength"></textarea>
+            <span class="absolute bottom-3 right-3 text-xs text-slate-400 pointer-events-none">{{ replyCharCount }}/5000</span>
+          </div>
+        </div>
       </div>
 
       <div class="p-4 px-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
@@ -99,6 +150,15 @@ async function toggleVisibility() {
           @click="$emit('close')"
         >
           {{ t('common.close') || 'Close' }}
+        </button>
+        <button
+          v-if="!review.is_replied"
+          :disabled="!replyText.trim() || submitting || replyText.length > maxReplyLength"
+          @click="submitReply"
+          class="inline-flex items-center justify-center gap-2 py-2 px-4.5 rounded-lg text-sm font-semibold bg-brand-primary text-white shadow-md hover:bg-brand-primary-hover hover:shadow-lg transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <span v-if="submitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+          <span v-else>{{ t('reviews.submitReply') || 'Submit Reply' }}</span>
         </button>
         <button
           :disabled="store.actionLoading"

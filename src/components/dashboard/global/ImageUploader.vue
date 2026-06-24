@@ -65,14 +65,14 @@ const removeImage = () => {
 
 <template>
   <div class="space-y-2">
-    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">{{ label }}</label>
+    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ label }}</label>
 
     <div
       v-if="!previewUrl"
       class="relative border-2 border-dashed rounded-xl transition-all duration-200 group"
       :class="[
         aspectRatio,
-        isDragging ? 'border-brand-primary bg-brand-primary/5' : 'border-slate-200 hover:border-slate-300 bg-slate-50'
+        isDragging ? 'border-brand-primary bg-brand-primary/5' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50 dark:bg-slate-800/50'
       ]"
       @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
@@ -85,13 +85,13 @@ const removeImage = () => {
         @change="onFileChange"
       />
       <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-        <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-brand-primary transition-colors">cloud_upload</span>
-        <p class="mt-2 text-sm font-semibold text-slate-600">Click to upload or drag and drop</p>
-        <p class="text-xs text-slate-400 mt-1">PNG, JPG or WEBP (Max 2MB)</p>
+        <span class="material-symbols-outlined text-3xl text-slate-400 dark:text-slate-500 group-hover:text-brand-primary transition-colors">cloud_upload</span>
+        <p class="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300">Click to upload or drag and drop</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">PNG, JPG or WEBP (Max 2MB)</p>
       </div>
     </div>
 
-    <div v-else class="relative rounded-xl overflow-hidden border border-slate-200 group" :class="aspectRatio">
+    <div v-else class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group" :class="aspectRatio">
       <img :src="previewUrl" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
         <label class="cursor-pointer p-2 bg-white rounded-lg text-slate-700 hover:bg-slate-50 transition shadow-lg">

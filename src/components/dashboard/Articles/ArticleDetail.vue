@@ -20,7 +20,7 @@ const articleTags = computed(() => {
   return article.value.tags.map(id => tagsStore.tags.find(t => t.id === id)).filter(Boolean);
 });
 
-const goBack = () => router.push('/admin/articles');
+const goBack = () => router.push('/platform/articles');
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
 const statusClass = (s) => ({

@@ -1,12 +1,14 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
 import { useUserStats } from '../../../composables/useUserStats';
+import CreateUserDialog from './CreateUserDialog.vue';
 
 const store  = useDashboardStore();
 const router = useRouter();
 const { stats: apiStats, fetchUserStats } = useUserStats();
+const showCreateDialog = ref(false);
 
 const stats = computed(() => ({
   total: apiStats.value.total_users ?? store.userStats.total,
@@ -26,7 +28,7 @@ const quickActions = [
     icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>`,
     title: 'Staff Management',
     desc: 'View and manage medical staff — specializations, bios, consultation fees, and experience.',
-    route: '/admin/staff',
+    route: '/platform/staff',
     color: 'teal',
   },
   {
@@ -34,7 +36,7 @@ const quickActions = [
     icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>`,
     title: 'Patient Records',
     desc: 'Manage patient accounts and their medical history records across all facilities.',
-    route: '/admin/patients',
+    route: '/platform/patients',
     color: 'blue',
   },
 ];
@@ -60,7 +62,7 @@ const statCards = computed(() => [
     iconBg: 'bg-teal-50',
     iconColor: 'text-teal-600',
     arrow: true,
-    route: '/admin/staff',
+    route: '/platform/staff',
   },
   {
     id: 'patients',
@@ -71,7 +73,7 @@ const statCards = computed(() => [
     iconBg: 'bg-blue-50',
     iconColor: 'text-blue-500',
     arrow: true,
-    route: '/admin/patients',
+    route: '/platform/patients',
   },
   {
     id: 'online',
@@ -94,12 +96,24 @@ const handleStatClick = (card) => {
   <div class="space-y-6 animate-fade-in">
 
     <!-- ── Page Header ───────────────────────────────────────────── -->
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">User Management</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-        Overview of all users registered in the
-        <span class="text-teal-600 font-semibold">health ecosystem</span>
-      </p>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">User Management</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Overview of all users registered in the
+          <span class="text-teal-600 font-semibold">health ecosystem</span>
+        </p>
+      </div>
+      <button
+        v-permission="'users.manage'"
+        class="inline-flex items-center gap-2 py-2.5 px-5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/15 transition cursor-pointer"
+        @click="showCreateDialog = true"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Add User
+      </button>
     </div>
 
     <!-- ── Stat Cards (4-col) ─────────────────────────────────────── -->
@@ -173,6 +187,11 @@ const handleStatClick = (card) => {
       </div>
     </div>
 
+    <CreateUserDialog
+      :show="showCreateDialog"
+      @close="showCreateDialog = false"
+      @created="fetchUserStats()"
+    />
   </div>
 </template>
 

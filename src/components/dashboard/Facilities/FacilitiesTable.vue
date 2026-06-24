@@ -363,7 +363,7 @@ const handleDelete = async () => {
               <td class="px-6 py-4 whitespace-nowrap text-right rtl:text-left">
                 <div class="flex justify-end rtl:justify-start gap-1">
                   <router-link
-                    :to="`/admin/facilities/${facility.uuid}`"
+                    :to="`/platform/facilities/${facility.uuid}`"
                     class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 p-1.5 rounded-lg transition cursor-pointer inline-flex"
                     :title="$t('common.view')"
                   >
