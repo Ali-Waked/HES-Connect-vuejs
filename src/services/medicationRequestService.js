@@ -10,6 +10,16 @@ function getFacilityUuid() {
   }
 }
 
+// ── Admin (platform) ──────────────────────
+
+export function getAdminMedicationRequests(params = {}) {
+  return axiosClient.get('/dashboard/medication-requests', { params })
+}
+
+export function getAdminMedicationRequest(uuid) {
+  return axiosClient.get(`/dashboard/medication-requests/${uuid}`)
+}
+
 // ── Patient (frontend) ─────────────────────
 
 export function getMedicationRequests(params = {}) {

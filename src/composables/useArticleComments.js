@@ -14,7 +14,7 @@ export function useArticleComments(articleId) {
   const submitError = ref('')
   const commentCount = ref(0)
 
-  const isAuthenticated = computed(() => authStore.isAuthenticated)
+  const isAuthenticated = computed(() => authStore.authenticated)
   const currentUser = computed(() => authStore.user)
 
   async function fetchComments() {

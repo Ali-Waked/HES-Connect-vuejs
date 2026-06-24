@@ -1,6 +1,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
 import * as doctorService from '@/services/public/doctorService'
 
 export function usePublicDoctors() {
@@ -48,7 +49,12 @@ export function usePublicDoctors() {
       if (filters.facility_id) params.facility_id = filters.facility_id
 
       const { data } = await doctorService.getDoctors(params)
-      doctors.value = data?.data || []
+      const authStore = useAuthStore()
+      const currentUser = authStore.user
+      const allDoctors = data?.data || []
+      doctors.value = currentUser
+        ? allDoctors.filter(d => d.uuid !== currentUser.uuid)
+        : allDoctors
       total.value = data?.meta?.total || data?.total || 0
     } catch (err) {
       doctors.value = []

@@ -67,7 +67,6 @@ export function useStaff() {
     saving.value = true
     try {
       await staffService.createStaff(formData)
-      store.addToast('Staff member created successfully', 'success')
       await fetchStaff(_lastParams)
       return { success: true }
     } catch (err) {
@@ -83,7 +82,6 @@ export function useStaff() {
     saving.value = true
     try {
       await staffService.updateStaff(id, formData)
-      store.addToast('Staff member updated successfully', 'success')
       await fetchStaff(_lastParams)
       return { success: true }
     } catch (err) {

@@ -1,5 +1,9 @@
 import axiosClient from '@/axiosClient'
 
+export function createReview(appointmentUuid, data) {
+  return axiosClient.post(`/reviews/${appointmentUuid}`, data)
+}
+
 export function getReviews(params = {}) {
   return axiosClient.get('/dashboard/reviews', { params })
 }
@@ -18,6 +22,10 @@ export function hideReview(uuid) {
 
 export function deleteReview(uuid) {
   return axiosClient.delete(`/dashboard/reviews/${uuid}`)
+}
+
+export function replyToReview(uuid, data) {
+  return axiosClient.post(`/dashboard/reviews/${uuid}/reply`, data)
 }
 
 export function getFacilityReviews(params = {}) {

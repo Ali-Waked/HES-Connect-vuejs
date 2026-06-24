@@ -9,3 +9,7 @@ export function getUserSelect(role) {
   if (role) params.role = role
   return axiosClient.get('/dashboard/users/select', { params })
 }
+
+export function createUser(data) {
+  return axiosClient.post('/dashboard/users', data)
+}

@@ -9,6 +9,7 @@ import AOS from 'aos'
 import App from './App.vue'
 import en from './locales/en.js'
 import ar from './locales/ar.js'
+import { permission, permissionAny, permissionAll } from './directives/permission'
 
 const savedLang = localStorage.getItem('lang') || 'en'
 
@@ -26,6 +27,9 @@ app.use(pinia)
 useThemeStore();
 app.use(i18n)
 app.use(router)
+app.directive('permission', permission)
+app.directive('permission-any', permissionAny)
+app.directive('permission-all', permissionAll)
 app.mount('#app')
 
 AOS.init({

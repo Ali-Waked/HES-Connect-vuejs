@@ -10,14 +10,14 @@ export function useDashboardNavigation() {
   const dashboardRoute = computed(() => authStore.dashboardRoute)
 
   function goToDashboard() {
-    if (dashboardRoute.value) {
-      router.push(dashboardRoute.value)
-    }
+    const dest = dashboardRoute.value
+    if (dest) router.push(dest)
   }
 
   const isDashboardPage = computed(() => {
-    if (!dashboardRoute.value) return false
-    const userBase = '/' + dashboardRoute.value.split('/').filter(Boolean)[0]
+    const dest = dashboardRoute.value
+    if (!dest) return false
+    const userBase = '/' + dest.split('/').filter(Boolean)[0]
     const currentBase = '/' + route.path.split('/').filter(Boolean)[0]
     return userBase === currentBase
   })

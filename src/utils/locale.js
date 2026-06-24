@@ -12,7 +12,18 @@
  */
 export function resolveTranslatedValue(value, locale) {
   if (value == null) return ''
-  if (typeof value === 'string') return value
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+        if (locale && parsed[locale]) return parsed[locale]
+        if (parsed.en) return parsed.en
+        if (parsed.ar) return parsed.ar
+        return ''
+      }
+    } catch {}
+    return value
+  }
   if (typeof value === 'object' && !Array.isArray(value)) {
     if (locale && value[locale]) return value[locale]
     if (value.en) return value.en

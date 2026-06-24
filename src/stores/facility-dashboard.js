@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import { useWorkspaceStore } from '@/stores/workspace'
 import {
   getDashboard,
   getLiveAppointments,
@@ -233,6 +234,30 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
       loading.all = false
     }
   }
+
+  const workspaceStore = useWorkspaceStore()
+  watch(() => workspaceStore.currentWorkspaceId, () => {
+    dashboard.total_appointments_today = 0
+    dashboard.total_appointments_month = 0
+    dashboard.completed_appointments = 0
+    dashboard.cancelled_appointments = 0
+    dashboard.active_doctors_count = 0
+    dashboard.total_patients_count = 0
+    dashboard.revenue_total = 0
+    liveAppointments.value = []
+    doctorsPerformance.value = []
+    patientsOverview.total = 0
+    patientsOverview.new = 0
+    patientsOverview.returning = 0
+    patientsOverview.top_patients = []
+    schedules.value = []
+    analytics.appointments_per_day = []
+    analytics.peak_hours = []
+    analytics.cancellation_trends = []
+    alerts.value = []
+    staff.value = []
+    fetchAll()
+  })
 
   return {
     dashboard, liveAppointments, doctorsPerformance, patientsOverview,
