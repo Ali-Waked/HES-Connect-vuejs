@@ -41,7 +41,7 @@ const loadMore = () => {
   reviewStore.fetchReviews(parseInt(uuid.value), 'staff')
 }
 
-const goBack = () => router.push('/admin/staff')
+const goBack = () => router.push('/platform/staff')
 
 const facilitiesCount = computed(() => detailStore.staff?.facilities?.length || 0)
 const departmentsCount = computed(() => {

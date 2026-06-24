@@ -75,22 +75,22 @@ stats.value[3].label = t('stats.articles');
     <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
       <h2 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('footer.quickLinks') }}</h2>
       <div class="flex flex-wrap gap-3">
-        <router-link to="/admin/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50/30 dark:bg-teal-500/10 hover:bg-teal-100/50 dark:hover:bg-teal-500/20 text-teal-700 dark:text-teal-400 text-sm font-semibold rounded-lg border border-teal-200 dark:border-teal-900/50 transition cursor-pointer">
+        <router-link to="/platform/organizations" class="inline-flex items-center gap-2 py-2.5 px-4 bg-teal-50/30 dark:bg-teal-500/10 hover:bg-teal-100/50 dark:hover:bg-teal-500/20 text-teal-700 dark:text-teal-400 text-sm font-semibold rounded-lg border border-teal-200 dark:border-teal-900/50 transition cursor-pointer">
           {{ $t('stats.hospitals') }} →
         </router-link>
-        <router-link to="/admin/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50/30 dark:bg-blue-500/10 hover:bg-blue-100/50 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold rounded-lg border border-blue-200 dark:border-blue-900/50 transition cursor-pointer">
+        <router-link to="/platform/facilities" class="inline-flex items-center gap-2 py-2.5 px-4 bg-blue-50/30 dark:bg-blue-500/10 hover:bg-blue-100/50 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold rounded-lg border border-blue-200 dark:border-blue-900/50 transition cursor-pointer">
           {{ $t('nav.facilities') }} →
         </router-link>
-        <router-link to="/admin/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50/30 dark:bg-orange-500/10 hover:bg-orange-100/50 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-400 text-sm font-semibold rounded-lg border border-orange-200 dark:border-orange-900/50 transition cursor-pointer">
+        <router-link to="/platform/jobs" class="inline-flex items-center gap-2 py-2.5 px-4 bg-orange-50/30 dark:bg-orange-500/10 hover:bg-orange-100/50 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-400 text-sm font-semibold rounded-lg border border-orange-200 dark:border-orange-900/50 transition cursor-pointer">
           {{ $t('jobs.title') }} →
         </router-link>
-        <router-link to="/admin/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50/30 dark:bg-rose-500/10 hover:bg-rose-100/50 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 text-sm font-semibold rounded-lg border border-rose-200 dark:border-rose-900/50 transition cursor-pointer">
+        <router-link to="/platform/articles" class="inline-flex items-center gap-2 py-2.5 px-4 bg-rose-50/30 dark:bg-rose-500/10 hover:bg-rose-100/50 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 text-sm font-semibold rounded-lg border border-rose-200 dark:border-rose-900/50 transition cursor-pointer">
           {{ $t('stats.articles') }} →
         </router-link>
-        <router-link to="/admin/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50/30 dark:bg-purple-500/10 hover:bg-purple-100/50 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-sm font-semibold rounded-lg border border-purple-200 dark:border-purple-900/50 transition cursor-pointer">
+        <router-link to="/platform/stories" class="inline-flex items-center gap-2 py-2.5 px-4 bg-purple-50/30 dark:bg-purple-500/10 hover:bg-purple-100/50 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-sm font-semibold rounded-lg border border-purple-200 dark:border-purple-900/50 transition cursor-pointer">
           {{ $t('nav.stories') }} →
         </router-link>
-        <router-link to="/admin/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-700 transition cursor-pointer">
+        <router-link to="/platform/departments" class="inline-flex items-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg border border-slate-200 dark:border-slate-700 transition cursor-pointer">
           {{ $t('departments.title') }} →
         </router-link>
       </div>

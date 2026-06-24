@@ -10,7 +10,8 @@ import BasePagination from '../../../components/dashboard/global/BasePagination.
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+import { resolveTranslatedValue } from '../../../utils/locale';
+const { t, locale } = useI18n();
 const { formatDate } = useFormatDate();
 const { cities, loading, deleteCity, pagination, fetchCities, fetchCity } = useCities();
 
@@ -208,7 +209,7 @@ const handleDelete = async () => {
               class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
             >
               <td class="px-6 py-4.5">
-                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ city.name || '—' }}</span>
+                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ resolveTranslatedValue(city.name, locale) || '—' }}</span>
               </td>
               <td class="px-6 py-4.5 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="{
@@ -263,7 +264,7 @@ const handleDelete = async () => {
     <ConfirmModal
       :show="showDeleteModal"
       :title="$t('cities.delete')"
-      :message="$t('cities.deleteConfirm', { name: `<strong>${selectedCity?.name || ''}</strong>` })"
+      :message="$t('cities.deleteConfirm', { name: `<strong>${resolveTranslatedValue(selectedCity?.name, locale) || ''}</strong>` })"
       :confirm-text="$t('common.delete')"
       @confirm="handleDelete"
       @close="showDeleteModal = false"

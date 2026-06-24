@@ -30,7 +30,7 @@ async function handleSubmit() {
   const result = await store.createMedicine({ ...form })
 
   if (result.success) {
-    router.push('/admin/medicines')
+    router.push('/platform/medicines')
   }
 }
 
@@ -45,7 +45,7 @@ const hasApiError = computed(() => store.errors.general)
   <div class="max-w-2xl mx-auto space-y-8 animate-fade-in">
     <div>
       <button
-        @click="router.push('/admin/medicines')"
+        @click="router.push('/platform/medicines')"
         class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition mb-4 cursor-pointer"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ const hasApiError = computed(() => store.errors.general)
       <div class="flex items-center justify-end gap-3 pt-2">
         <button
           type="button"
-          @click="router.push('/admin/medicines')"
+          @click="router.push('/platform/medicines')"
           class="py-2.5 px-6 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-lg transition cursor-pointer"
         >
           {{ t('common.cancel') }}

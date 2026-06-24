@@ -30,7 +30,7 @@ onMounted(async () => {
   <div class="max-w-2xl mx-auto space-y-6 animate-fade-in">
     <div class="flex items-center gap-3">
       <router-link
-        to="/admin/positions"
+        to="/platform/positions"
         class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer inline-flex"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -95,7 +95,7 @@ onMounted(async () => {
 
       <div class="p-4 px-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
         <router-link
-          to="/admin/positions"
+          to="/platform/positions"
           class="inline-flex items-center justify-center py-2 px-4.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
         >
           {{ $t('common.back') }}

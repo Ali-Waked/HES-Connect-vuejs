@@ -34,7 +34,7 @@ async function handleDelete() {
   const result = await store.deleteMedicine(props.uuid)
   showDeleteConfirm.value = false
   if (result.success) {
-    router.push('/admin/medicines')
+    router.push('/platform/medicines')
   }
 }
 </script>
@@ -44,7 +44,7 @@ async function handleDelete() {
     <div class="flex items-center justify-between">
       <div>
         <button
-          @click="router.push('/admin/medicines')"
+          @click="router.push('/platform/medicines')"
           class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition mb-4 cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ async function handleDelete() {
 
       <div class="flex items-center gap-2" v-if="item">
         <button
-          @click="router.push(`/admin/medicines/${props.uuid}/edit`)"
+          @click="router.push(`/platform/medicines/${props.uuid}/edit`)"
           class="inline-flex items-center gap-2 py-2.5 px-5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-lg transition cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

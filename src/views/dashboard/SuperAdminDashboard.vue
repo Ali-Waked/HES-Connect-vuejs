@@ -7,6 +7,7 @@ import { useAppointmentsStore } from '../../stores/appointments';
 import { useClinicalStore } from '../../stores/clinical';
 import { useAccessStore } from '../../stores/access';
 import { useTagsStore } from '../../stores/tags';
+import { useAuthPermissions } from '../../composables/useAuthPermissions';
 import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
 
 const { t } = useI18n();
@@ -16,20 +17,24 @@ const apptStore = useAppointmentsStore();
 const clinicalStore = useClinicalStore();
 const accessStore = useAccessStore();
 const tagsStore = useTagsStore();
+const { can } = useAuthPermissions();
 
 // Aggregate Data for Overview
-const mainStats = computed(() => [
-  { title: t('superAdmin.totalUsers'), value: dashboardStore.userStats.total, icon: 'group', color: 'primary' },
-  { title: t('superAdmin.totalPatients'), value: dashboardStore.userStats.patients, icon: 'patient_list', color: 'success' },
-  { title: t('superAdmin.totalDoctors'), value: dashboardStore.userStats.staff, icon: 'medical_information', color: 'info' },
-  { title: t('superAdmin.totalFacilities'), value: dashboardStore.facilityCount, icon: 'home_health', color: 'warning' },
-  { title: t('superAdmin.totalAppointments'), value: apptStore.stats.total, icon: 'calendar_month', color: 'primary' },
-  { title: t('superAdmin.totalPrescriptions'), value: clinicalStore.clinicalStats.totalPrescriptions, icon: 'description', color: 'info' },
-  { title: t('superAdmin.totalMedications'), value: 124, icon: 'medication', color: 'success' },
-  { title: t('superAdmin.totalReviews'), value: 342, icon: 'star', color: 'warning' },
-  { title: t('superAdmin.totalArticles'), value: dashboardStore.articleCount, icon: 'article', color: 'primary' },
-  { title: t('superAdmin.medicationRequests'), value: clinicalStore.clinicalStats.pendingRequests, icon: 'pending_actions', color: 'danger' }
-]);
+const mainStats = computed(() => {
+  const stats = [
+    { title: t('superAdmin.totalUsers'), value: dashboardStore.userStats.total, icon: 'group', color: 'primary', permission: 'users.view' },
+    { title: t('superAdmin.totalPatients'), value: dashboardStore.userStats.patients, icon: 'patient_list', color: 'success', permission: 'patients.view' },
+    { title: t('superAdmin.totalDoctors'), value: dashboardStore.userStats.staff, icon: 'medical_information', color: 'info', permission: 'staff.view' },
+    { title: t('superAdmin.totalFacilities'), value: dashboardStore.facilityCount, icon: 'home_health', color: 'warning', permission: 'facilities.view' },
+    { title: t('superAdmin.totalAppointments'), value: apptStore.stats.total, icon: 'calendar_month', color: 'primary', permission: 'appointments.view' },
+    { title: t('superAdmin.totalPrescriptions'), value: clinicalStore.clinicalStats.totalPrescriptions, icon: 'description', color: 'info', permission: 'prescriptions.view' },
+    { title: t('superAdmin.totalMedications'), value: 124, icon: 'medication', color: 'success', permission: 'medicines.view' },
+    { title: t('superAdmin.totalReviews'), value: 342, icon: 'star', color: 'warning', permission: 'reviews.view' },
+    { title: t('superAdmin.totalArticles'), value: dashboardStore.articleCount, icon: 'article', color: 'primary', permission: 'articles.view' },
+    { title: t('superAdmin.medicationRequests'), value: clinicalStore.clinicalStats.pendingRequests, icon: 'pending_actions', color: 'danger', permission: 'medication_requests.view' }
+  ]
+  return stats.filter(s => can(s.permission))
+})
 
 const systems = computed(() => [
   { key: 'api', label: t('superAdmin.apiServer') },
@@ -75,11 +80,11 @@ const recentActivity = computed(() => [
             </svg>
           </span>
         </button>
-        <button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2 shadow-sm">
+        <button v-permission="'reports.export'" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2 shadow-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           {{ t('superAdmin.exportReport') }}
         </button>
-        <button class="px-4 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition flex items-center gap-2 shadow-lg shadow-brand-primary/20">
+        <button v-permission="'settings.manage'" class="px-4 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition flex items-center gap-2 shadow-lg shadow-brand-primary/20">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           {{ t('superAdmin.systemAction') }}
         </button>
@@ -188,7 +193,7 @@ const recentActivity = computed(() => [
                   <code class="text-xs font-mono font-bold text-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 px-2 py-0.5 rounded">{{ req.prescription }}</code>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <button @click="clinicalStore.approveRequest(req.id)" class="text-xs font-black text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 uppercase tracking-widest">{{ t('superAdmin.approve') }}</button>
+                  <button v-permission="'medication_requests.approve'" @click="clinicalStore.approveRequest(req.id)" class="text-xs font-black text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 uppercase tracking-widest">{{ t('superAdmin.approve') }}</button>
                 </td>
               </tr>
             </tbody>

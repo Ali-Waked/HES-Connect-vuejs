@@ -19,7 +19,7 @@ const router = useRouter();
 const { t } = useI18n();
 const store = useFacilityDetailStore();
 
-const goBack = () => router.push('/admin/facilities');
+const goBack = () => router.push('/platform/facilities');
 
 onMounted(async () => {
   const uuid = route.params.id;
@@ -29,7 +29,7 @@ onMounted(async () => {
       store.fetchReviewStats(uuid),
     ]);
   } catch {
-    router.push('/admin/facilities');
+    router.push('/platform/facilities');
   }
 });
 
@@ -42,7 +42,7 @@ watch(() => route.params.id, async (newId, oldId) => {
         store.fetchReviewStats(newId),
       ]);
     } catch {
-      router.push('/admin/facilities');
+      router.push('/platform/facilities');
     }
   }
 });

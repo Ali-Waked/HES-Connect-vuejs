@@ -64,13 +64,13 @@ const tabConfig = computed(() => {
         </p>
         <div class="flex gap-3">
           <router-link
-            to="/admin/dashboard"
+            to="/platform/dashboard"
             class="inline-flex items-center justify-center py-2.5 px-5 text-sm font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 text-white transition cursor-pointer shadow-md shadow-teal-600/15"
           >
             ← Back to Dashboard
           </router-link>
           <router-link
-            to="/admin/organizations"
+            to="/platform/organizations"
             class="inline-flex items-center justify-center py-2.5 px-5 text-sm font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer"
           >
             Go to Organizations
