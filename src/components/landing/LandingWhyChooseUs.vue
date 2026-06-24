@@ -36,11 +36,11 @@ const features = [
 </script>
 
 <template>
-  <section class="py-16 lg:py-24 bg-white">
+  <section class="py-16 lg:py-24 bg-white dark:bg-slate-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16 animate-fade-in-up">
-        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Why Choose Us</h2>
-        <p class="text-slate-500 mt-3 max-w-2xl mx-auto">We are dedicated to providing a seamless healthcare experience for everyone in our community.</p>
+        <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">Why Choose Us</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-3 max-w-2xl mx-auto">We are dedicated to providing a seamless healthcare experience for everyone in our community.</p>
       </div>
 
       <div class="space-y-16 lg:space-y-24">
@@ -70,8 +70,8 @@ const features = [
               <span class="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
               Feature {{ idx + 1 }}
             </div>
-            <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 mb-4">{{ feature.title }}</h3>
-            <p class="text-slate-500 leading-relaxed text-lg">{{ feature.description }}</p>
+            <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-4">{{ feature.title }}</h3>
+            <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-lg">{{ feature.description }}</p>
           </div>
 
           <div v-if="feature.imageSide === 'right'" :class="`rounded-3xl ${feature.color} p-8 lg:p-12 aspect-[4/3] flex items-center justify-center order-1 lg:order-2`">

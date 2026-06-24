@@ -75,7 +75,7 @@ const typeLabel = computed(() => {
             </button>
           </div>
           <button
-            class="bg-white text-brand-primary rounded-xl px-5 py-2.5 font-bold text-sm shadow-sm hover:bg-brand-primary-light transition-all cursor-pointer"
+            class="bg-white  text-brand-secondary/80 dark:text-slate-900 rounded-xl px-5 py-2.5 font-bold text-sm shadow-sm hover:bg-brand-primary-light transition-all cursor-pointer"
             @click="handleSearch"
           >
             <svg class="w-4 h-4 sm:mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
@@ -112,7 +112,7 @@ const typeLabel = computed(() => {
           </button>
         </div>
       </div>
-      <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
+      <!-- <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div> -->
     </div>
 
     <section class="relative z-10 -mt-6 pb-16">

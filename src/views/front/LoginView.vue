@@ -45,7 +45,8 @@ async function handleLogin() {
     if (redirect) {
       router.push(redirect)
     } else {
-      router.push(authStore.dashboardRoute || '/')
+      const route = authStore.dashboardRoute || '/'
+      router.push(route)
     }
   }
 }

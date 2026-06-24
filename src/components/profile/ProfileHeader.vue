@@ -69,7 +69,7 @@ defineEmits(['upload-avatar', 'upload-cover']);
         </div>
 
         <router-link
-          to="/admin/dashboard"
+          to="/platform/dashboard"
           class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
         >
           <span class="material-symbols-outlined text-[18px]">dashboard</span>

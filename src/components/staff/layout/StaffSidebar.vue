@@ -20,25 +20,28 @@ const authStore = useAuthStore();
 const staffStore = useStaffStore();
 const { t } = useI18n();
 
-const links = [
-  { label: () => t('staffSidebar.dashboard'), icon: 'dashboard', to: '/staff/dashboard' },
-  { label: () => t('staffSidebar.appointments'), icon: 'calendar_month', to: '/staff/appointments' },
-  { label: () => t('staffSidebar.myPatients'), icon: 'group', to: '/staff/patients' },
-  { label: () => t('staffSidebar.prescriptions'), icon: 'medication', to: '/staff/prescriptions' },
-  { label: () => t('staffSidebar.mySchedule'), icon: 'event_available', to: '/staff/schedule' },
-  { label: () => t('staffSidebar.reviews'), icon: 'star', to: '/staff/reviews' },
-  { label: () => t('staffSidebar.inventory'), icon: 'inventory_2', to: '/staff/inventory' },
-  { label: () => t('staffSidebar.medicationRequests'), icon: 'inbox', to: '/staff/medication-requests' },
-  { label: () => t('staffSidebar.departments'), icon: 'domain', to: '/staff/departments' },
-  { label: () => t('staffSidebar.staff'), icon: 'badge', to: '/admin/staff' },
-  { label: () => t('staffSidebar.jobPosts'), icon: 'work', to: '/staff/job-posts' },
-  { label: () => t('staffSidebar.documents'), icon: 'folder', to: '/staff/documents' },
-  { label: () => t('staffSidebar.reports'), icon: 'analytics', to: '/staff/reports' },
-  { label: () => t('staffSidebar.messages'), icon: 'chat', to: '/staff/messages' },
-  { label: () => t('staffSidebar.myProfile'), icon: 'person', to: '/staff/profile' }
+const allLinks = [
+  { label: () => t('staffSidebar.dashboard'), icon: 'dashboard', to: '/facility/dashboard', permission: null },
+  { label: () => t('staffSidebar.appointments'), icon: 'calendar_month', to: '/facility/appointments', permission: 'appointments.view' },
+  { label: () => t('staffSidebar.myPatients'), icon: 'group', to: '/facility/patients', permission: 'patients.view' },
+  { label: () => t('staffSidebar.prescriptions'), icon: 'medication', to: '/facility/prescriptions', permission: 'prescriptions.view' },
+  { label: () => t('staffSidebar.mySchedule'), icon: 'event_available', to: '/facility/schedule', permission: 'schedule.view' },
+  { label: () => t('staffSidebar.reviews'), icon: 'star', to: '/facility/reviews', permission: 'reviews.view' },
+  { label: () => t('staffSidebar.inventory'), icon: 'inventory_2', to: '/facility/inventory', permission: 'inventory.view' },
+  { label: () => t('staffSidebar.medicationRequests'), icon: 'inbox', to: '/facility/medication-requests', permission: 'medication_requests.view' },
+  { label: () => t('staffSidebar.departments'), icon: 'domain', to: '/facility/departments', permission: 'departments.view' },
+  { label: () => t('staffSidebar.staff'), icon: 'badge', to: '/platform/staff', permission: 'staff.view' },
+  { label: () => t('staffSidebar.jobPosts'), icon: 'work', to: '/facility/job-posts', permission: 'job_posts.view' },
+  { label: () => t('staffSidebar.documents'), icon: 'folder', to: '/facility/documents', permission: 'documents.view' },
+  { label: () => t('staffSidebar.reports'), icon: 'analytics', to: '/facility/reports', permission: 'reports.view' },
+  { label: () => t('staffSidebar.messages'), icon: 'chat', to: '/facility/messages', permission: 'messages.view' },
+  { label: () => t('staffSidebar.myProfile'), icon: 'person', to: '/facility/profile', permission: null }
 ];
 
-const visibleLinks = computed(() => links);
+const visibleLinks = computed(() => {
+  if (authStore.isSuperAdmin()) return allLinks
+  return allLinks.filter(link => !link.permission || authStore.can(link.permission))
+})
 
 function navigate(to) {
   router.push(to);
@@ -77,7 +80,7 @@ function navigate(to) {
             <AvatarInitial :name="resolveTranslatedValue(staffStore.currentUser.name)" />
             <div class="min-w-0 flex-1">
               <p class="text-sm font-bold text-slate-900 truncate">{{ resolveTranslatedValue(staffStore.currentUser.name) }}</p>
-              <p class="text-xs text-slate-500 truncate">{{ authStore.user?.dashboard_route?.split('/')[1] || '' }}</p>
+              <p class="text-xs text-slate-500 truncate">Facility User</p>
             </div>
       </div>
       <button class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50" @click="router.push('/')">

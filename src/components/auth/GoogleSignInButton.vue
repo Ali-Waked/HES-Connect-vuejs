@@ -5,7 +5,7 @@ import { useAuthStore } from '../../stores/auth';
 import { useGoogleAuth } from '../../composables/useGoogleAuth';
 
 const props = defineProps({
-  redirectTo: { type: String, default: '/admin/dashboard' }
+  redirectTo: { type: String, default: '/platform/dashboard' }
 });
 
 const emit = defineEmits(['error']);

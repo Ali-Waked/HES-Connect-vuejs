@@ -74,6 +74,6 @@ function goBack() {
       </p>
     </div>
 
-    <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
+    <!-- <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div> -->
   </section>
 </template>

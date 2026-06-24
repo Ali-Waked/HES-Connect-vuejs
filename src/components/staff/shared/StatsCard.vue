@@ -18,11 +18,11 @@ const tones = {
 </script>
 
 <template>
-  <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+  <article class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm transition hover:shadow-md">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-2xl font-bold text-slate-900">{{ value }}</p>
-        <p class="mt-1 text-sm text-slate-500">{{ label }}</p>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ value }}</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ label }}</p>
       </div>
       <span class="material-symbols-outlined flex h-11 w-11 items-center justify-center rounded-xl" :class="tones[tone] || tones.brand">
         {{ icon }}

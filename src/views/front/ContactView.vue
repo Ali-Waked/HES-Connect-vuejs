@@ -1,12 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import AppNavbar from '../../components/global/AppNavbar.vue'
 import LandingFooter from '../../components/landing/LandingFooter.vue'
 import PageHero from '../../components/shared/PageHero.vue'
 import { useContactForm } from '../../composables/useContactForm'
 
 const { t } = useI18n()
+const route = useRoute()
 const {
   form,
   errors,
@@ -23,11 +25,17 @@ const {
 const openFaq = ref(null)
 
 const contactMethods = [
-  { key: 'email', icon: 'mail', label: t('contactPage.emailLabel'), value: 'info@hesconnect.ps' },
-  { key: 'phone', icon: 'call', label: t('contactPage.phoneLabel'), value: '+970 59 000 0000' },
-  { key: 'address', icon: 'location_on', label: t('contactPage.addressLabel'), value: t('contactPage.addressValue') },
-  { key: 'hours', icon: 'schedule', label: t('contactPage.hoursLabel'), value: t('contactPage.hoursValue') },
+  { key: 'email', icon: 'mail', label: t('contactPage.emailLabel'), value: 'info@hesconnect.ps', action: 'mailto:info@hesconnect.ps' },
+  { key: 'phone', icon: 'call', label: t('contactPage.phoneLabel'), value: '+970 59 000 0000', action: 'tel:+970590000000' },
+  { key: 'address', icon: 'location_on', label: t('contactPage.addressLabel'), value: t('contactPage.addressValue'), action: null },
+  { key: 'hours', icon: 'schedule', label: t('contactPage.hoursLabel'), value: t('contactPage.hoursValue'), action: null },
 ]
+
+onMounted(() => {
+  if (route.query.subject) {
+    form.message = route.query.subject + '\n\n'
+  }
+})
 
 const faqs = [
   { q: t('contactPage.faq1.q'), a: t('contactPage.faq1.a') },
@@ -47,6 +55,10 @@ const socialLinks = [
 function toggleFaq(index) {
   openFaq.value = openFaq.value === index ? null : index
 }
+
+function windowOpen(url) {
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
@@ -57,7 +69,6 @@ function toggleFaq(index) {
       :title="t('contactPage.title')"
       :description="t('contactPage.description')"
       :breadcrumbs="[
-        { label: t('nav.home'), to: '/' },
         { label: t('contactPage.title') }
       ]"
     />
@@ -73,6 +84,8 @@ function toggleFaq(index) {
                 v-for="method in contactMethods"
                 :key="method.key"
                 class="card-hover p-5"
+                :class="method.action ? 'cursor-pointer' : ''"
+                @click="method.action ? windowOpen(method.action) : null"
               >
                 <div class="icon-box mb-3">
                   <span class="material-symbols-outlined text-xl">{{ method.icon }}</span>

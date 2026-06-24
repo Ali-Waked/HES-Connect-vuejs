@@ -1,15 +1,19 @@
 <script setup>
-import { computed, nextTick } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/auth'
 import { useDoctorDetail } from '../../composables/useDoctorDetail'
+import { findOrCreateConversation } from '@/services/chatService'
 import AppNavbar from '../../components/global/AppNavbar.vue'
 import LandingFooter from '../../components/landing/LandingFooter.vue'
+import BookAppointmentModal from '../../components/staff/modals/BookAppointmentModal.vue'
 import { resolveTranslatedValue, getNameInitial } from '../../utils/locale'
 
 const props = defineProps({ id: { type: String, default: '' } })
 const router = useRouter()
 const { t, locale } = useI18n()
+const auth = useAuthStore()
 
 const { doctor, loading, error, notFound, fetchDoctor } = useDoctorDetail(props.id)
 
@@ -22,6 +26,8 @@ const typeBadge = {
 
 const hasFacilities = computed(() => (doctor.value?.facilities?.length || 0) > 0)
 const hasRelated = computed(() => (doctor.value?.related_doctors?.length || 0) > 0)
+const bookModal = ref(false)
+const chatLoading = ref(false)
 
 async function initMap() {
   await nextTick()
@@ -51,11 +57,42 @@ async function initMap() {
     setTimeout(() => map.invalidateSize(), 300)
   } catch { /* map not critical */ }
 }
+
+function goToBook() {
+  if (auth.authenticated) {
+    bookModal.value = true
+  } else {
+    router.push({ name: 'login', query: { redirect: `/doctors/${props.id}` } })
+  }
+}
+
+async function openChat() {
+  if (!auth.authenticated) {
+    router.push({ name: 'login', query: { redirect: `/doctors/${props.id}` } })
+    return
+  }
+  if (chatLoading.value) return
+  chatLoading.value = true
+  try {
+    const doctorUserUuid = doctor.value?.user?.uuid || doctor.value?.user_uuid
+    if (!doctorUserUuid) return
+    const { data } = await findOrCreateConversation({
+      type: 'doctor_patient',
+      participant_ids: [doctorUserUuid]
+    })
+    const conv = data.data || data
+    router.push(`/conversations/${conv.id}`)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    chatLoading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-surface-secondary dark:bg-slate-900 font-sans antialiased text-slate-900 dark:text-slate-100">
-    <AppNavbar variant="landing" />
+    <!-- <AppNavbar variant="landing" /> -->
 
     <main>
       <template v-if="loading">
@@ -165,13 +202,13 @@ async function initMap() {
                       </div>
                     </div>
                     <div class="flex flex-wrap gap-3 mt-5 pt-5 border-t border-slate-100 dark:border-slate-700">
-                      <button class="btn-primary">
+                      <button class="btn-primary" @click="goToBook">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z"/></svg>
                         {{ t('doctorDetail.bookAppointment') }}
                       </button>
-                      <button class="btn-secondary">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                        {{ t('doctorDetail.contactDoctor') }}
+                       <button class="btn-secondary" @click="openChat" :disabled="chatLoading">
+                        <span v-if="chatLoading" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                        {{ chatLoading ? 'Opening...' : t('doctorDetail.chatWithDoctor') }}
                       </button>
                     </div>
                   </div>
@@ -316,8 +353,11 @@ async function initMap() {
               <div class="card-base p-5 bg-brand-primary-light dark:bg-brand-primary/10 border-brand-primary/20">
                 <h3 class="text-sm font-extrabold text-slate-900 dark:text-white mb-1">{{ t('doctorDetail.bookAppointment') }}</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ t('doctorDetail.consultationFee') }}: ${{ doctor.fee }}</p>
-                <button class="btn-primary w-full">{{ t('doctorDetail.bookAppointment') }}</button>
-                <button class="btn-secondary w-full mt-2">{{ t('doctorDetail.contactDoctor') }}</button>
+                <button class="btn-primary w-full" @click="goToBook">{{ t('doctorDetail.bookAppointment') }}</button>
+                <button class="btn-secondary w-full mt-2" @click="openChat" :disabled="chatLoading">
+                  <span v-if="chatLoading" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                  {{ chatLoading ? 'Opening...' : t('doctorDetail.chatWithDoctor') }}
+                </button>
               </div>
             </div>
           </div>
@@ -371,6 +411,8 @@ async function initMap() {
     </main>
 
     <LandingFooter />
+
+    <BookAppointmentModal :show="bookModal" :staff-uuid="props.id" @close="bookModal = false" @booked="bookModal = false" />
   </div>
 </template>
 

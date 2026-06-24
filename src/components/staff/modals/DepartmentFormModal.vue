@@ -35,7 +35,6 @@ import { useStaffStore } from '@/stores/useStaffStore'
 import StaffModalShell from './StaffModalShell.vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleField } from '@/composables/useLocaleField'
-import { resolveTranslatedValue } from '@/utils/locale'
 
 const props = defineProps({ show: Boolean, departmentId: Number })
 const emit = defineEmits(['close'])
@@ -48,7 +47,7 @@ const name_ar = ref('')
 const headDoctor = ref('')
 const error = ref('')
 const errors = reactive({})
-const doctorStaff = computed(() => store.facilityStaff.filter(s => resolveTranslatedValue(s.specialization) !== 'Nursing' && resolveTranslatedValue(s.specialization) !== 'Pharmacy'))
+const doctorStaff = computed(() => store.facilityStaff.filter(s => s.role?.slug === 'doctor'))
 
 watch(() => props.show, (v) => {
   if (v && isEdit.value) {

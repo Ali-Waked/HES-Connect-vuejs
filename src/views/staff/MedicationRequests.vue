@@ -18,9 +18,9 @@
       </template>
       <template #cell-actions="{ item }">
         <div class="flex gap-2">
-          <button class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="viewRequest(item.id)">View</button>
-          <button v-if="item.status === 'pending'" class="rounded-md bg-green-600 px-3 py-1.5 text-xs text-white" @click="confirmApprove(item)">Approve</button>
-          <button v-if="item.status === 'pending'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="confirmReject(item)">Reject</button>
+          <button v-permission="'medication_requests.view'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="viewRequest(item.id)">View</button>
+          <button v-if="item.status === 'pending'" v-permission="'medication_requests.approve'" class="rounded-md bg-green-600 px-3 py-1.5 text-xs text-white" @click="confirmApprove(item)">Approve</button>
+          <button v-if="item.status === 'pending'" v-permission="'medication_requests.reject'" class="rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-700" @click="confirmReject(item)">Reject</button>
         </div>
       </template>
     </DataTable>
@@ -33,12 +33,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStaffStore } from '@/stores/useStaffStore'
+import { useAuthPermissions } from '@/composables/useAuthPermissions'
 import DataTable from '@/components/staff/shared/DataTable.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
 import RequestDetailModal from '@/components/staff/modals/RequestDetailModal.vue'
 import ConfirmModal from '@/components/staff/modals/ConfirmModal.vue'
 
 const store = useStaffStore()
+const { can } = useAuthPermissions()
 const loading = ref(true)
 const activeTab = ref('all')
 const detailModal = ref(false)
@@ -69,12 +71,14 @@ const confirm = ref({ visible: false, request: null, action: null, title: '', me
 function viewRequest(id) { detailId.value = id; detailModal.value = true }
 
 function confirmApprove(req) {
+  if (!can('medication_requests.approve')) return
   confirm.value.request = req; confirm.value.action = 'approve'
   confirm.value.title = 'Approve Request'; confirm.value.message = `Approve medication request for ${req.patientName}? Stock will be deducted.`; confirm.value.confirmText = 'Approve'
   confirm.value.visible = true
 }
 
 function confirmReject(req) {
+  if (!can('medication_requests.reject')) return
   confirm.value.request = req; confirm.value.action = 'reject'
   confirm.value.title = 'Reject Request'; confirm.value.message = `Reject medication request for ${req.patientName}?`; confirm.value.confirmText = 'Reject'
   confirm.value.visible = true

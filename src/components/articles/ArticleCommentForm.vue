@@ -17,7 +17,7 @@ const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 
-const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isAuthenticated = computed(() => authStore.authenticated)
 
 function goToLogin() {
   router.push('/login')

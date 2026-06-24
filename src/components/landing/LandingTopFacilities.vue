@@ -19,12 +19,12 @@ const typeStyles = {
 </script>
 
 <template>
-  <section class="py-16 lg:py-24 bg-white">
+  <section class="py-16 lg:py-24 bg-white dark:bg-slate-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-end justify-between mb-12 animate-fade-in-up">
         <div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Featured Facilities</h2>
-          <p class="text-slate-500 mt-2">Top-rated healthcare facilities in our network.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">Featured Facilities</h2>
+          <p class="text-slate-500 dark:text-slate-400 mt-2">Top-rated healthcare facilities in our network.</p>
         </div>
         <button
           class="btn-ghost shrink-0"
@@ -38,8 +38,8 @@ const typeStyles = {
       </div>
 
       <div v-if="loading" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="n in 3" :key="n" class="rounded-3xl border border-slate-200 overflow-hidden animate-pulse">
-          <div class="h-96 bg-slate-100"></div>
+        <div v-for="n in 3" :key="n" class="rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-pulse">
+          <div class="h-96 bg-slate-100 dark:bg-slate-800"></div>
         </div>
       </div>
 

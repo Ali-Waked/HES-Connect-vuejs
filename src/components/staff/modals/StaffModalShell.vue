@@ -9,17 +9,44 @@ defineEmits(['close']);
 </script>
 
 <template>
-  <div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs" @click.self="$emit('close')">
-    <section class="max-h-[90vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl" :class="width">
-      <header class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-        <h2 class="text-base font-bold text-slate-900">{{ title }}</h2>
-        <button class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" @click="$emit('close')">
-          <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-      </header>
-      <div class="max-h-[calc(90vh-64px)] overflow-y-auto p-5">
-        <slot />
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 dark:bg-black/60 p-4 backdrop-blur-xs" @click.self="$emit('close')">
+        <section class="max-h-[90vh] w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl" :class="width">
+          <header class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-5 py-4">
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">{{ title }}</h2>
+            <button class="rounded-lg p-1 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer" @click="$emit('close')">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </header>
+          <div class="max-h-[calc(90vh-64px)] overflow-y-auto p-5">
+            <slot />
+          </div>
+        </section>
       </div>
-    </section>
-  </div>
+    </Transition>
+  </Teleport>
 </template>
+
+<style scoped>
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-enter-active section,
+.modal-leave-active section {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-from section {
+  transform: scale(0.95) translateY(8px);
+  opacity: 0;
+}
+.modal-leave-to section {
+  transform: scale(0.95) translateY(8px);
+  opacity: 0;
+}
+</style>

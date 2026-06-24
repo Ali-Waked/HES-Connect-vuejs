@@ -49,19 +49,19 @@
                 <input v-model="form.address" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm" />
               </div>
             </div>
-            <div v-if="isDoctorOrNurse">
+            <div v-if="isClinicalStaff">
               <label class="mb-1 block text-xs font-semibold text-slate-500">Specialization</label>
               <input v-model="form.specialization" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm" />
             </div>
-            <div v-if="isDoctorOrNurse">
+            <div v-if="isClinicalStaff">
               <label class="mb-1 block text-xs font-semibold text-slate-500">Experience (years)</label>
               <input type="number" v-model.number="form.experience" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm" />
             </div>
-            <div v-if="isDoctorOrNurse">
+            <div v-if="isClinicalStaff">
               <label class="mb-1 block text-xs font-semibold text-slate-500">Bio</label>
               <textarea v-model="form.bio" rows="3" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm"></textarea>
             </div>
-            <div v-if="isDoctorOrNurse">
+            <div v-if="isClinicalStaff">
               <label class="mb-1 block text-xs font-semibold text-slate-500">Consultation Fee ($)</label>
               <input type="number" v-model.number="form.fee" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm" />
             </div>
@@ -118,8 +118,7 @@ const authStore = useAuthStore()
 const store = useStaffStore()
 const loading = ref(true)
 
-const dashboardPath = computed(() => authStore.user?.dashboard_route?.split('/')[1] || '')
-const isDoctorOrNurse = computed(() => dashboardPath.value === 'doctor' || dashboardPath.value === 'nurse')
+const isClinicalStaff = computed(() => authStore.userRoles.includes('doctor') || authStore.userRoles.includes('nurse'))
 
 const userName = computed(() => resolveTranslatedValue(store.currentUser.name))
 

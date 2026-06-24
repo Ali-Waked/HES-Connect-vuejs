@@ -1,18 +1,15 @@
 <template>
-  <DoctorHome v-if="view === 'doctor'" />
-  <NurseHome v-else-if="view === 'nurse'" />
-  <ManagerHome v-else-if="view === 'hospital_manager'" />
-  <PharmacistHome v-else-if="view === 'pharmacist'" />
+  <div class="animate-fade-in">
+    <p class="text-sm text-slate-500">Redirecting to unified dashboard...</p>
+  </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import DoctorHome from './dashboard/DoctorHome.vue'
-import NurseHome from './dashboard/NurseHome.vue'
-import ManagerHome from './dashboard/ManagerHome.vue'
-import PharmacistHome from './dashboard/PharmacistHome.vue'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore()
-const view = computed(() => authStore.user?.dashboard_route?.split('/')[1] || '')
+const router = useRouter()
+onMounted(() => {
+  router.replace('/facility/dashboard')
+})
 </script>
