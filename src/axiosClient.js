@@ -1,5 +1,11 @@
 import axios from "axios";
 
+let workspaceIdProvider = null;
+
+export function setWorkspaceIdProvider(fn) {
+  workspaceIdProvider = fn;
+}
+
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
@@ -13,6 +19,14 @@ axiosClient.interceptors.request.use(
   (config) => {
     const lang = localStorage.getItem("lang") || "en";
     config.headers["Accept-Language"] = lang;
+
+    if (workspaceIdProvider) {
+      const wsId = workspaceIdProvider();
+      if (wsId) {
+        config.headers["X-Workspace-Id"] = wsId;
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
