@@ -33,7 +33,7 @@ function staffCount(dept) {
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Departments</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ departments.length }} department(s)</p>
       </div>
-      <button v-if="can('departments.manage')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition">
+      <button v-if="can('update_department')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition">
         <span class="material-symbols-outlined text-[18px]">add</span>
         Add Department
       </button>
@@ -58,7 +58,7 @@ function staffCount(dept) {
         <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{{ d.description || d.desc || '' }}</p>
         <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700">
           <span class="text-xs text-slate-400 dark:text-slate-500">{{ staffCount(d) }} staff</span>
-          <button v-if="can('departments.manage')" class="text-xs font-bold text-brand-primary hover:underline">Manage</button>
+          <button v-if="can('update_department')" class="text-xs font-bold text-brand-primary hover:underline">Manage</button>
         </div>
       </div>
       <div v-if="departments.length === 0" class="col-span-full text-center text-sm text-slate-400 dark:text-slate-500 py-10">No departments found.</div>

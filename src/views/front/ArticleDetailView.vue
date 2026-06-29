@@ -3,14 +3,14 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useLocaleField } from '../../composables/useLocaleField'
 import { useArticleDetail } from '../../composables/useArticleDetail'
-import { useArticleComments } from '../../composables/useArticleComments'
 import AppNavbar from '../../components/global/AppNavbar.vue'
 import LandingFooter from '../../components/landing/LandingFooter.vue'
 import ArticleCard from '../../components/articles/ArticleCard.vue'
 import ArticleAuthorCard from '../../components/articles/ArticleAuthorCard.vue'
 import ArticleShareSection from '../../components/articles/ArticleShareSection.vue'
-import ArticleCommentList from '../../components/articles/ArticleCommentList.vue'
-import ArticleCommentForm from '../../components/articles/ArticleCommentForm.vue'
+import CategoryBadge from '../../components/shared/CategoryBadge.vue'
+import FavoriteButton from '../../components/favorites/FavoriteButton.vue'
+import ArticleComments from '../../components/articles/ArticleComments.vue'
 
 const props = defineProps({ id: { type: String, default: '' } })
 
@@ -32,24 +32,11 @@ const {
   excerpt,
   categoryName,
   authorName,
-  hasGallery,
-  galleryImages,
-  currentGalleryIndex,
   formatDate,
   goToTag,
   goToCategory,
   goToArticle,
 } = useArticleDetail(props.id)
-
-const {
-  comments,
-  loading: commentsLoading,
-  commentText,
-  submitting,
-  submitError,
-  commentCount,
-  submitComment,
-} = useArticleComments(props.id)
 </script>
 
 <template>
@@ -104,9 +91,12 @@ const {
             <span class="text-white/40">/</span>
             <span class="text-white/80 truncate max-w-[200px] lg:max-w-xs">{{ title }}</span>
           </nav>
-          <h1 class="text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-4xl">
-            {{ title }}
-          </h1>
+          <div class="flex items-center gap-3">
+            <h1 class="text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-4xl">
+              {{ title }}
+            </h1>
+            <FavoriteButton :favoritable-id="article?.uuid || article?.id" favoritable-type="article" size="lg" />
+          </div>
         </div>
         <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
       </div>
@@ -118,44 +108,18 @@ const {
             <article class="lg:col-span-2 space-y-8">
               <div class="card-base p-6 sm:p-8 lg:p-10">
                 <div class="flex flex-wrap items-center gap-3 mb-5">
-                  <span
-                    class="rounded-full px-3 py-1 text-xs font-semibold bg-brand-primary-light dark:bg-brand-primary/20 text-brand-primary cursor-pointer hover:bg-brand-primary hover:text-white transition-all"
+                  <CategoryBadge
+                    v-if="article.category"
+                    :category="article.category"
+                    size="sm"
+                    class="cursor-pointer"
                     @click="goToCategory(article.category?.slug)"
-                  >
-                    {{ categoryName }}
-                  </span>
+                  />
                   <span v-if="article.reading_time_minutes" class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     {{ t('articleDetail.readingTime', { min: article.reading_time_minutes }) }}
                   </span>
                   <span class="text-xs text-slate-400 dark:text-slate-500">{{ formatDate(article.published_at) }}</span>
-                </div>
-
-                <div class="aspect-[21/9] rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700 mb-8">
-                  <img
-                    v-if="article.cover_image"
-                    :src="article.cover_image"
-                    :alt="title"
-                    class="w-full h-full object-cover"
-                  />
-                  <div v-else class="w-full h-full bg-gradient-to-br from-brand-primary/20 to-brand-accent/10 dark:from-slate-600 dark:to-slate-500"></div>
-                </div>
-
-                <div v-if="hasGallery" class="space-y-3 mb-8">
-                  <div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                    <button
-                      v-for="(img, i) in galleryImages"
-                      :key="i"
-                      class="aspect-[4/3] rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700 ring-2 transition-all duration-200 cursor-pointer"
-                      :class="currentGalleryIndex === i ? 'ring-brand-primary shadow-md scale-[1.02]' : 'ring-transparent hover:ring-slate-300 dark:hover:ring-slate-600'"
-                      @click="currentGalleryIndex = i"
-                    >
-                      <img :src="img.url || img" :alt="img.alt || `Gallery ${i + 1}`" class="w-full h-full object-cover" />
-                    </button>
-                  </div>
-                  <p v-if="galleryImages[currentGalleryIndex]?.caption" class="text-xs text-slate-400 dark:text-slate-500 text-center italic">
-                    {{ galleryImages[currentGalleryIndex].caption }}
-                  </p>
                 </div>
 
                 <div class="prose prose-slate dark:prose-invert max-w-none prose-lg prose-headings:text-slate-900 dark:prose-headings:text-white prose-a:text-brand-primary leading-relaxed prose-img:rounded-md prose-img:shadow-md">
@@ -188,26 +152,7 @@ const {
                 </div>
               </div>
 
-              <div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                  {{ t('articleDetail.commentsTitle') }}
-                  <span class="text-sm font-normal text-slate-400 dark:text-slate-500">({{ commentCount }})</span>
-                </h3>
-                <div class="card-base p-6 space-y-6">
-                  <ArticleCommentForm
-                    :article-id="props.id"
-                    :comment-text="commentText"
-                    :submitting="submitting"
-                    :submit-error="submitError"
-                    @update:comment-text="commentText = $event"
-                    @submit="submitComment"
-                  />
-                  <ArticleCommentList
-                    :comments="comments"
-                    :loading="commentsLoading"
-                  />
-                </div>
-              </div>
+              <ArticleComments :article-id="props.id" />
 
               <div v-if="article.related_articles && article.related_articles.length">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">

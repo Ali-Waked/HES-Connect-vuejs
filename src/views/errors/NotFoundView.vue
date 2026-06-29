@@ -1,8 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 </script>
 
@@ -16,24 +18,23 @@ const authStore = useAuthStore()
       </div>
 
       <h1 class="text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-2">404</h1>
-      <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-4">Page Not Found</h2>
+      <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-4">{{ t('errors.notFound.title') }}</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
-        The page you're looking for doesn't exist or has been moved.
-        Check the URL or navigate back to a known page.
+        {{ t('errors.notFound.description') }}
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <button
-          class="px-6 py-3 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition shadow-lg shadow-brand-primary/20"
+          class="px-6 py-3 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition shadow-lg shadow-brand-primary/20 cursor-pointer"
           @click="router.push(authStore.dashboardRoute || '/')"
         >
-          Go Home
+          {{ t('errors.notFound.goHome') }}
         </button>
         <button
-          class="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+          class="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
           @click="router.back()"
         >
-          Go Back
+          {{ t('errors.notFound.goBack') }}
         </button>
       </div>
     </div>

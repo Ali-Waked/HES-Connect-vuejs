@@ -7,11 +7,11 @@ import { getFacilityPrescriptions, getFacilityOwnerPrescriptionAnalytics } from 
 import AddPrescriptionDialog from '@/components/prescriptions/AddPrescriptionDialog.vue'
 import PrescriptionDetailDialog from '@/components/dashboard/Prescriptions/PrescriptionDetailDialog.vue'
 import AvatarInitial from '@/components/staff/shared/AvatarInitial.vue'
-import StatsCard from '@/components/staff/shared/StatsCard.vue'
+import StatisticsCard from '@/components/dashboard/global/StatisticsCard.vue'
 
 const staffStore = useStaffStore()
 const workspaceStore = useWorkspaceStore()
-const { can, currentRoleSlug } = useAuthPermissions()
+const { can } = useAuthPermissions()
 
 const prescriptions = ref([])
 const loading = ref(false)
@@ -31,8 +31,7 @@ const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
 const selectedPrescription = ref(null)
 
-const isDoctor = computed(() => currentRoleSlug.value === 'doctor')
-const isFacilityOwner = computed(() => currentRoleSlug.value === 'facility_owner')
+const canCreatePrescription = computed(() => can('create_prescription'))
 
 const statusTabs = [
   { key: '', label: 'All' },
@@ -143,18 +142,19 @@ async function fetchPrescriptions() {
 }
 
 async function fetchAnalytics() {
-  if (!isFacilityOwner.value) return
+  if (!can('view_prescriptions')) return
   analyticsLoading.value = true
   try {
-    const { data } = await getFacilityOwnerPrescriptionAnalytics()
+    const res = await getFacilityOwnerPrescriptionAnalytics()
+    const d = res.data?.data ?? res.data
     analytics.value = {
-      total: data.total || 0,
-      active: data.active || 0,
-      pharmacy_selected: data.pharmacy_selected || 0,
-      accepted: data.accepted || 0,
-      dispensed: data.dispensed || 0,
-      rejected: data.rejected || 0,
-      cancelled: data.cancelled || 0,
+      total: d.total ?? d.total_prescriptions ?? 0,
+      active: d.active ?? d.active_prescriptions ?? 0,
+      pharmacy_selected: d.pharmacy_selected ?? 0,
+      accepted: d.accepted ?? 0,
+      dispensed: d.dispensed ?? d.dispensed_prescriptions ?? 0,
+      rejected: d.rejected ?? 0,
+      cancelled: d.cancelled ?? d.cancelled_prescriptions ?? 0,
     }
   } catch {
     analytics.value = { total: 0, active: 0, pharmacy_selected: 0, accepted: 0, dispensed: 0, rejected: 0, cancelled: 0 }
@@ -184,28 +184,30 @@ watch(() => workspaceStore.currentWorkspaceId, () => {
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Prescriptions</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ pagination.total }} prescription(s)</p>
       </div>
-      <button v-if="isDoctor && can('prescriptions.manage')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition cursor-pointer" @click="showAddDialog = true">
+      <button v-if="canCreatePrescription && can('create_prescription')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition cursor-pointer" @click="showAddDialog = true">
         <span class="material-symbols-outlined text-[18px]">add</span>
         New Prescription
       </button>
     </div>
 
-    <template v-if="isFacilityOwner">
-      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+    <template v-if="can('view_prescriptions')">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <template v-if="analyticsLoading">
-          <div v-for="i in 5" :key="i" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 animate-pulse">
-            <div class="flex items-start justify-between gap-4">
-              <div class="space-y-2"><div class="h-7 w-12 bg-slate-100 dark:bg-slate-700 rounded"></div><div class="h-3 w-20 bg-slate-100 dark:bg-slate-700 rounded"></div></div>
-              <div class="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-700"></div>
+          <div v-for="i in 4" :key="i" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 animate-pulse">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 shrink-0"></div>
+              <div class="space-y-2 flex-1">
+                <div class="h-3 w-16 bg-slate-100 dark:bg-slate-700 rounded"></div>
+                <div class="h-7 w-10 bg-slate-100 dark:bg-slate-700 rounded"></div>
+              </div>
             </div>
           </div>
         </template>
         <template v-else>
-          <StatsCard icon="description" :value="analytics.total" label="Total" tone="brand" />
-          <StatsCard icon="play_circle" :value="analytics.active" label="Active" tone="green" />
-          <StatsCard icon="local_pharmacy" :value="analytics.pharmacy_selected" label="Pharmacy Selected" tone="blue" />
-          <StatsCard icon="check_circle" :value="analytics.accepted" label="Accepted" tone="emerald" />
-          <StatsCard icon="medication" :value="analytics.dispensed" label="Dispensed" tone="purple" />
+          <StatisticsCard title="Total" :value="analytics.total" icon="description" color="primary" />
+          <StatisticsCard title="Active" :value="analytics.active" icon="play_circle" color="success" />
+          <StatisticsCard title="Pharmacy Selected" :value="analytics.pharmacy_selected" icon="local_pharmacy" color="info" />
+          <StatisticsCard title="Dispensed" :value="analytics.dispensed" icon="medication" color="info" />
         </template>
       </div>
     </template>
@@ -240,7 +242,7 @@ watch(() => workspaceStore.currentWorkspaceId, () => {
             <th class="px-5 py-3.5">Status</th>
             <th class="px-5 py-3.5">Items</th>
             <th class="px-5 py-3.5">Created At</th>
-            <th v-if="isDoctor" class="px-5 py-3.5 text-right">Actions</th>
+            <th v-if="canCreatePrescription" class="px-5 py-3.5 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -252,12 +254,12 @@ watch(() => workspaceStore.currentWorkspaceId, () => {
               <td class="px-5 py-3.5"><div class="h-5 w-16 bg-slate-100 dark:bg-slate-700 rounded-full"></div></td>
               <td class="px-5 py-3.5"><div class="h-4 w-8 bg-slate-100 dark:bg-slate-700 rounded"></div></td>
               <td class="px-5 py-3.5"><div class="h-4 w-20 bg-slate-100 dark:bg-slate-700 rounded"></div></td>
-              <td v-if="isDoctor" class="px-5 py-3.5"><div class="h-7 w-16 bg-slate-100 dark:bg-slate-700 rounded-lg ml-auto"></div></td>
+              <td v-if="canCreatePrescription" class="px-5 py-3.5"><div class="h-7 w-16 bg-slate-100 dark:bg-slate-700 rounded-lg ml-auto"></div></td>
             </tr>
           </template>
           <template v-else-if="error">
             <tr>
-              <td :colspan="isDoctor ? 7 : 6" class="px-5 py-12 text-center">
+              <td :colspan="canCreatePrescription ? 7 : 6" class="px-5 py-12 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <span class="material-symbols-outlined text-3xl text-red-400">error_outline</span>
                   <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ error }}</p>
@@ -292,13 +294,13 @@ watch(() => workspaceStore.currentWorkspaceId, () => {
               </td>
               <td class="px-5 py-3.5 text-slate-600 dark:text-slate-400">{{ p.items?.length ?? 0 }}</td>
               <td class="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{{ formatDate(p.created_at) }}</td>
-              <td v-if="isDoctor" class="px-5 py-3.5 text-right">
+              <td v-if="canCreatePrescription" class="px-5 py-3.5 text-right">
                 <button class="rounded-lg bg-slate-100 dark:bg-slate-700 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition cursor-pointer" @click="viewPrescription(p)">View</button>
               </td>
             </tr>
           </template>
           <tr v-else>
-            <td :colspan="isDoctor ? 7 : 6" class="px-5 py-12 text-center">
+            <td :colspan="canCreatePrescription ? 7 : 6" class="px-5 py-12 text-center">
               <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">prescriptions</span>
               <p class="mt-2 text-sm font-bold text-slate-900 dark:text-white">No prescriptions found</p>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Try changing filters or creating a new prescription.</p>

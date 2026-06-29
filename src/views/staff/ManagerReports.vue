@@ -1,133 +1,228 @@
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useFacilityReportsStore } from '@/stores/facilityReports';
+import FacilityReportFilters from '@/components/facility/FacilityReportFilters.vue';
+import ExportButtons from '@/components/dashboard/global/ExportButtons.vue';
+import SectionHeader from '@/components/dashboard/global/SectionHeader.vue';
+import ChartCard from '@/components/dashboard/global/ChartCard.vue';
+import BaseTable from '@/components/dashboard/global/BaseTable.vue';
+import BaseSearch from '@/components/dashboard/global/BaseSearch.vue';
+import BasePagination from '@/components/dashboard/global/BasePagination.vue';
+import BaseLoading from '@/components/dashboard/global/BaseLoading.vue';
+import BaseEmptyState from '@/components/dashboard/global/BaseEmptyState.vue';
+
+const { t } = useI18n();
+const store = useFacilityReportsStore();
+
+const searchQueries = ref({});
+
+function getSearchKey(tIdx) {
+  return `table_${tIdx}`;
+}
+
+const filteredTables = computed(() => {
+  return (store.tables || []).map((table, tIdx) => {
+    const q = (searchQueries.value[getSearchKey(tIdx)] || '').toLowerCase();
+    if (!q) return { ...table, filteredRows: table.rows || [] };
+    const cols = (table.columns || []).map(c => c.key);
+    const filtered = (table.rows || []).filter(row =>
+      cols.some(key => String(row[key] || '').toLowerCase().includes(q))
+    );
+    return { ...table, filteredRows: filtered };
+  });
+});
+
+function sortTable(table, colKey) {
+  const sort = table._sort;
+  if (sort?.key === colKey) {
+    sort.asc = !sort.asc;
+  } else {
+    table._sort = { key: colKey, asc: true };
+  }
+  const dir = table._sort.asc ? 1 : -1;
+  table.filteredRows.sort((a, b) => {
+    const va = a[colKey], vb = b[colKey];
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    return String(va).localeCompare(String(vb), undefined, { numeric: true }) * dir;
+  });
+}
+
+const tablePage = ref({});
+
+function setPage(tIdx, page) {
+  tablePage.value[tIdx] = page;
+}
+
+function pageRows(table, tIdx) {
+  const p = tablePage.value[tIdx] || 1;
+  const per = table.pagination?.perPage || 10;
+  const start = (p - 1) * per;
+  return (table.filteredRows || []).slice(start, start + per);
+}
+
+function totalPages(table) {
+  const total = (table.filteredRows || []).length;
+  const per = table.pagination?.perPage || 10;
+  return Math.max(1, Math.ceil(total / per));
+}
+
+onMounted(() => {
+  if (!store.hasData) {
+    store.fetchReports();
+  }
+});
+</script>
+
 <template>
-  <div class="animate-fade-in space-y-6">
-    <div>
-      <h2 class="text-xl font-bold text-slate-900">Reports</h2>
-      <p class="text-sm text-slate-500">Analytics and insights</p>
+  <div class="space-y-6 animate-fade-in">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('staffSidebar.reports') }}</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Analytics and insights</p>
+      </div>
+      <ExportButtons
+        :loading-excel="store.exporting.excel"
+        :loading-pdf="store.exporting.pdf"
+        @export-excel="store.exportToExcel()"
+        @export-pdf="store.exportToPdf()"
+      />
     </div>
 
-    <div v-if="loading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="h-64 w-full animate-pulse rounded-xl bg-slate-100"></div>
+    <!-- Filters -->
+    <FacilityReportFilters
+      :filters="store.filters"
+      @update:filters="store.filters = $event"
+      @apply="store.applyFilters()"
+      @reset="store.resetFilters(); store.applyFilters()"
+    />
+
+    <!-- Loading -->
+    <BaseLoading v-if="store.loading && !store.hasData" />
+
+    <!-- Error -->
+    <div v-else-if="store.error && !store.hasData" class="text-center py-16">
+      <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-4">error_outline</span>
+      <p class="text-sm font-bold text-rose-600 dark:text-rose-400">{{ store.error }}</p>
+      <button
+        @click="store.fetchReports()"
+        class="mt-4 px-4 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition"
+      >
+        {{ t('common.retry') }}
+      </button>
     </div>
 
-    <template v-else>
-      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 mb-4">Appointments by Status</h3>
-        <div class="flex flex-col sm:flex-row items-center gap-8">
-          <svg width="180" height="180" viewBox="0 0 180 180">
-            <g v-for="(seg, i) in donutSegments" :key="i">
-              <path :d="seg.path" :fill="seg.color" />
-            </g>
-            <circle cx="90" cy="90" r="50" fill="white" />
-            <text x="90" y="85" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">{{ totalAppts }}</text>
-            <text x="90" y="105" text-anchor="middle" font-size="11" fill="#64748b">Total</text>
-          </svg>
-          <div class="space-y-2">
-            <div v-for="leg in legend" :key="leg.label" class="flex items-center gap-2 text-sm">
-              <span class="h-3 w-3 rounded-full" :style="{ background: leg.color }"></span>
-              <span class="text-slate-700">{{ leg.label }}</span>
-              <span class="font-bold">{{ leg.count }}</span>
-            </div>
-          </div>
+    <!-- Content -->
+    <template v-else-if="store.hasData">
+      <!-- Overview Cards -->
+      <div v-if="Object.keys(store.overview).length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          v-for="(value, key) in store.overview"
+          :key="key"
+          class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm"
+        >
+          <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
+            {{ key.replace(/_/g, ' ') }}
+          </p>
+          <h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ value }}</h3>
         </div>
-      </section>
+      </div>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 mb-4">Staff by Specialization</h3>
-        <div class="space-y-3">
-          <div v-for="bar in specBars" :key="bar.label" class="flex items-center gap-3">
-            <span class="w-32 text-sm text-slate-700">{{ bar.label }}</span>
-            <div class="flex-1 h-6 rounded-md bg-slate-100">
-              <div class="h-6 rounded-md bg-brand-primary transition-all" :style="{ width: bar.percent + '%' }"></div>
-            </div>
-            <span class="w-8 text-sm font-bold text-slate-700">{{ bar.count }}</span>
-          </div>
+      <!-- Charts -->
+      <template v-if="store.charts.length > 0">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <ChartCard
+            v-for="(chart, idx) in store.charts"
+            :key="idx"
+            :chart="chart"
+          />
         </div>
-      </section>
+      </template>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-slate-900 mb-4">Reviews Over Time</h3>
-        <svg viewBox="0 0 400 200" class="w-full">
-          <text x="20" y="30" font-size="10" fill="#94a3b8">5.0</text>
-          <text x="20" y="80" font-size="10" fill="#94a3b8">4.5</text>
-          <text x="20" y="130" font-size="10" fill="#94a3b8">4.0</text>
-          <text x="20" y="175" font-size="10" fill="#94a3b8">3.5</text>
-          <line x1="40" y1="20" x2="40" y2="175" stroke="#e2e8f0" stroke-width="1" />
-          <line x1="40" y1="175" x2="380" y2="175" stroke="#e2e8f0" stroke-width="1" />
-          <polyline :points="linePoints" fill="none" stroke="#027a75" stroke-width="2.5" stroke-linejoin="round" />
-          <g v-for="(pt, i) in lineData" :key="i">
-            <circle :cx="pt.x" :cy="pt.y" r="4" fill="#027a75" />
-            <text :x="pt.x" y="190" font-size="9" text-anchor="middle" fill="#64748b">{{ pt.label }}</text>
-          </g>
-        </svg>
-      </section>
+      <!-- Tables -->
+      <template v-for="(table, tIdx) in filteredTables" :key="tIdx">
+        <div class="space-y-4">
+          <SectionHeader :title="table.title || `Report Table ${tIdx + 1}`">
+            <template #actions>
+              <div class="flex items-center gap-3">
+                <BaseSearch
+                  v-model="searchQueries[getSearchKey(tIdx)]"
+                  placeholder="Search table..."
+                />
+              </div>
+            </template>
+          </SectionHeader>
+
+          <BaseTable
+            :columns="table.columns || []"
+            :items="pageRows(table, tIdx)"
+            :loading="store.loading"
+          >
+            <template
+              v-for="col in (table.columns || [])"
+              :key="col.key"
+              #[`cell(${col.key})`]="{ item }"
+            >
+              <button
+                v-if="col.sortable"
+                class="inline-flex items-center gap-1 text-sm text-slate-700 dark:text-slate-300"
+                @click="sortTable(table, col.key)"
+              >
+                {{ item[col.key] }}
+                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+              </button>
+              <span
+                v-else-if="col.type === 'badge'"
+                class="inline-flex items-center gap-1.5"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  :class="{
+                    'bg-emerald-500': ['active','approved','completed'].includes(item[col.key]),
+                    'bg-amber-500': item[col.key] === 'pending',
+                    'bg-rose-500': ['cancelled','rejected'].includes(item[col.key]),
+                    'bg-slate-300 dark:bg-slate-600': !item[col.key],
+                  }"
+                />
+                <span class="text-sm capitalize text-slate-700 dark:text-slate-300">{{ item[col.key] }}</span>
+              </span>
+              <span v-else class="text-sm text-slate-700 dark:text-slate-300">{{ item[col.key] }}</span>
+            </template>
+
+            <template #empty>
+              <BaseEmptyState />
+            </template>
+          </BaseTable>
+
+          <BasePagination
+            v-if="totalPages(table) > 1"
+            :current-page="tablePage[tIdx] || 1"
+            :total-pages="totalPages(table)"
+            :total-items="(table.filteredRows || []).length"
+            :items-per-page="table.pagination?.perPage || 10"
+            @change="setPage(tIdx, $event)"
+          />
+        </div>
+      </template>
+
+      <!-- Empty overview + charts + tables -->
+      <div
+        v-if="Object.keys(store.overview).length === 0 && store.charts.length === 0 && store.tables.length === 0"
+        class="text-center py-16"
+      >
+        <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-4">bar_chart</span>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('common.noData') }}</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ t('common.resetFilters') }}</p>
+      </div>
     </template>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useStaffStore } from '@/stores/useStaffStore'
-import { resolveTranslatedValue } from '@/utils/locale'
-
-const store = useStaffStore()
-const loading = ref(true)
-
-const totalAppts = computed(() => store.appointments.length)
-const statusCounts = computed(() => {
-  const counts = { booked: 0, completed: 0, cancelled: 0, rescheduled: 0 }
-  store.appointments.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++ })
-  return counts
-})
-
-const colors = { booked: '#3b82f6', completed: '#22c55e', cancelled: '#ef4444', rescheduled: '#f59e0b' }
-const statusLabels = { booked: 'Booked', completed: 'Completed', cancelled: 'Cancelled', rescheduled: 'Rescheduled' }
-
-const legend = computed(() => Object.entries(statusCounts.value).filter(([_, c]) => c > 0).map(([key, count]) => ({ label: statusLabels[key], count, color: colors[key] })))
-
-const donutSegments = computed(() => {
-  const total = Object.values(statusCounts.value).reduce((s, c) => s + c, 0) || 1
-  let offset = 0
-  const segments = []
-  Object.entries(statusCounts.value).forEach(([key, count]) => {
-    if (count === 0) return
-    const percent = count / total
-    const angle = percent * 360
-    const startAngle = offset
-    const endAngle = offset + angle
-    const r = 65, cx = 90, cy = 90
-    const x1 = cx + r * Math.cos((startAngle - 90) * Math.PI / 180)
-    const y1 = cy + r * Math.sin((startAngle - 90) * Math.PI / 180)
-    const x2 = cx + r * Math.cos((endAngle - 90) * Math.PI / 180)
-    const y2 = cy + r * Math.sin((endAngle - 90) * Math.PI / 180)
-    const large = angle > 180 ? 1 : 0
-    segments.push({ path: `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z`, color: colors[key] })
-    offset += angle
-  })
-  return segments
-})
-
-const specBars = computed(() => {
-  const map = {}
-  store.facilityStaff.forEach(s => { const sp = resolveTranslatedValue(s.specialization); map[sp] = (map[sp] || 0) + 1 })
-  const total = Object.values(map).reduce((s, c) => s + c, 0) || 1
-  return Object.entries(map).map(([label, count]) => ({ label, count, percent: (count / total) * 100 }))
-})
-
-const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
-const mockRatings = [4.8, 4.5, 4.7, 4.2, 4.6, 4.9]
-
-const lineData = computed(() => {
-  const minY = 30, maxY = 170
-  const range = 0.5 // 5.0 - 4.5
-  const minVal = 4.0
-  return months.map((label, i) => ({
-    label,
-    x: 65 + i * 55,
-    y: maxY - ((mockRatings[i] - minVal) / range) * (maxY - minY)
-  }))
-})
-
-const linePoints = computed(() => lineData.value.map(p => `${p.x},${p.y}`).join(' '))
-
-onMounted(() => { setTimeout(() => { loading.value = false }, 600) })
-</script>
+<style scoped>
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+</style>

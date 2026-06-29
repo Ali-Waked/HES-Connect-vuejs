@@ -11,7 +11,7 @@ import StatisticsCard from '@/components/dashboard/global/StatisticsCard.vue'
 import BaseDialog from '@/components/dashboard/global/BaseDialog.vue'
 
 const workspaceStore = useWorkspaceStore()
-const { can, isFacilityManager, currentRoleSlug } = useAuthPermissions()
+const { can } = useAuthPermissions()
 const { locale } = useI18n()
 
 const { stats, loading: statsLoading, fetchStats, startPolling, stopPolling } = useAppointmentStats()
@@ -33,7 +33,7 @@ const filters = ref({ search: '', status: '', date_from: '', date_to: '', staff_
 let searchDebounce = null
 
 const showStaffFilter = computed(() => {
-  return can('appointments.view-all') || isFacilityManager() || currentRoleSlug.value === 'facility_owner'
+  return can('view_appointments')
 })
 
 const hasActiveFilters = computed(() => {

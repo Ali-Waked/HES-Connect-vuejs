@@ -10,21 +10,21 @@
     <!-- Stats Row -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard v-if="can('facilities.view')" icon="home_health" :value="facilityCount" label="Facilities" tone="brand" />
-      <StatsCard v-if="can('staff.view')" icon="badge" :value="staffCount" label="Total Staff" tone="blue" />
-      <StatsCard v-if="can('patients.view')" icon="group" :value="patientCount" label="Patients" tone="green" />
-      <StatsCard v-if="can('appointments.view')" icon="calendar_month" :value="appointmentCount" label="Total Appointments" tone="purple" />
-      <StatsCard v-if="can('reviews.view')" icon="star" :value="reviewCount" label="Reviews" tone="amber" />
+      <StatsCard v-if="can('view_staff')" icon="badge" :value="staffCount" label="Total Staff" tone="blue" />
+      <StatsCard v-if="can('view_patients')" icon="group" :value="patientCount" label="Patients" tone="green" />
+      <StatsCard v-if="can('view_appointments')" icon="calendar_month" :value="appointmentCount" label="Total Appointments" tone="purple" />
+      <StatsCard v-if="can('view_reviews')" icon="star" :value="reviewCount" label="Reviews" tone="amber" />
     </div>
 
     <!-- Main Widget Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
-        <AppointmentsWidget v-if="can('appointments.view')" />
+        <AppointmentsWidget v-if="can('view_appointments')" />
         <FacilitiesOverviewWidget v-if="can('facilities.view')" />
       </div>
       <div class="space-y-6">
-        <StaffStatisticsWidget v-if="can('staff.view')" />
-        <DepartmentStatisticsWidget v-if="can('departments.view')" />
+        <StaffStatisticsWidget v-if="can('view_staff')" />
+        <DepartmentStatisticsWidget v-if="can('view_departments')" />
       </div>
     </div>
   </div>

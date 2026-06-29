@@ -118,7 +118,7 @@ const authStore = useAuthStore()
 const store = useStaffStore()
 const loading = ref(true)
 
-const isClinicalStaff = computed(() => authStore.userRoles.includes('doctor') || authStore.userRoles.includes('nurse'))
+const isClinicalStaff = computed(() => authStore.can('create_prescription') || authStore.can('view_medical_records'))
 
 const userName = computed(() => resolveTranslatedValue(store.currentUser.name))
 

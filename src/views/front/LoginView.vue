@@ -1,7 +1,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+
+const { t } = useI18n()
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthCard from '@/components/auth/AuthCard.vue'
 import AuthHeader from '@/components/auth/AuthHeader.vue'
@@ -67,8 +70,8 @@ function clearFieldError(field) {
   <AuthLayout variant="split">
     <AuthCard>
       <AuthHeader
-        title="Welcome back"
-        subtitle="Sign in to your account to continue"
+        :title="t('auth.welcomeBack')"
+        :subtitle="t('auth.signInToContinue')"
         :showLogo="false"
       />
 
@@ -76,18 +79,18 @@ function clearFieldError(field) {
         v-if="authStore.errors.general"
         type="error"
         :message="authStore.errors.general"
-        class="mb-6"
+        class="mb-4 sm:mb-6"
       />
 
-      <form @submit.prevent="handleLogin" class="space-y-5" novalidate>
+      <form @submit.prevent="handleLogin" class="space-y-4 sm:space-y-5" novalidate>
         <div>
           <AuthInput
             v-model="form.email"
             id="email"
             name="email"
             type="email"
-            label="Email address"
-            placeholder="you@example.com"
+            :label="t('auth.email')"
+            :placeholder="t('auth.emailPlaceholder')"
             autocomplete="email"
             :error="getFieldError('email')"
             @input="clearFieldError('email')"
@@ -96,34 +99,34 @@ function clearFieldError(field) {
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <label for="password" class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Password</label>
+            <label for="password" class="text-xs font-semibold text-slate-500 uppercase tracking-wider">{{ t('auth.password') }}</label>
             <router-link
               to="/forgot-password"
-              class="text-xs font-medium text-brand-primary hover:text-brand-primary-hover transition-colors"
+              class="text-xs font-medium text-brand-primary hover:text-brand-primary-hover transition-colors py-1"
             >
-              Forgot password?
+              {{ t('auth.forgotPassword') }}
             </router-link>
           </div>
           <PasswordInput
             v-model="form.password"
             id="password"
             name="password"
-            placeholder="Enter your password"
+            :placeholder="t('auth.passwordPlaceholder')"
             autocomplete="current-password"
             :error="getFieldError('password')"
             @input="clearFieldError('password')"
           />
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2.5 py-1">
           <input
             id="remember"
             v-model="form.remember"
             type="checkbox"
-            class="w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary/30 cursor-pointer"
+            class="w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary/30 cursor-pointer shrink-0"
           />
-          <label for="remember" class="text-sm text-slate-600 cursor-pointer select-none">
-            Keep me signed in
+          <label for="remember" class="text-xs sm:text-sm text-slate-600 cursor-pointer select-none">
+            {{ t('auth.keepMeSignedIn') }}
           </label>
         </div>
 
@@ -132,17 +135,17 @@ function clearFieldError(field) {
           full-width
           size="lg"
         >
-          {{ authStore.loading ? 'Signing in...' : 'Sign In' }}
+          {{ authStore.loading ? t('auth.signingIn') : t('auth.signIn') }}
         </AuthButton>
       </form>
 
-      <p class="text-center text-sm text-slate-500 mt-6">
-        Don't have an account?
+      <p class="text-center text-xs sm:text-sm text-slate-500 mt-5 sm:mt-6">
+        {{ t('auth.noAccount') }}
         <router-link
           to="/register"
           class="font-semibold text-brand-primary hover:text-brand-primary-hover transition-colors"
         >
-          Create account
+          {{ t('auth.createAccountLink') }}
         </router-link>
       </p>
     </AuthCard>

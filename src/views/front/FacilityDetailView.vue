@@ -6,10 +6,13 @@ import { useFacilityDetail } from '../../composables/useFacilityDetail'
 import AppNavbar from '../../components/global/AppNavbar.vue'
 import LandingFooter from '../../components/landing/LandingFooter.vue'
 import { resolveTranslatedValue, getNameInitial } from '../../utils/locale'
+import FavoriteButton from '../../components/favorites/FavoriteButton.vue'
+import * as facilityReviewService from '@/services/public/facilityReviewService'
 
 const props = defineProps({ id: { type: String, default: '' } })
 const router = useRouter()
 const { t, locale } = useI18n()
+const isRtl = computed(() => locale.value === 'ar')
 
 const {
   facility,
@@ -26,30 +29,21 @@ const typeBadge = {
   medical_point: 'bg-warning-light text-warning border-warning/30 dark:bg-warning/20 dark:text-warning-light'
 }
 
-const typeGradient = {
-  hospital: 'from-slate-900 via-slate-800 to-slate-900',
-  clinic: 'from-slate-900 via-slate-800 to-slate-900',
-  pharmacy: 'from-slate-900 via-slate-800 to-slate-900',
-  medical_point: 'from-slate-900 via-slate-800 to-slate-900'
-}
-
 const doctorsCount = computed(() => facility.value?.doctors?.length || 0)
-const departmentsCount = computed(() => facility.value?.departments?.length || 0)
-const certificatesCount = computed(() => facility.value?.facilityFiles?.length || 0)
+const filesCount = computed(() => facility.value?.files?.length || 0)
+const imagesCount = computed(() => facility.value?.images?.length || 0)
 
 const imagesForGallery = computed(() => {
-  if (facility.value?.facilityImages?.length) return facility.value.facilityImages
-  if (facility.value?.images?.length) return facility.value.images.map(url => ({ url, alt: resolveTranslatedValue(facility.value.name, locale.value), caption: '' }))
+  if (facility.value?.images?.length) {
+    return facility.value.images.map(img => ({
+      url: img.image_url || img.url,
+      alt: resolveTranslatedValue(facility.value.name),
+    }))
+  }
   return []
 })
 
 const hasGallery = computed(() => imagesForGallery.value.length > 0)
-
-const workingHoursEntries = computed(() => {
-  const wh = facility.value?.working_hours
-  if (!wh) return []
-  return Object.entries(wh).map(([day, hours]) => ({ day, hours }))
-})
 
 function initMap() {
   nextTick(async () => {
@@ -67,7 +61,7 @@ function initMap() {
       }).addTo(map)
       L.marker([fac.latitude, fac.longitude])
         .addTo(map)
-        .bindPopup(`<b>${resolveTranslatedValue(fac.name, locale.value)}</b><br>${fac.location || ''}`)
+        .bindPopup(`<b>${resolveTranslatedValue(fac.name)}</b>`)
       setTimeout(() => map.invalidateSize(), 300)
     } catch { /* map not critical */ }
   })
@@ -76,10 +70,71 @@ function initMap() {
 watch(() => facility.value, (val) => {
   if (val?.latitude && val?.longitude) initMap()
 })
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+const reviews = ref([])
+const reviewsMeta = ref({ current_page: 1, last_page: 1, total: 0 })
+const canReview = ref(false)
+const reviewsLoading = ref(false)
+const reviewRating = ref(0)
+const reviewComment = ref('')
+const reviewSubmitting = ref(false)
+const reviewError = ref('')
+
+async function fetchReviews() {
+  reviewsLoading.value = true
+  try {
+    const { data } = await facilityReviewService.getFacilityReviews(props.id)
+    reviews.value = data?.data || []
+    reviewsMeta.value = data?.meta || { current_page: 1, last_page: 1, total: 0 }
+    canReview.value = data?.can_review ?? false
+  } catch {
+    reviews.value = []
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+const ratingLabel = computed(() => {
+  const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
+  return labels[reviewRating.value] || ''
+})
+
+async function submitReview() {
+  if (!reviewRating.value || reviewSubmitting.value) return
+  reviewSubmitting.value = true
+  reviewError.value = ''
+  try {
+    await facilityReviewService.submitFacilityReview(props.id, {
+      rating: reviewRating.value,
+      comment: reviewComment.value,
+    })
+    reviewRating.value = 0
+    reviewComment.value = ''
+    canReview.value = false
+    await fetchReviews()
+  } catch (err) {
+    reviewError.value = err.response?.data?.message || 'Failed to submit review'
+  } finally {
+    reviewSubmitting.value = false
+  }
+}
+
+watch(() => facility.value, (val) => {
+  if (val) fetchReviews()
+})
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary dark:bg-slate-900 font-sans antialiased">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans antialiased">
     <AppNavbar variant="landing" />
 
     <main>
@@ -119,13 +174,14 @@ watch(() => facility.value, (val) => {
       </template>
 
       <template v-else-if="facility">
-        <div
-          class="relative hero-gradient overflow-hidden pt-28 lg:pt-32 pb-10 lg:pb-14"
-        >
-          <div class="hero-grid-pattern absolute inset-0 opacity-50"></div>
-          <div class="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl"></div>
-          <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-white/5 blur-3xl"></div>
-          <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-28 lg:pt-32 pb-10 lg:pb-14">
+          <div v-if="facility.cover_image" class="absolute inset-0">
+            <img :src="facility.cover_image" :alt="resolveTranslatedValue(facility.name)" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80"></div>
+          </div>
+          <div v-else class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
+          <div class="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-brand-primary/10 blur-3xl"></div>
+          <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-brand-accent/10 blur-3xl"></div>
 
           <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="flex items-center gap-2 text-sm text-white/60 mb-4" aria-label="Breadcrumb">
@@ -133,10 +189,10 @@ watch(() => facility.value, (val) => {
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
                 <span class="hidden sm:inline">{{ t('nav.home') }}</span>
               </button>
-              <svg class="w-3.5 h-3.5 rtl:rotate-180 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+              <svg class="w-3.5 h-3.5" :class="isRtl ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
               <button class="hover:text-white transition cursor-pointer" @click="router.push('/facilities')">{{ t('facilitiesListing.pageTitle') }}</button>
-              <svg class="w-3.5 h-3.5 rtl:rotate-180 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-              <span class="text-white/80 font-medium truncate max-w-[200px]">{{ resolveTranslatedValue(facility.name, locale.value) }}</span>
+              <svg class="w-3.5 h-3.5" :class="isRtl ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+              <span class="text-white/80 font-medium truncate max-w-[200px]">{{ resolveTranslatedValue(facility.name) }}</span>
             </nav>
 
             <div class="flex flex-wrap items-center gap-3 mb-3">
@@ -144,32 +200,31 @@ watch(() => facility.value, (val) => {
                 class="rounded-full px-3 py-1 text-xs font-bold border backdrop-blur-md shadow-sm"
                 :class="typeBadge[facility.facility_type] || 'bg-white/90 text-slate-700'"
               >{{ facility.facility_type?.replace('_', ' ') }}</span>
-              <span class="flex items-center gap-1 text-white/90 text-sm">
-                <svg class="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                <span class="font-bold">{{ facility.rating }}</span>
-                <span class="text-white/60">({{ facility.review_count }})</span>
+              <span v-if="facility.organization" class="flex items-center gap-1.5 text-white/70 text-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                {{ resolveTranslatedValue(facility.organization.name) }}
               </span>
             </div>
 
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl">
-              {{ resolveTranslatedValue(facility.name, locale.value) }}
-            </h1>
-            <p class="mt-1.5 text-base sm:text-lg text-white/75 max-w-2xl">
-              {{ facility.organization_name }}
-            </p>
+            <div class="flex items-center gap-3">
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl">
+                {{ resolveTranslatedValue(facility.name) }}
+              </h1>
+              <FavoriteButton :favoritable-id="facility.uuid || facility.id" favoritable-type="facility" size="lg" />
+            </div>
 
             <div class="flex flex-wrap gap-x-6 gap-y-1 mt-5 pt-4 border-t border-white/20">
               <div>
                 <span class="text-xl font-bold text-white">{{ doctorsCount }}</span>
-                <span class="text-xs text-white/70 ml-1.5">{{ t('facilityDetail.quickStats.doctors') }}</span>
+                <span class="text-xs text-white/70 mr-1.5">{{ t('facilityDetail.quickStats.doctors') }}</span>
               </div>
               <div>
-                <span class="text-xl font-bold text-white">{{ departmentsCount }}</span>
-                <span class="text-xs text-white/70 ml-1.5">{{ t('facilityDetail.quickStats.departments') }}</span>
+                <span class="text-xl font-bold text-white">{{ filesCount }}</span>
+                <span class="text-xs text-white/70 mr-1.5">{{ t('facilityDetail.quickStats.certificates') }}</span>
               </div>
               <div>
-                <span class="text-xl font-bold text-white">{{ certificatesCount }}</span>
-                <span class="text-xs text-white/70 ml-1.5">{{ t('facilityDetail.quickStats.certificates') }}</span>
+                <span class="text-xl font-bold text-white">{{ imagesCount }}</span>
+                <span class="text-xs text-white/70 mr-1.5">{{ t('facilityDetail.quickStats.documents') }}</span>
               </div>
             </div>
           </div>
@@ -179,16 +234,10 @@ watch(() => facility.value, (val) => {
           <div class="grid lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
 
-              <section>
+              <section v-if="resolveTranslatedValue(facility.description)">
                 <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-3">{{ t('facilityDetail.about') }}</h2>
-                <div class="card-base p-5">
-                  <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{{ resolveTranslatedValue(facility.description, locale.value) }}</p>
-                  <div v-if="facility.features?.length" class="mt-4 grid sm:grid-cols-2 gap-2">
-                    <div v-for="(f, i) in facility.features" :key="i" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                      <svg class="w-4 h-4 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                      {{ f }}
-                    </div>
-                  </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                  <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ resolveTranslatedValue(facility.description) }}</p>
                 </div>
               </section>
 
@@ -197,68 +246,61 @@ watch(() => facility.value, (val) => {
                   <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('facilityDetail.doctors') }}</h2>
                   <span class="rounded-full px-2.5 py-0.5 text-xs font-bold bg-brand-primary/10 text-brand-primary">{{ doctorsCount }}</span>
                 </div>
-                <div class="space-y-2">
+                <div class="grid sm:grid-cols-2 gap-3">
                   <div
                     v-for="doc in facility.doctors"
-                    :key="doc.id"
-                    class="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-sm transition-shadow cursor-pointer"
-                    @click="router.push(`/doctors/${doc.id}`)"
+                    :key="doc.uuid"
+                    class="flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-sm hover:border-brand-primary/30 transition-all cursor-pointer"
+                    @click="router.push(`/doctors/${doc.uuid}`)"
                   >
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 flex items-center justify-center text-sm font-bold text-brand-primary shrink-0">
-                      {{ getNameInitial(doc.name, locale.value) }}
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 flex items-center justify-center text-sm font-bold text-brand-primary shrink-0">
+                      {{ getNameInitial(doc.name) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                      <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ resolveTranslatedValue(doc.name, locale.value) }}</h4>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">{{ resolveTranslatedValue(doc.specialization, locale.value) }}</p>
+                      <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ resolveTranslatedValue(doc.name) }}</h4>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">{{ resolveTranslatedValue(doc.specialization?.name || doc.specialization) }}</p>
+                      <p v-if="doc.position" class="text-xs text-brand-primary font-medium mt-0.5">{{ resolveTranslatedValue(doc.position?.name || doc.position) }}</p>
                     </div>
-                    <div class="flex items-center gap-0.5 mr-2">
-                      <svg v-for="s in 5" :key="s" class="w-3 h-3" :class="s <= Math.round(doc.rating) ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    </div>
-                    <span class="text-xs font-semibold text-brand-primary hover:underline shrink-0 whitespace-nowrap">
-                      {{ t('facilityDetail.viewProfile') }}
-                      <svg class="w-3 h-3 inline-block ml-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                    </span>
+                    <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" :class="isRtl ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                   </div>
                 </div>
               </section>
 
-              <section v-if="facility.facilityFiles?.length">
+              <section v-if="facility.files?.length">
                 <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-3">{{ t('facilityDetail.certificates') }}</h2>
-                <div class="space-y-2">
-                  <div
-                    v-for="file in facility.facilityFiles"
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <a
+                    v-for="file in facility.files"
                     :key="file.id"
-                    class="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-brand-primary/30 transition-colors"
+                    :href="file.file_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-primary/30 hover:shadow-sm transition-all group"
                   >
-                    <div class="w-8 h-8 rounded-lg bg-warning-light dark:bg-warning/20 flex items-center justify-center text-warning dark:text-warning-light shrink-0">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    <div class="w-10 h-10 rounded-lg bg-warning-light dark:bg-warning/20 flex items-center justify-center text-warning dark:text-warning-light shrink-0">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ resolveTranslatedValue(file.name, locale.value) }}</p>
-                      <p class="text-xs text-slate-400 dark:text-slate-500 capitalize">{{ file.type }}</p>
+                      <p class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors capitalize">{{ file.document_type?.replace(/_/g, ' ') }}</p>
+                      <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ file.document_type }}</p>
                     </div>
-                    <button
-                      class="shrink-0 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center justify-center text-slate-400 transition cursor-pointer"
-                      :title="t('facilityDetail.download')"
-                    >
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                    </button>
-                  </div>
+                    <svg class="w-4 h-4 text-slate-400 group-hover:text-brand-primary shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                  </a>
                 </div>
               </section>
 
               <section v-if="hasGallery">
                 <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-3">{{ t('facilityDetail.gallery') }}</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div
                     v-for="(img, i) in imagesForGallery"
                     :key="i"
-                    class="aspect-[4/3] rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer group"
+                    class="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer group relative"
                     @click="selectedImage = i"
                   >
                     <img
                       :src="img.url"
-                      :alt="img.alt || resolveTranslatedValue(facility.name, locale.value)"
+                      :alt="img.alt"
                       class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
@@ -287,7 +329,7 @@ watch(() => facility.value, (val) => {
                   >&#8250;</button>
                   <img
                     :src="imagesForGallery[selectedImage]?.url"
-                    :alt="imagesForGallery[selectedImage]?.alt || resolveTranslatedValue(facility.name, locale.value)"
+                    :alt="imagesForGallery[selectedImage]?.alt"
                     class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
                   />
                   <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
@@ -303,51 +345,162 @@ watch(() => facility.value, (val) => {
                   class="w-full h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 z-0"
                 ></div>
               </section>
+
+              <section>
+                <div class="flex items-center gap-2 mb-4">
+                  <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('reviews.title') }}</h2>
+                  <span v-if="!reviewsLoading" class="rounded-full px-2.5 py-0.5 text-xs font-bold bg-brand-primary/10 text-brand-primary">{{ reviewsMeta.total }}</span>
+                </div>
+
+                <div v-if="canReview" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-5">
+                  <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ t('reviews.writeReview') || 'Write a Review' }}</h3>
+                  <div class="flex items-center gap-1 mb-3">
+                    <button
+                      v-for="s in 5"
+                      :key="s"
+                      type="button"
+                      class="cursor-pointer transition-transform hover:scale-110"
+                      @click="reviewRating = s"
+                    >
+                      <svg class="w-7 h-7" :class="s <= reviewRating ? 'text-amber-400' : 'text-slate-200 dark:text-slate-700'" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </button>
+                    <span v-if="reviewRating" class="ml-2 text-xs text-slate-500 dark:text-slate-400">{{ ratingLabel }}</span>
+                  </div>
+                  <textarea
+                    v-model="reviewComment"
+                    rows="3"
+                    :placeholder="t('reviews.writePlaceholder') || 'Share your experience with this facility...'"
+                    class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition resize-none mb-3"
+                  />
+                  <p v-if="reviewError" class="text-sm text-red-500 dark:text-red-400 mb-3">{{ reviewError }}</p>
+                  <button
+                    class="px-4 py-2 bg-brand-primary text-white text-sm font-semibold rounded-lg hover:bg-brand-primary-hover transition cursor-pointer disabled:opacity-50"
+                    :disabled="!reviewRating || reviewSubmitting"
+                    @click="submitReview"
+                  >{{ reviewSubmitting ? (t('common.submitting') || 'Submitting...') : (t('common.submit') || 'Submit') }}</button>
+                </div>
+
+                <div v-if="reviewsLoading" class="space-y-3">
+                  <div v-for="n in 3" :key="n" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 animate-pulse">
+                    <div class="flex items-center gap-3 mb-2">
+                      <div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                      <div class="flex-1 space-y-1.5">
+                        <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
+                        <div class="h-2 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+                      </div>
+                    </div>
+                    <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
+                  </div>
+                </div>
+
+                <div v-else-if="reviews.length === 0" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center">
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('reviews.noReviews') || 'No reviews yet.' }}</p>
+                </div>
+
+                <div v-else class="space-y-3">
+                  <div
+                    v-for="review in reviews"
+                    :key="review.id"
+                    class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
+                  >
+                    <div class="flex items-start gap-3">
+                      <div class="shrink-0">
+                        <img
+                          v-if="review.patient?.avatar"
+                          :src="review.patient.avatar"
+                          :alt="resolveTranslatedValue(review.patient.name)"
+                          class="w-9 h-9 rounded-full object-cover"
+                        />
+                        <div v-else class="w-9 h-9 rounded-full bg-brand-primary/10 dark:bg-brand-primary/20 flex items-center justify-center text-xs font-bold text-brand-primary">
+                          {{ getNameInitial(review.patient?.name) }}
+                        </div>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                          <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ resolveTranslatedValue(review.patient?.name) }}</h4>
+                          <span class="text-xs text-slate-400 dark:text-slate-500 shrink-0">{{ formatDate(review.created_at) }}</span>
+                        </div>
+                        <div class="flex items-center gap-0.5 mt-1">
+                          <svg
+                            v-for="s in 5"
+                            :key="s"
+                            class="w-3.5 h-3.5"
+                            :class="s <= review.rating ? 'text-amber-400' : 'text-slate-200 dark:text-slate-700'"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          ><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <p v-if="review.comment" class="text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{{ review.comment }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="reviewsMeta.last_page > 1 && !reviewsLoading" class="mt-4 flex justify-center">
+                  <nav class="flex items-center gap-1.5">
+                    <button
+                      class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition cursor-pointer bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-brand-primary/10 hover:border-brand-primary/30 hover:text-brand-primary"
+                      :disabled="reviewsMeta.current_page <= 1"
+                      @click="fetchReviews"
+                    >
+                      <svg class="w-3.5 h-3.5" :class="isRtl ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 px-2">{{ reviewsMeta.current_page }} / {{ reviewsMeta.last_page }}</span>
+                    <button
+                      class="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs transition cursor-pointer bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-brand-primary/10 hover:border-brand-primary/30 hover:text-brand-primary"
+                      :disabled="reviewsMeta.current_page >= reviewsMeta.last_page"
+                      @click="fetchReviews"
+                    >
+                      <svg class="w-3.5 h-3.5" :class="isRtl ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    </button>
+                  </nav>
+                </div>
+              </section>
             </div>
 
             <div class="space-y-5">
-              <div class="card-base p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ t('facilityDetail.contactInfo') }}</h3>
+              <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4">{{ t('facilityDetail.contactInfo') }}</h3>
                 <div class="space-y-3">
-                  <div v-if="facility.location" class="flex items-start gap-2.5 text-sm">
+                  <div v-if="facility.organization" class="flex items-start gap-2.5 text-sm">
+                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                    <div>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">{{ t('facilityDetail.organization') || 'Organization' }}</p>
+                      <p class="text-slate-700 dark:text-slate-300 font-medium">{{ resolveTranslatedValue(facility.organization.name) }}</p>
+                    </div>
+                  </div>
+                  <div v-if="facility.head_staff" class="flex items-start gap-2.5 text-sm">
+                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                    <div>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">{{ t('facilitiesListing.headDoctor') }}</p>
+                      <p class="text-slate-700 dark:text-slate-300 font-medium">{{ resolveTranslatedValue(facility.head_staff.name) }}</p>
+                      <p v-if="facility.head_staff.specialization" class="text-xs text-slate-500 dark:text-slate-400">{{ resolveTranslatedValue(facility.head_staff.specialization?.name || facility.head_staff.specialization) }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-2.5 text-sm">
                     <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-                    <span class="text-slate-600 dark:text-slate-300">{{ facility.location }}</span>
+                    <div>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">{{ t('facilityDetail.coordinates') || 'Coordinates' }}</p>
+                      <p class="text-slate-700 dark:text-slate-300 font-medium">{{ Number(facility.latitude).toFixed(4) }}, {{ Number(facility.longitude).toFixed(4) }}</p>
+                    </div>
                   </div>
-                  <div v-if="facility.phone" class="flex items-start gap-2.5 text-sm">
-                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
-                    <a :href="`tel:${facility.phone}`" class="text-brand-primary hover:underline">{{ facility.phone }}</a>
-                  </div>
-                  <div v-if="facility.email" class="flex items-start gap-2.5 text-sm">
-                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                    <a :href="`mailto:${facility.email}`" class="text-brand-primary hover:underline break-all">{{ facility.email }}</a>
-                  </div>
-                  <div v-if="facility.website" class="flex items-start gap-2.5 text-sm">
-                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-                    <a :href="facility.website" target="_blank" rel="noopener noreferrer" class="text-brand-primary hover:underline break-all">{{ facility.website }}</a>
+                  <div class="flex items-start gap-2.5 text-sm">
+                    <svg class="w-4 h-4 text-slate-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                      <p class="text-xs text-slate-400 dark:text-slate-500">{{ t('facilityDetail.updatedAt') }}</p>
+                      <p class="text-slate-700 dark:text-slate-300 font-medium">{{ formatDate(facility.updated_at || facility.created_at) }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="card-base p-4">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">{{ t('facilityDetail.workingHours') }}</h3>
-                <table class="w-full text-sm">
-                  <tbody>
-                    <tr v-for="entry in workingHoursEntries" :key="entry.day" class="border-b border-slate-100 dark:border-slate-700 last:border-0">
-                      <td class="py-1.5 text-slate-600 dark:text-slate-400 capitalize">{{ entry.day.replace('_', ' - ') }}</td>
-                      <td class="py-1.5 text-right font-semibold" :class="entry.hours === 'Closed' ? 'text-danger dark:text-danger-light' : 'text-slate-900 dark:text-white'">{{ entry.hours }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="card-base p-4 bg-brand-primary-light dark:bg-brand-primary/10 border-brand-primary/20">
+              <div class="bg-brand-primary/5 dark:bg-brand-primary/10 rounded-xl border border-brand-primary/20 p-5">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">{{ t('facilityDetail.bookAppointment') }}</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Schedule a visit with this healthcare facility.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Schedule a visit with this healthcare facility.</p>
                 <button
-                  class="btn-primary w-full"
-                  @click="$emit('book')"
+                  class="w-full py-2.5 bg-brand-primary text-white text-sm font-semibold rounded-lg hover:bg-brand-primary-hover transition cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <svg class="w-4 h-4 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z"/></svg>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z"/></svg>
                   {{ t('facilityDetail.bookAppointment') }}
                 </button>
               </div>

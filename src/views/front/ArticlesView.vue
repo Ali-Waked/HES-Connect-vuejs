@@ -9,6 +9,7 @@ import LandingFooter from '../../components/landing/LandingFooter.vue'
 import ArticleSearchFilters from '../../components/articles/ArticleSearchFilters.vue'
 import ArticleCard from '../../components/articles/ArticleCard.vue'
 import ArticleSidebar from '../../components/articles/ArticleSidebar.vue'
+import CategoryBadge from '../../components/shared/CategoryBadge.vue'
 import ArticleSkeleton from '../../components/articles/ArticleSkeleton.vue'
 
 const router = useRouter()
@@ -128,7 +129,13 @@ onMounted(() => {
           </div>
 
           <div class="absolute inset-0 p-6 lg:p-10 flex flex-col justify-end">
-            <span class="inline-block px-3 py-1 rounded text-xs font-semibold text-white bg-brand-primary mb-3 w-fit">
+            <CategoryBadge
+              v-if="featuredArticle.category"
+              :category="featuredArticle.category"
+              size="sm"
+              class="mb-3 w-fit"
+            />
+            <span v-else-if="featuredCategoryName" class="inline-block px-3 py-1 rounded text-xs font-semibold text-white bg-brand-primary mb-3 w-fit">
               {{ featuredCategoryName }}
             </span>
             <h2 class="text-2xl lg:text-3xl font-bold text-white leading-tight mb-2 max-w-2xl hover:underline">

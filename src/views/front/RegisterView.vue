@@ -1,7 +1,10 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+
+const { t } = useI18n()
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthCard from '@/components/auth/AuthCard.vue'
 import AuthHeader from '@/components/auth/AuthHeader.vue'
@@ -80,8 +83,8 @@ function clearFieldError(field) {
   <AuthLayout variant="split">
     <AuthCard>
       <AuthHeader
-        title="Create your account"
-        subtitle="Join HES Connect and start your healthcare journey"
+        :title="t('auth.createYourAccount')"
+        :subtitle="t('auth.joinHesConnect')"
         :showLogo="false"
       />
 
@@ -89,18 +92,18 @@ function clearFieldError(field) {
         v-if="authStore.errors.general"
         type="error"
         :message="authStore.errors.general"
-        class="mb-6"
+        class="mb-4 sm:mb-6"
       />
 
-      <form @submit.prevent="handleRegister" class="space-y-5" novalidate>
+      <form @submit.prevent="handleRegister" class="space-y-4 sm:space-y-5" novalidate>
         <div>
           <AuthInput
             v-model="form.name"
             id="name"
             name="name"
             type="text"
-            label="Full name"
-            placeholder="Dr. Sarah Johnson"
+            :label="t('auth.fullName')"
+            :placeholder="t('auth.namePlaceholder')"
             autocomplete="name"
             :error="getFieldError('name')"
             @input="clearFieldError('name')"
@@ -113,7 +116,7 @@ function clearFieldError(field) {
             id="email"
             name="email"
             type="email"
-            label="Email address"
+            :label="t('auth.email')"
             placeholder="you@hospital.org"
             autocomplete="email"
             :error="getFieldError('email')"
@@ -126,7 +129,7 @@ function clearFieldError(field) {
             v-model="form.password"
             id="password"
             name="password"
-            label="Password"
+            :label="t('auth.password')"
             placeholder="Min. 8 characters"
             autocomplete="new-password"
             :error="getFieldError('password')"
@@ -140,8 +143,8 @@ function clearFieldError(field) {
             v-model="form.password_confirmation"
             id="password_confirmation"
             name="password_confirmation"
-            label="Confirm password"
-            placeholder="Repeat your password"
+            :label="t('auth.confirmPassword')"
+            :placeholder="t('auth.confirmPasswordPlaceholder')"
             autocomplete="new-password"
             :error="getFieldError('password_confirmation')"
             @input="clearFieldError('password_confirmation')"
@@ -153,7 +156,7 @@ function clearFieldError(field) {
             <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
             </svg>
-            Passwords do not match
+            {{ t('auth.passwordsDoNotMatch') }}
           </p>
         </div>
 
@@ -166,11 +169,11 @@ function clearFieldError(field) {
               class="w-4 h-4 mt-0.5 rounded border-slate-300 text-brand-primary focus:ring-brand-primary/30 cursor-pointer"
               @change="clearFieldError('agreeTerms')"
             />
-            <label for="agreeTerms" class="text-sm text-slate-600 cursor-pointer select-none leading-relaxed">
+            <label for="agreeTerms" class="text-xs sm:text-sm text-slate-600 cursor-pointer select-none leading-relaxed">
               I agree to the
-              <a href="/terms" class="font-medium text-brand-primary hover:text-brand-primary-hover transition-colors" target="_blank">Terms of Service</a>
+              <a href="/terms" class="font-medium text-brand-primary hover:text-brand-primary-hover transition-colors" target="_blank">{{ t('auth.termsOfService') }}</a>
               and
-              <a href="/privacy" class="font-medium text-brand-primary hover:text-brand-primary-hover transition-colors" target="_blank">Privacy Policy</a>
+              <a href="/privacy" class="font-medium text-brand-primary hover:text-brand-primary-hover transition-colors" target="_blank">{{ t('auth.privacyPolicy') }}</a>
             </label>
           </div>
           <p v-if="getFieldError('agreeTerms')" class="mt-1.5 text-xs text-danger flex items-center gap-1 ml-6">
@@ -183,17 +186,17 @@ function clearFieldError(field) {
           full-width
           size="lg"
         >
-          {{ authStore.loading ? 'Creating account...' : 'Create Account' }}
+          {{ authStore.loading ? t('auth.creatingAccount') : t('auth.createAccount') }}
         </AuthButton>
       </form>
 
-      <p class="text-center text-sm text-slate-500 mt-6">
-        Already have an account?
+      <p class="text-center text-xs sm:text-sm text-slate-500 mt-5 sm:mt-6">
+        {{ t('auth.haveAccount') }}
         <router-link
           to="/login"
           class="font-semibold text-brand-primary hover:text-brand-primary-hover transition-colors"
         >
-          Sign in
+          {{ t('auth.signInLink') }}
         </router-link>
       </p>
     </AuthCard>

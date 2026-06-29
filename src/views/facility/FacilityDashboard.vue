@@ -2,17 +2,17 @@
   <div class="animate-fade-in space-y-6">
     <!-- Stats Row -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-      <StatsCard v-if="can('appointments.view')" icon="calendar_month" :value="todayAppts.length" label="Today's Appointments" tone="brand" />
-      <StatsCard v-if="can('patients.view')" icon="group" :value="store.patients.length" label="Total Patients" tone="blue" />
-      <StatsCard v-if="can('staff.view')" icon="badge" :value="store.facilityStaff.length" label="Total Staff" tone="slate" />
-      <StatsCard v-if="can('medication_requests.view')" icon="inbox" :value="store.pendingRequests.length" label="Pending Requests" tone="amber" />
-      <StatsCard v-if="can('inventory.view')" icon="warning" :value="store.lowStockItems.length" label="Low Stock Items" tone="red" />
-      <StatsCard v-if="can('prescriptions.view')" icon="description" :value="pendingPrescriptions" label="Pending Prescriptions" tone="purple" />
-      <StatsCard v-if="can('departments.view') || can('facility_dashboard.view')" icon="domain" :value="store.departments.length" label="Departments" tone="blue" />
+      <StatsCard v-if="can('view_appointments')" icon="calendar_month" :value="todayAppts.length" label="Today's Appointments" tone="brand" />
+      <StatsCard v-if="can('view_patients')" icon="group" :value="store.patients.length" label="Total Patients" tone="blue" />
+      <StatsCard v-if="can('view_staff')" icon="badge" :value="store.facilityStaff.length" label="Total Staff" tone="slate" />
+      <StatsCard v-if="can('view_medication_requests')" icon="inbox" :value="store.pendingRequests.length" label="Pending Requests" tone="amber" />
+      <StatsCard v-if="can('view_medicines')" icon="warning" :value="store.lowStockItems.length" label="Low Stock Items" tone="red" />
+      <StatsCard v-if="can('view_prescriptions')" icon="description" :value="pendingPrescriptions" label="Pending Prescriptions" tone="purple" />
+      <StatsCard v-if="can('view_departments') || can('view_dashboard_statistics')" icon="domain" :value="store.departments.length" label="Departments" tone="blue" />
     </div>
 
     <!-- Facility Owner: Full Analytics Section -->
-    <template v-if="can('facility_dashboard.view')">
+    <template v-if="can('view_dashboard_statistics')">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatsCard icon="calendar_month" :value="store.appointments.length" label="Total Appointments" tone="brand" />
         <StatsCard icon="group" :value="store.patients.length" label="Total Patients" tone="blue" />
@@ -24,28 +24,28 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Left column (2/3) -->
       <div class="lg:col-span-2 space-y-6">
-        <AppointmentsWidget v-if="can('appointments.view')" :showActions="can('appointments.manage')" />
-        <MedicineRequestsWidget v-else-if="can('medication_requests.view')" :showActions="can('medication_requests.manage')" />
-        <PrescriptionsWidget v-else-if="can('prescriptions.view')" />
+        <AppointmentsWidget v-if="can('view_appointments')" :showActions="can('update_appointment')" />
+        <MedicineRequestsWidget v-else-if="can('view_medication_requests')" :showActions="can('update_medication_request')" />
+        <PrescriptionsWidget v-else-if="can('view_prescriptions')" />
       </div>
 
       <!-- Right column (1/3) -->
       <div class="space-y-6">
-        <StaffStatisticsWidget v-if="can('staff.view')" />
+        <StaffStatisticsWidget v-if="can('view_staff')" />
         <DepartmentStatisticsWidget v-else-if="can('departments.view')" />
-        <ScheduleWidget v-if="can('schedule.view')" />
+        <ScheduleWidget v-if="can('view_staff_schedules')" />
       </div>
     </div>
 
     <!-- Lower Widgets Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <InventoryWidget v-if="can('inventory.view')" />
-      <PatientsWidget v-if="can('patients.view') && !can('appointments.view')" />
-      <PrescriptionsWidget v-if="can('prescriptions.view') && !can('appointments.view')" />
+      <InventoryWidget v-if="can('view_medicines')" />
+      <PatientsWidget v-if="can('view_patients') && !can('view_appointments')" />
+      <PrescriptionsWidget v-if="can('view_prescriptions') && !can('view_appointments')" />
     </div>
 
     <!-- Facility Owner: Additional Sections -->
-    <template v-if="can('facility_dashboard.view')">
+    <template v-if="can('view_dashboard_statistics')">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>

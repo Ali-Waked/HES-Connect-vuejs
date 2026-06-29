@@ -260,6 +260,15 @@
     </Teleport>
 
     <ReviewModal :show="reviewModal" :appointment-id="reviewAppointmentId" @close="reviewModal = false" @reviewed="onReviewed" />
+
+    <ConfirmModal
+      :show="cancelModal"
+      title="Cancel Appointment"
+      message="Are you sure you want to cancel this appointment? This action cannot be undone."
+      confirm-text="Yes, Cancel"
+      @confirm="confirmCancel"
+      @close="cancelModal = false"
+    />
   </div>
 </template>
 
@@ -268,6 +277,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import AppNavbar from '@/components/global/AppNavbar.vue'
 import LandingFooter from '@/components/landing/LandingFooter.vue'
 import ReviewModal from '@/components/public/ReviewModal.vue'
+import ConfirmModal from '@/components/dashboard/global/ConfirmModal.vue'
 import { usePatientAppointments } from '@/composables/usePatientAppointments'
 import { useWorkspaceStore } from '@/stores/workspace'
 
@@ -304,6 +314,8 @@ const drawerOpen = ref(false)
 const drawerAppt = ref(null)
 const reviewModal = ref(false)
 const reviewAppointmentId = ref(null)
+const cancelModal = ref(false)
+const cancelAppt = ref(null)
 
 function doctorName(appt) {
   return appt.doctor?.name || appt.doctor_name || 'Doctor'
@@ -378,11 +390,19 @@ function closeDrawer() {
 }
 
 async function handleCancel(appt) {
-  if (!confirm('Are you sure you want to cancel this appointment?')) return
+  cancelAppt.value = appt
+  cancelModal.value = true
+}
+
+async function confirmCancel() {
+  if (!cancelAppt.value) return
   try {
-    await cancelAppointment(appt.id)
+    await cancelAppointment(cancelAppt.value.id)
   } catch (err) {
     alert(err.response?.data?.message || 'Failed to cancel appointment')
+  } finally {
+    cancelModal.value = false
+    cancelAppt.value = null
   }
 }
 

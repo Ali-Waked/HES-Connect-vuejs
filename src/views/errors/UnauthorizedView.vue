@@ -1,8 +1,10 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 </script>
 
@@ -16,10 +18,9 @@ const authStore = useAuthStore()
       </div>
 
       <h1 class="text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-2">403</h1>
-      <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-4">Access Denied</h2>
+      <h2 class="text-xl font-bold text-slate-700 dark:text-slate-300 mb-4">{{ t('errors.unauthorized.title') }}</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
-        You don't have the required permissions to access this page.
-        If you believe this is an error, please contact your administrator.
+        {{ t('errors.unauthorized.description') }}
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -27,13 +28,13 @@ const authStore = useAuthStore()
           class="px-6 py-3 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition shadow-lg shadow-brand-primary/20"
           @click="router.push(authStore.dashboardRoute || '/')"
         >
-          Return to Dashboard
+          {{ t('errors.unauthorized.returnDashboard') }}
         </button>
         <button
           class="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition"
           @click="router.back()"
         >
-          Go Back
+          {{ t('errors.unauthorized.goBack') }}
         </button>
       </div>
     </div>

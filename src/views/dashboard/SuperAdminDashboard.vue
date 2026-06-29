@@ -1,67 +1,59 @@
 <script setup>
-import { computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { useDashboardStore } from '../../stores/dashboard';
-import { useAppointmentsStore } from '../../stores/appointments';
-import { useClinicalStore } from '../../stores/clinical';
-import { useAccessStore } from '../../stores/access';
-import { useTagsStore } from '../../stores/tags';
-import { useAuthPermissions } from '../../composables/useAuthPermissions';
+import { useDashboardApiStore } from '../../stores/dashboardApi';
 import StatisticsCard from '../../components/dashboard/global/StatisticsCard.vue';
+import GrowthBadge from '../../components/dashboard/global/GrowthBadge.vue';
+import ChartCard from '../../components/dashboard/global/ChartCard.vue';
+import RecentActivityCard from '../../components/dashboard/global/RecentActivityCard.vue';
+import SectionHeader from '../../components/dashboard/global/SectionHeader.vue';
+import BaseLoading from '../../components/dashboard/global/BaseLoading.vue';
 
 const { t } = useI18n();
 const themeStore = useThemeStore();
-const dashboardStore = useDashboardStore();
-const apptStore = useAppointmentsStore();
-const clinicalStore = useClinicalStore();
-const accessStore = useAccessStore();
-const tagsStore = useTagsStore();
-const { can } = useAuthPermissions();
+const dash = useDashboardApiStore();
 
-// Aggregate Data for Overview
-const mainStats = computed(() => {
-  const stats = [
-    { title: t('superAdmin.totalUsers'), value: dashboardStore.userStats.total, icon: 'group', color: 'primary', permission: 'users.view' },
-    { title: t('superAdmin.totalPatients'), value: dashboardStore.userStats.patients, icon: 'patient_list', color: 'success', permission: 'patients.view' },
-    { title: t('superAdmin.totalDoctors'), value: dashboardStore.userStats.staff, icon: 'medical_information', color: 'info', permission: 'staff.view' },
-    { title: t('superAdmin.totalFacilities'), value: dashboardStore.facilityCount, icon: 'home_health', color: 'warning', permission: 'facilities.view' },
-    { title: t('superAdmin.totalAppointments'), value: apptStore.stats.total, icon: 'calendar_month', color: 'primary', permission: 'appointments.view' },
-    { title: t('superAdmin.totalPrescriptions'), value: clinicalStore.clinicalStats.totalPrescriptions, icon: 'description', color: 'info', permission: 'prescriptions.view' },
-    { title: t('superAdmin.totalMedications'), value: 124, icon: 'medication', color: 'success', permission: 'medicines.view' },
-    { title: t('superAdmin.totalReviews'), value: 342, icon: 'star', color: 'warning', permission: 'reviews.view' },
-    { title: t('superAdmin.totalArticles'), value: dashboardStore.articleCount, icon: 'article', color: 'primary', permission: 'articles.view' },
-    { title: t('superAdmin.medicationRequests'), value: clinicalStore.clinicalStats.pendingRequests, icon: 'pending_actions', color: 'danger', permission: 'medication_requests.view' }
-  ]
-  return stats.filter(s => can(s.permission))
-})
+onMounted(() => {
+  if (!dash.hasData) {
+    dash.fetchFromApi();
+  }
+});
 
-const systems = computed(() => [
+const systemHealth = [
   { key: 'api', label: t('superAdmin.apiServer') },
   { key: 'db', label: t('superAdmin.database') },
   { key: 'storage', label: t('superAdmin.fileStorage') },
   { key: 'auth', label: t('superAdmin.authService') },
-]);
+];
 
-const recentActivity = computed(() => [
-  { type: 'registration', user: 'Khalid Abu Amr', time: '5 mins ago', icon: 'person_add', color: 'text-blue-500 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30' },
-  { type: 'appointment', user: 'Dr. Ahmed Hassan', detail: 'New booking for general checkup', time: '12 mins ago', icon: 'event_available', color: 'text-emerald-500 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30' },
-  { type: 'review', user: 'Mohammed Al-Masri', detail: 'Left a 5-star review for Al-Awda Clinic', time: '45 mins ago', icon: 'star', color: 'text-amber-500 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/30' },
-  { type: 'request', user: 'Rania Saleh', detail: 'Medication request pending approval', time: '1 hour ago', icon: 'medication', color: 'text-rose-500 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30' }
-]);
+const recentKeys = computed(() => Object.keys(dash.recentActivity));
+
+const chartSections = computed(() => {
+  const timeSeries = [];
+  const topLists = [];
+  for (const chart of dash.charts) {
+    if (chart.key?.startsWith('top_')) {
+      topLists.push(chart);
+    } else {
+      timeSeries.push(chart);
+    }
+  }
+  return { timeSeries, topLists };
+});
 </script>
 
 <template>
-  <div class="space-y-8 animate-fade-in">
+  <div class="min-h-full space-y-8 animate-fade-in">
     <!-- Header -->
-    <div class="flex justify-between items-end">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ t('superAdmin.title') }}</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ t('superAdmin.subtitle') }}</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('superAdmin.title') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">{{ t('superAdmin.subtitle') }}</p>
       </div>
-      <div class="flex gap-3 items-center">
+      <div class="flex items-center gap-3">
         <button
-          class="relative w-14 h-7 rounded-full transition-colors duration-200 cursor-pointer"
+          class="relative w-14 h-7 rounded-full transition-colors duration-200 cursor-pointer shrink-0"
           :class="themeStore.isDark ? 'bg-brand-primary' : 'bg-slate-300'"
           @click="themeStore.toggle()"
           role="switch"
@@ -80,127 +72,98 @@ const recentActivity = computed(() => [
             </svg>
           </span>
         </button>
-        <button v-permission="'reports.export'" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2 shadow-sm">
+        <button v-permission="'reports.export'" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition shadow-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           {{ t('superAdmin.exportReport') }}
         </button>
-        <button v-permission="'settings.manage'" class="px-4 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition flex items-center gap-2 shadow-lg shadow-brand-primary/20">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          {{ t('superAdmin.systemAction') }}
-        </button>
       </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <StatisticsCard 
-        v-for="stat in mainStats" 
-        :key="stat.title"
-        v-bind="stat"
-      />
+    <!-- Loading state -->
+    <BaseLoading v-if="dash.loading && !dash.hasData" :message="t('common.loading')" />
+
+    <!-- Error state -->
+    <div v-else-if="dash.error && !dash.hasData" class="flex flex-col items-center justify-center py-16">
+      <span class="material-symbols-outlined text-5xl text-rose-300 dark:text-rose-700 mb-4">error_outline</span>
+      <p class="text-sm font-semibold text-rose-600 dark:text-rose-400">{{ dash.error }}</p>
+      <button @click="dash.fetchFromApi()" class="mt-4 px-5 py-2.5 bg-brand-primary text-white text-sm font-semibold rounded-xl hover:bg-brand-primary-hover transition shadow-lg shadow-brand-primary/20">
+        {{ t('common.retry') }}
+      </button>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-      <!-- Activity Feed -->
-      <div class="xl:col-span-1 space-y-6">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-brand-primary">bolt</span>
-            {{ t('superAdmin.recentActivity') }}
-          </h3>
-          
-          <div class="space-y-6">
-            <div v-for="(act, idx) in recentActivity" :key="idx" class="flex gap-4 relative">
-              <div v-if="idx !== recentActivity.length - 1" class="absolute left-5 top-10 bottom-[-24px] w-px bg-slate-100 dark:bg-slate-700"></div>
-              <div :class="`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${act.color}`">
-                <span class="material-symbols-outlined text-xl">{{ act.icon }}</span>
-              </div>
-              <div class="min-w-0 flex-grow">
-                <div class="flex justify-between items-start">
-                  <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ act.user }}</h4>
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase whitespace-nowrap">{{ act.time }}</span>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{{ act.detail || t('superAdmin.newUserActivity') }}</p>
-              </div>
-            </div>
+    <!-- Dashboard content -->
+    <template v-else-if="dash.hasData">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div v-for="card in dash.cards" :key="card.key" class="group relative">
+          <StatisticsCard
+            :title="card.title"
+            :value="card.value"
+            :icon="card.icon"
+            :color="card.color"
+          />
+          <div
+            v-if="dash.growthPercentages[card.key] !== undefined"
+            class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <GrowthBadge :value="dash.growthPercentages[card.key]" />
           </div>
+        </div>
+      </div>
 
-          <button class="w-full mt-8 py-3 text-xs font-black text-slate-400 dark:text-slate-500 hover:text-brand-primary transition uppercase tracking-widest border-t border-slate-50 dark:border-slate-700">
-            {{ t('superAdmin.viewFullAuditLog') }}
-          </button>
+      <!-- Recent Activity + System Health -->
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <!-- Recent Activity -->
+        <div class="lg:col-span-3">
+          <RecentActivityCard
+            v-if="recentKeys.length > 0"
+            :sections="dash.recentActivity"
+          />
+          <div v-else class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-10 text-center">
+            <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">history</span>
+            <p class="text-sm font-semibold text-slate-400 dark:text-slate-500">{{ t('common.noData') }}</p>
+          </div>
         </div>
 
         <!-- System Health -->
-        <div class="bg-slate-900 p-6 rounded-2xl shadow-xl shadow-slate-900/10">
-          <h3 class="text-lg font-bold text-white mb-6">{{ t('superAdmin.systemHealth') }}</h3>
-          <div class="space-y-4">
-            <div v-for="sys in systems" :key="sys.key" class="flex items-center justify-between">
-              <span class="text-sm text-slate-400 font-medium">{{ sys.label }}</span>
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold text-emerald-400 uppercase">{{ t('superAdmin.operational') }}</span>
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        <div class="lg:col-span-2">
+          <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-xl shadow-slate-900/15 p-6 h-full">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg text-emerald-400">monitor_heart</span>
+              </div>
+              <h3 class="text-base font-bold text-white">{{ t('superAdmin.systemHealth') }}</h3>
+            </div>
+            <div class="space-y-1">
+              <div v-for="sys in systemHealth" :key="sys.key" class="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-white/5 transition-colors">
+                <span class="text-sm font-medium text-slate-300">{{ sys.label }}</span>
+                <div class="flex items-center gap-2.5">
+                  <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wide">{{ t('superAdmin.operational') }}</span>
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Charts & Tables Placeholder -->
-      <div class="xl:col-span-2 space-y-8">
-        <!-- Monthly Trends Placeholder -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[400px] flex flex-col">
-          <div class="flex justify-between items-center mb-8">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('superAdmin.operationalTrends') }}</h3>
-            <div class="flex gap-2">
-              <button class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-black rounded-md">{{ t('superAdmin.period30d') }}</button>
-              <button class="px-3 py-1 text-slate-400 dark:text-slate-500 text-[10px] font-black rounded-md">{{ t('superAdmin.period90d') }}</button>
-            </div>
-          </div>
-          <div class="flex-grow flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-600">
-            <div class="text-center">
-              <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-2">monitoring</span>
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ t('superAdmin.chartContainer') }}</p>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ t('superAdmin.chartSubtitle') }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pending Medication Requests -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-50 dark:border-slate-700 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('superAdmin.highPriorityRequests') }}</h3>
-            <span class="px-2 py-0.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[10px] font-black rounded-full uppercase">{{ clinicalStore.clinicalStats.pendingRequests }} {{ t('superAdmin.pending') }}</span>
-          </div>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="bg-slate-50/50/50 dark:bg-slate-900/50 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                <th class="px-6 py-3">{{ t('superAdmin.patient') }}</th>
-                <th class="px-6 py-3">{{ t('superAdmin.facility') }}</th>
-                <th class="px-6 py-3">{{ t('pageTitles.prescriptions') }}</th>
-                <th class="px-6 py-3 text-right">{{ t('superAdmin.action') }}</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50 dark:divide-slate-700">
-              <tr v-for="req in clinicalStore.medicationRequests.filter(r => r.status === 'Pending')" :key="req.id" class="hover:bg-slate-50/30/30 dark:hover:bg-slate-800/30 transition-colors">
-                <td class="px-6 py-4">
-                  <span class="text-sm font-bold text-slate-900 dark:text-white">{{ req.patient }}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="text-sm text-slate-600 dark:text-slate-300">{{ req.facility }}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <code class="text-xs font-mono font-bold text-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10 px-2 py-0.5 rounded">{{ req.prescription }}</code>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button v-permission="'medication_requests.approve'" @click="clinicalStore.approveRequest(req.id)" class="text-xs font-black text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 uppercase tracking-widest">{{ t('superAdmin.approve') }}</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Charts -->
+      <div v-if="dash.charts.length > 0" class="space-y-8">
+        <SectionHeader :title="t('superAdmin.analytics')" :subtitle="t('superAdmin.chartSubtitle')" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ChartCard
+            v-for="(chart, idx) in dash.charts"
+            :key="idx"
+            :chart="chart"
+          />
         </div>
       </div>
-    </div>
+      <div v-else class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm py-12 text-center">
+        <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-3">monitoring</span>
+        <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ t('superAdmin.chartContainer') }}</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ t('superAdmin.chartSubtitle') }}</p>
+      </div>
+    </template>
   </div>
 </template>
 

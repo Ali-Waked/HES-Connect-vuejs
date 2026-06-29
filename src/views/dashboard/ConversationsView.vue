@@ -15,7 +15,7 @@ import ConfirmModal from '../../components/ConfirmModal.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { formatDate } = useFormatDate()
 const store = useConversationManagementStore()
 
@@ -178,6 +178,30 @@ function formatActivity(dateString) {
 
   return formatDate(dateString)
 }
+
+function resolveLocalizedName(name) {
+  if (!name) return '—'
+  if (typeof name === 'string') return name
+  return name[locale.value] || name.en || name.ar || Object.values(name)[0] || '—'
+}
+
+const senderSideMap = computed(() => {
+  const map = {}
+  let side = 0
+  for (const msg of store.messages || []) {
+    const senderId = msg.sender?.id || msg.sender?.uuid || msg.sender_id
+    if (senderId && !(senderId in map)) {
+      map[senderId] = side
+      side = side === 0 ? 1 : 0
+    }
+  }
+  return map
+})
+
+function isOwnMessage(msg) {
+  const senderId = msg.sender?.id || msg.sender?.uuid || msg.sender_id
+  return (senderSideMap.value[senderId] ?? 0) === 0
+}
 </script>
 
 <template>
@@ -209,7 +233,7 @@ function formatActivity(dateString) {
         </div>
         <div>
           <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('conversationsManagement.totalConversations') }}</p>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.total_conversations ?? store.stats?.total ?? '-' }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.total_conversations ?? '-' }}</p>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -220,7 +244,7 @@ function formatActivity(dateString) {
         </div>
         <div>
           <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('conversationsManagement.supportConversations') }}</p>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.support_count ?? store.stats?.support ?? '-' }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.support_conversations ?? '-' }}</p>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -231,7 +255,7 @@ function formatActivity(dateString) {
         </div>
         <div>
           <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('conversationsManagement.doctorPatientConversations') }}</p>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.doctor_patient_count ?? store.stats?.doctor_patient ?? '-' }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.doctor_patient_conversations ?? '-' }}</p>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -242,7 +266,7 @@ function formatActivity(dateString) {
         </div>
         <div>
           <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('conversationsManagement.activeConversations') }}</p>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.active_count ?? store.stats?.active ?? '-' }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.active_conversations ?? '-' }}</p>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -253,7 +277,7 @@ function formatActivity(dateString) {
         </div>
         <div>
           <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('conversationsManagement.messagesToday') }}</p>
-          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.messages_today ?? store.stats?.today_messages ?? '-' }}</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ store.stats?.messages_today ?? '-' }}</p>
         </div>
       </div>
     </div>
@@ -300,10 +324,10 @@ function formatActivity(dateString) {
           <div class="flex flex-col gap-0.5">
             <span
               v-for="p in (item.participants || []).slice(0, 2)"
-              :key="p.id ?? p.name ?? p"
+              :key="p.id ?? p"
               class="text-sm font-medium text-slate-900 dark:text-white"
             >
-              {{ p.name ?? p }}
+              {{ resolveLocalizedName(p.name) }}
             </span>
             <span v-if="(item.participants || []).length > 2" class="text-xs text-slate-400">
               +{{ item.participants.length - 2 }} {{ t('common.more') }}
@@ -316,8 +340,8 @@ function formatActivity(dateString) {
         </template>
 
         <template #cell(last_activity)="{ item }">
-          <span class="text-xs text-slate-500 dark:text-slate-400" :title="item.last_activity">
-            {{ formatActivity(item.last_activity ?? item.updated_at) }}
+          <span class="text-xs text-slate-500 dark:text-slate-400" :title="item.last_message_at">
+            {{ formatActivity(item.last_message_at ?? item.updated_at) }}
           </span>
         </template>
 
@@ -335,7 +359,7 @@ function formatActivity(dateString) {
           <div class="flex justify-end gap-1">
             <button
               @click="viewConversation(item)"
-              class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
+              class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition cursor-pointer"
               :title="t('conversationsManagement.view')"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,12 +415,12 @@ function formatActivity(dateString) {
               class="w-11 h-11 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center text-white font-bold text-sm"
               :class="i === 0 ? 'bg-brand-primary' : i === 1 ? 'bg-emerald-500' : 'bg-amber-500'"
             >
-              {{ (p.name ?? 'U').charAt(0).toUpperCase() }}
+              {{ resolveLocalizedName(p.name).charAt(0).toUpperCase() }}
             </div>
           </div>
           <div class="flex-1 min-w-0">
             <h4 class="text-base font-bold text-slate-900 dark:text-white truncate">
-              {{ (store.conversation.participants || []).map(p => p.name ?? p).join(', ') }}
+              {{ (store.conversation.participants || []).map(p => resolveLocalizedName(p.name)).join(', ') }}
             </h4>
             <div class="flex items-center gap-2 mt-0.5">
               <BaseBadge :variant="getTypeVariant(store.conversation.type)">
@@ -444,10 +468,10 @@ function formatActivity(dateString) {
               class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
               :class="i === 0 ? 'bg-brand-primary' : 'bg-slate-400'"
             >
-              {{ (p.name ?? 'U').charAt(0).toUpperCase() }}
+              {{ resolveLocalizedName(p.name).charAt(0).toUpperCase() }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ p.name ?? p }}</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ resolveLocalizedName(p.name) }}</p>
               <p v-if="p.email" class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ p.email }}</p>
             </div>
             <BaseBadge v-if="p.role" variant="primary">{{ p.role }}</BaseBadge>
@@ -468,12 +492,12 @@ function formatActivity(dateString) {
                 v-for="msg in store.messages"
                 :key="msg.id"
                 class="flex flex-col"
-                :class="msg.is_admin ? 'items-end' : 'items-start'"
+                :class="isOwnMessage(msg) ? 'items-end' : 'items-start'"
               >
                 <div class="flex flex-col gap-1 max-w-[80%]">
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2" :class="isOwnMessage(msg) ? 'flex-row-reverse' : ''">
                     <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                      {{ msg.sender?.name ?? msg.sender_name ?? 'Unknown' }}
+                      {{ resolveLocalizedName(msg.sender?.name) ?? msg.sender_name ?? 'Unknown' }}
                     </span>
                     <span class="text-[9px] text-slate-400 dark:text-slate-500">
                       {{ formatDate(msg.created_at) }}
@@ -481,7 +505,7 @@ function formatActivity(dateString) {
                   </div>
                   <div
                     class="p-3 rounded-2xl text-sm"
-                    :class="msg.is_admin
+                    :class="isOwnMessage(msg)
                       ? 'bg-brand-primary text-white rounded-tr-none shadow-md shadow-brand-primary/15'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none'"
                   >
@@ -533,26 +557,30 @@ function formatActivity(dateString) {
     </BaseDialog>
 
     <!-- Archive Confirmation -->
-    <ConfirmModal
-      :show="showArchiveConfirm"
-      :title="t('conversationsManagement.archiveConfirmTitle')"
-      :message="t('conversationsManagement.archiveConfirmMessage')"
-      :confirmText="t('conversationsManagement.archive')"
-      :isDanger="false"
-      @confirm="handleArchive"
-      @close="showArchiveConfirm = false"
-    />
+    <Teleport to="body">
+      <ConfirmModal
+        :show="showArchiveConfirm"
+        :title="t('conversationsManagement.archiveConfirmTitle')"
+        :message="t('conversationsManagement.archiveConfirmMessage')"
+        :confirmText="t('conversationsManagement.archive')"
+        :isDanger="false"
+        @confirm="handleArchive"
+        @close="showArchiveConfirm = false"
+      />
+    </Teleport>
 
     <!-- Lock Confirmation -->
-    <ConfirmModal
-      :show="showLockConfirm"
-      :title="t('conversationsManagement.lockConfirmTitle')"
-      :message="t('conversationsManagement.lockConfirmMessage')"
-      :confirmText="t('conversationsManagement.lock')"
-      :isDanger="true"
-      @confirm="handleLock"
-      @close="showLockConfirm = false"
-    />
+    <Teleport to="body">
+      <ConfirmModal
+        :show="showLockConfirm"
+        :title="t('conversationsManagement.lockConfirmTitle')"
+        :message="t('conversationsManagement.lockConfirmMessage')"
+        :confirmText="t('conversationsManagement.lock')"
+        :isDanger="true"
+        @confirm="handleLock"
+        @close="showLockConfirm = false"
+      />
+    </Teleport>
   </div>
 </template>
 

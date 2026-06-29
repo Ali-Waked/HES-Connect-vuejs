@@ -37,7 +37,7 @@ function nextPage() { if (currentPage.value < totalPages.value) currentPage.valu
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Articles</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ articles.length }} article(s)</p>
       </div>
-      <button v-if="can('articles.manage')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition">
+      <button v-if="can('update_article')" class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-primary-dark transition">
         <span class="material-symbols-outlined text-[18px]">add</span>
         New Article
       </button>
