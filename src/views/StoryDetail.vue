@@ -8,6 +8,7 @@ import { resolveTranslatedValue } from '@/utils/locale'
 import CategoryBadge from '@/components/shared/CategoryBadge.vue'
 import AppNavbar from '@/components/global/AppNavbar.vue'
 import FavoriteButton from '@/components/favorites/FavoriteButton.vue'
+import DonateModal from '@/components/story/DonateModal.vue'
 import LandingFooter from '@/components/landing/LandingFooter.vue'
 
 const route = useRoute()
@@ -21,6 +22,7 @@ const story = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const contentLang = ref('en')
+const showDonate = ref(false)
 
 function localField(obj, field) {
   if (!obj || !obj[field]) return ''
@@ -143,7 +145,7 @@ onMounted(fetchStory)
 
           <div class="flex items-center gap-3">
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl">{{ localField(story, 'title') }}</h1>
-            <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" size="lg" />
+            <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" :is-favorited="story?.is_favorited" size="lg" />
           </div>
         </template>
       </div>
@@ -242,7 +244,7 @@ onMounted(fetchStory)
                   <span class="font-bold text-slate-900 dark:text-white">{{ formatCurrency(story.collected_amount) }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-slate-500 dark:text-slate-400">{{ t('stories.goal') || 'Goal' }}</span>
+                  <span class="text-slate-500 dark:text-slate-400">{{ t('stories.goal') }}</span>
                   <span class="font-bold text-slate-900 dark:text-white">{{ formatCurrency(story.target_amount) }}</span>
                 </div>
                 <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
@@ -255,6 +257,15 @@ onMounted(fetchStory)
                   {{ Math.round(progressPercent()) }}% {{ t('stories.raised') }}
                 </p>
               </div>
+              <button
+                class="mt-5 w-full rounded-xl bg-brand-primary py-3 text-sm font-bold text-white transition hover:bg-brand-primary-hover cursor-pointer flex items-center justify-center gap-2"
+                @click="showDonate = true"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                {{ t('donations.donate') }}
+              </button>
             </div>
 
             <!-- Share Card -->
@@ -272,6 +283,8 @@ onMounted(fetchStory)
 
     <LandingFooter />
   </div>
+
+  <DonateModal :show="showDonate" :story="story" @close="showDonate = false" />
 </template>
 
 <style scoped>

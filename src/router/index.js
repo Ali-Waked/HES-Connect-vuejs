@@ -13,6 +13,12 @@ import ProfileView from '../views/ProfileView.vue';
 
 const routes = [
   {
+    path: '/ai-consultation',
+    name: 'ai-consultation',
+    component: () => import('../views/front/AiConsultationView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/',
     name: 'home',
     component: HomeView
@@ -155,6 +161,22 @@ const routes = [
     name: 'favorites',
     component: () => import('../views/front/FavoritesView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/donations/success',
+    name: 'donation-success',
+    component: () => import('../views/front/DonationSuccessView.vue'),
+  },
+  {
+    path: '/donations/failed',
+    name: 'donation-failed',
+    component: () => import('../views/front/DonationFailedView.vue'),
+  },
+  {
+    path: '/donations/:id/status',
+    name: 'donation-status',
+    component: () => import('../views/front/DonationStatusView.vue'),
+    props: true,
   },
   {
     path: '/subscription/verify/:token',
@@ -337,6 +359,11 @@ const routes = [
         name: 'dashboard-analytics',
         component: () => import('../views/facility/FacilityDashboardView.vue'),
         meta: { permission: 'view_dashboard_statistics' }
+      },
+      {
+        path: 'ai-chat',
+        name: 'dashboard-ai-chat',
+        component: () => import('../views/dashboard/AiChatView.vue')
       },
       {
         path: 'notifications',
@@ -585,6 +612,11 @@ const routes = [
         name: 'platform-search-history',
         component: () => import('../views/dashboard/SearchHistoryView.vue'),
         meta: { permission: 'view_settings' }
+      },
+      {
+        path: 'ai-chat',
+        name: 'platform-ai-chat',
+        component: () => import('../views/dashboard/AiChatView.vue')
       },
       {
         path: 'notifications',
