@@ -134,7 +134,13 @@ const pageTitle = computed(() => {
               class="flex items-center gap-2.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 p-1.5 pr-2.5 rounded-xl transition"
               @click.stop="toggleProfileMenu"
             >
-              <div class="w-7 h-7 bg-gradient-to-br from-brand-primary to-brand-primary-dark text-white font-bold rounded-full flex items-center justify-center text-[11px] shadow-sm shrink-0">
+              <img
+                v-if="authStore.user?.avatar"
+                :src="authStore.user.avatar"
+                :alt="resolveTranslatedValue(authStore.user?.name)"
+                class="w-7 h-7 rounded-full object-cover shadow-sm shrink-0"
+              />
+              <div v-else class="w-7 h-7 bg-gradient-to-br from-brand-primary to-brand-primary-dark text-white font-bold rounded-full flex items-center justify-center text-[11px] shadow-sm shrink-0">
                 {{ authStore.user.initials }}
               </div>
               <div class="hidden sm:flex flex-col text-left">

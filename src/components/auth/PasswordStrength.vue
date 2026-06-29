@@ -31,7 +31,7 @@ const { score, level, hasPassword, criteria } = usePasswordStrength(passwordRef)
       </span>
     </div>
 
-    <div v-if="showCriteria" class="grid grid-cols-2 gap-x-4 gap-y-1">
+    <div v-if="showCriteria" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
       <div
         v-for="item in criteria"
         :key="item.label"

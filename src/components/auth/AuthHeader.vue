@@ -11,7 +11,7 @@ defineProps({
 
 <template>
   <header
-    class="mb-8"
+    class="mb-5 sm:mb-6 lg:mb-8"
     :class="{ 'text-center': centered }"
   >
     <div v-if="showLogo" :class="centered ? 'flex justify-center mb-6' : 'mb-6'">
@@ -21,14 +21,14 @@ defineProps({
     </div>
     <div v-if="title">
       <h1
-        class="text-2xl font-bold tracking-tight text-landing-dark"
+        class="text-xl sm:text-2xl font-bold tracking-tight text-landing-dark"
         :class="{ 'text-center': centered }"
       >
         {{ title }}
       </h1>
       <p
         v-if="subtitle"
-        class="mt-2 text-sm leading-relaxed text-landing-muted"
+        class="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed text-landing-muted"
         :class="{ 'text-center': centered }"
       >
         {{ subtitle }}

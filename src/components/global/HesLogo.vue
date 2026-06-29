@@ -9,7 +9,7 @@ const isDark = props.theme === 'dark' || props.theme === 'white'
 const tileColor = props.theme === 'dark' ? '#1e293b' : '#0f172a'
 const tileBorder = props.theme === 'dark' ? '#334155' : 'none'
 const hesTextColor = isDark ? '#FFFFFF' : '#1a2e2d'
-const connectTextColor = isDark ? '#5eead4' : '#027a75'
+const connectTextColor = '#027a75'
 const scale = props.height / 48
 </script>
 
