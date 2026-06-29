@@ -35,6 +35,7 @@ const menuGroups = computed(() => {
       title: () => t('sidebar.platformOverview'),
       items: [
         { id: 'dashboard', label: () => t('sidebar.dashboard'), icon: 'grid_view', permission: null },
+        { id: 'ai-chat', label: () => t('sidebar.aiChat'), icon: 'smart_toy', permission: null },
         { id: 'audit-logs', label: () => t('sidebar.auditLogs'), icon: 'history', permission: 'view_activity_logs' },
         { id: 'reports', label: () => t('sidebar.reports'), icon: 'assessment', permission: 'view_reports' }
       ]

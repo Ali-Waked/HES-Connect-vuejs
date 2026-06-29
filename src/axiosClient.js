@@ -20,6 +20,11 @@ axiosClient.interceptors.request.use(
     const lang = localStorage.getItem("lang") || "en";
     config.headers["Accept-Language"] = lang;
 
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     if (workspaceIdProvider) {
       const wsId = workspaceIdProvider();
       if (wsId) {
