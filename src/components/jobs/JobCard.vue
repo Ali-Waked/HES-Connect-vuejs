@@ -57,7 +57,7 @@ const isExpiringSoon = computed(() => {
           </h3>
           <p v-if="facilityName" class="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">{{ facilityName }}</p>
         </div>
-        <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" size="sm" @click.stop />
+        <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" :is-favorited="job.is_favorited" size="sm" @click.stop />
       </div>
 
       <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4 flex-1">

@@ -116,7 +116,7 @@ const isExpiringSoon = () => {
                 <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight flex-1">
                   {{ localField(job, 'title') }}
                 </h1>
-                <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" />
+                <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" :is-favorited="job?.is_favorited" />
               </div>
 
               <div class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2 border-t border-slate-100 dark:border-slate-700 mt-6">

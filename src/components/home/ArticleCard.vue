@@ -41,7 +41,7 @@ function fmtDate(d) {
           </svg>
           {{ article.views ?? 0 }}
         </div>
-        <FavoriteButton :favoritable-id="article.uuid || article.id" favoritable-type="article" size="sm" @click.stop />
+        <FavoriteButton :favoritable-id="article.uuid || article.id" favoritable-type="article" :is-favorited="article.is_favorited" size="sm" @click.stop />
       </div>
     </div>
     <div class="p-5">

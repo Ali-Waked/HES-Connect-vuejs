@@ -11,6 +11,7 @@ import DoctorFacilities from '@/components/public/doctors/DoctorFacilities.vue'
 import DoctorDepartments from '@/components/public/doctors/DoctorDepartments.vue'
 import BookAppointmentModal from '@/components/staff/modals/BookAppointmentModal.vue'
 import ChatSidebar from '@/components/public/ChatSidebar.vue'
+import FavoriteButton from '@/components/favorites/FavoriteButton.vue'
 
 const props = defineProps({ uuid: { type: String, default: '' } })
 
@@ -167,6 +168,7 @@ function openChat() {
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3 flex-wrap">
                   <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{{ resolveTranslatedValue(doctor.name, locale.value) }}</h1>
+                  <FavoriteButton :favoritable-id="doctor.uuid || doctor.id" favoritable-type="staff" :is-favorited="doctor.is_favorited" size="md" />
                   <span v-if="doctor.is_head_doctor" class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-400/20 text-amber-300 rounded-lg text-xs font-bold shrink-0 backdrop-blur-sm">
                     <span class="material-symbols-outlined text-sm">workspace_premium</span>
                     {{ t('doctorDetail.headDoctorBadge') }}

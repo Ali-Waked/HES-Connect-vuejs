@@ -289,7 +289,11 @@ watch(() => route.path, async () => {
                       <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
                       {{ $t('nav.appointments') }}
                     </button>
-                    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer"                       @click="router.push('/favorites'); showProfileMenu = false">
+                    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer" @click="router.push('/ai-consultation'); showProfileMenu = false">
+                      <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M11.42 15.17l-7.5-7.5 4.33-4.33 7.5 7.5-4.33 4.33zM3.5 3.5l3.38 3.38M16.62 16.62L20 20M12 12l4.24-4.24M12 12l-4.24 4.24"/></svg>
+                      AI Consultation
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer" @click="router.push('/favorites'); showProfileMenu = false">
                       <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
                       {{ $t('nav.myFavorites') }}
                     </button>
@@ -434,9 +438,16 @@ watch(() => route.path, async () => {
                   {{ $t('nav.appointments') }}
                 </button>
                 <button
-                  class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
-                  @click="router.push('/favorites'); mobileOpen = false"
-                >
+                   class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                   @click="router.push('/ai-consultation'); mobileOpen = false"
+                 >
+                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M11.42 15.17l-7.5-7.5 4.33-4.33 7.5 7.5-4.33 4.33zM3.5 3.5l3.38 3.38M16.62 16.62L20 20M12 12l4.24-4.24M12 12l-4.24 4.24"/></svg>
+                   AI Consultation
+                 </button>
+                <button
+                   class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                   @click="router.push('/favorites'); mobileOpen = false"
+                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
                   {{ $t('nav.myFavorites') }}
                 </button>

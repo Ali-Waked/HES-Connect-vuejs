@@ -95,7 +95,7 @@ const {
             <h1 class="text-3xl lg:text-4xl font-extrabold text-white leading-tight max-w-4xl">
               {{ title }}
             </h1>
-            <FavoriteButton :favoritable-id="article?.uuid || article?.id" favoritable-type="article" size="lg" />
+            <FavoriteButton :favoritable-id="article?.uuid || article?.id" favoritable-type="article" :is-favorited="article?.is_favorited" size="lg" />
           </div>
         </div>
         <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>

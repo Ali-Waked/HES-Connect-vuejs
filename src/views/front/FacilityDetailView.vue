@@ -210,7 +210,7 @@ watch(() => facility.value, (val) => {
               <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl">
                 {{ resolveTranslatedValue(facility.name) }}
               </h1>
-              <FavoriteButton :favoritable-id="facility.uuid || facility.id" favoritable-type="facility" size="lg" />
+              <FavoriteButton :favoritable-id="facility.uuid || facility.id" favoritable-type="facility" :is-favorited="facility?.is_favorited" size="lg" />
             </div>
 
             <div class="flex flex-wrap gap-x-6 gap-y-1 mt-5 pt-4 border-t border-white/20">

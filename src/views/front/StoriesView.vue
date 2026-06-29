@@ -6,6 +6,7 @@ import { getPublicStories } from '@/services/publicStoriesService'
 import { useCategories } from '@/composables/useCategories'
 import { resolveTranslatedValue } from '@/utils/locale'
 import CategoryBadge from '@/components/shared/CategoryBadge.vue'
+import FavoriteButton from '@/components/favorites/FavoriteButton.vue'
 import AppNavbar from '@/components/global/AppNavbar.vue'
 import LandingFooter from '@/components/landing/LandingFooter.vue'
 
@@ -266,6 +267,9 @@ watch(
               <svg class="w-12 h-12 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                 <path stroke-linecap="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/>
               </svg>
+            </div>
+            <div class="absolute top-3 right-3 z-10">
+              <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" :is-favorited="story.is_favorited" size="sm" @click.stop />
             </div>
             <!-- Fundraising Badge -->
             <div v-if="story.is_fundraising" class="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300 shadow-sm">

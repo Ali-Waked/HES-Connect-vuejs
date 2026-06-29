@@ -77,7 +77,7 @@ function viewProfile() {
             <span class="truncate">{{ doctor.city || t('common.notSpecified') }}</span>
           </div>
         </div>
-        <FavoriteButton :favoritable-id="doctor.uuid || doctor.id" favoritable-type="staff" size="sm" @click.stop />
+        <FavoriteButton :favoritable-id="doctor.uuid || doctor.id" favoritable-type="staff" :is-favorited="doctor.is_favorited" size="sm" @click.stop />
       </div>
 
       <div v-if="doctor.facilities_count !== undefined || doctor.primary_facility" class="flex items-center gap-2 mt-3 flex-wrap">

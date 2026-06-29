@@ -6,6 +6,7 @@ import { usePublicFacilities } from '../../composables/usePublicFacilities'
 import AppNavbar from '../../components/global/AppNavbar.vue'
 import LandingFooter from '../../components/landing/LandingFooter.vue'
 import { resolveTranslatedValue } from '../../utils/locale'
+import FavoriteButton from '../../components/favorites/FavoriteButton.vue'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -184,6 +185,9 @@ function coverImage(fac) {
 
               <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent"></div>
 
+              <div class="absolute top-3 right-3 z-10">
+                <FavoriteButton :favoritable-id="fac.uuid || fac.id" favoritable-type="facility" :is-favorited="fac.is_favorited" size="sm" @click.stop />
+              </div>
               <div class="absolute top-3 left-3 z-10 flex gap-2">
                 <span
                   class="rounded-full px-2.5 py-0.5 text-xs font-bold border shadow-sm backdrop-blur-md bg-white/95 dark:bg-slate-800/95"

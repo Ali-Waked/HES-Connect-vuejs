@@ -491,7 +491,7 @@ function prevReview() {
                   {{ job.employment_type.replace(/_/g, ' ') }}
                 </span>
                 <div class="absolute top-2 right-2">
-                  <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" size="sm" @click.stop />
+                  <FavoriteButton :favoritable-id="job.uuid || job.id" favoritable-type="job_post" :is-favorited="job.is_favorited" size="sm" @click.stop />
                 </div>
               </div>
               <div class="p-4">
@@ -586,7 +586,7 @@ function prevReview() {
                   </span>
                 </div>
                 <div class="absolute bottom-3 right-3">
-                  <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" size="sm" @click.stop />
+                  <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" :is-favorited="story.is_favorited" size="sm" @click.stop />
                 </div>
               </div>
               <div class="p-5">

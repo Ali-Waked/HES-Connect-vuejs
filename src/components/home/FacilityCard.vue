@@ -40,7 +40,7 @@ function typeInfo(type) {
         {{ typeInfo(facility.facility_type).label }}
       </div>
       <div class="absolute top-3 right-3">
-        <FavoriteButton :favoritable-id="facility.uuid || facility.id" favoritable-type="facility" size="sm" @click.stop />
+        <FavoriteButton :favoritable-id="facility.uuid || facility.id" favoritable-type="facility" :is-favorited="facility.is_favorited" size="sm" @click.stop />
       </div>
     </div>
     <div class="p-5">

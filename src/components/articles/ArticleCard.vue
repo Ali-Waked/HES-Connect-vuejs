@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useLocaleField } from '../../composables/useLocaleField'
 import { useI18n } from 'vue-i18n'
 import CategoryBadge from '../shared/CategoryBadge.vue'
+import FavoriteButton from '../favorites/FavoriteButton.vue'
 import { resolveTranslatedValue } from '../../utils/locale'
 
 const props = defineProps({
@@ -72,6 +73,9 @@ const authorName = computed(() => {
         <span v-else-if="categoryName" class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold text-white bg-brand-primary/90 backdrop-blur-sm shadow-sm">
           {{ categoryName }}
         </span>
+      </div>
+      <div class="absolute top-3 right-3 z-10">
+        <FavoriteButton :favoritable-id="article.uuid || article.id" favoritable-type="article" :is-favorited="article.is_favorited" size="sm" @click.stop />
       </div>
     </div>
 
