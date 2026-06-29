@@ -15,3 +15,7 @@ export function markAllAsRead() {
 export function getUnreadCount() {
   return axiosClient.get('/notifications/unread-count')
 }
+
+export function deleteNotification(uuid) {
+  return axiosClient.delete(`/notifications/${uuid}`)
+}

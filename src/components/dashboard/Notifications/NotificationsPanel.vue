@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationsStore } from '../../../stores/notifications'
 import InfiniteScroll from '../global/InfiniteScroll.vue'
 import BaseBadge from '../global/BaseBadge.vue'
+import ConfirmModal from '../global/ConfirmModal.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -12,6 +13,8 @@ const store = useNotificationsStore()
 
 const unreadOnly = ref(false)
 const selectedType = ref(null)
+const deleting = ref(null)
+const pendingDelete = ref(null)
 const typeOptions = [
   { value: null, label: () => t('common.all') || 'All' },
   { value: 'story', label: 'Stories' },
@@ -36,6 +39,16 @@ const displayed = computed(() => {
   return result
 })
 
+const grouped = computed(() => {
+  const groups = {}
+  for (const n of displayed.value) {
+    const type = n.type || 'system'
+    if (!groups[type]) groups[type] = []
+    groups[type].push(n)
+  }
+  return groups
+})
+
 function onFilterTypeChange(e) {
   selectedType.value = e.target.value || null
 }
@@ -46,6 +59,24 @@ function toggleUnreadOnly() {
 
 function handleMarkRead(n) {
   if (!n.read_at) store.markAsRead(n.uuid)
+}
+
+function handleDelete(n) {
+  pendingDelete.value = n
+}
+
+function confirmDelete() {
+  if (!pendingDelete.value) return
+  const n = pendingDelete.value
+  pendingDelete.value = null
+  deleting.value = n.uuid || n.id
+  store.deleteNotification(n.uuid || n.id).finally(() => {
+    deleting.value = null
+  })
+}
+
+function cancelDelete() {
+  pendingDelete.value = null
 }
 
 function handleMarkAllRead() {
@@ -159,57 +190,83 @@ function timeAgo(dateStr) {
         :has-more="store.pagination.page < store.pagination.lastPage"
         @load-more="store.fetchMore()"
       >
-        <div class="divide-y divide-slate-100 dark:divide-slate-800">
-          <div
-            v-for="n in displayed"
-            :key="n.id"
-            class="flex items-start gap-4 px-6 py-4 transition-colors group cursor-pointer"
-            :class="[
-              n.read_at ? 'bg-white dark:bg-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/40' : 'bg-blue-50/30 dark:bg-blue-900/5 hover:bg-blue-50/60 dark:hover:bg-blue-900/15',
-              n.action_url ? 'cursor-pointer' : ''
-            ]"
-            @click="handleItemClick(n)"
-          >
-            <div class="flex-shrink-0 mt-0.5">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="store.getConfig(n.type).bg">
-                <svg
-                  class="w-5 h-5"
-                  :class="store.getConfig(n.type).icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none" viewBox="0 0 24 24"
-                  stroke-width="1.8" stroke="currentColor"
-                  v-html="store.getConfig(n.type).svg"
-                ></svg>
-              </div>
-            </div>
-
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="text-sm font-bold text-slate-900 dark:text-white leading-snug">{{ n.title }}</p>
-                  <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ n.message }}</p>
-                </div>
-                <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap font-medium">{{ timeAgo(n.created_at) }}</span>
-                  <span v-if="!n.read_at" class="w-2 h-2 rounded-full bg-brand-primary flex-shrink-0"></span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              v-if="!n.read_at"
-              class="flex-shrink-0 mt-1 text-slate-300 dark:text-slate-600 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-              :title="t('notifications.markRead')"
-              @click.stop="handleMarkRead(n)"
-            >
-              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-              </svg>
-            </button>
+        <template v-for="(notifs, type) in grouped" :key="type">
+          <div class="px-6 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            {{ type }}
           </div>
-        </div>
+          <div class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div
+              v-for="n in notifs"
+              :key="n.id"
+              class="flex items-start gap-4 px-6 py-4 transition-colors group cursor-pointer"
+              :class="[
+                n.read_at ? 'bg-white dark:bg-slate-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/40' : 'bg-blue-50/30 dark:bg-blue-900/5 hover:bg-blue-50/60 dark:hover:bg-blue-900/15',
+                n.action_url ? 'cursor-pointer' : ''
+              ]"
+              @click="handleItemClick(n)"
+            >
+              <div class="flex-shrink-0 mt-0.5">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="store.getConfig(n.type).bg">
+                  <svg
+                    class="w-5 h-5"
+                    :class="store.getConfig(n.type).icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.8" stroke="currentColor"
+                    v-html="store.getConfig(n.type).svg"
+                  ></svg>
+                </div>
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-snug">{{ n.title }}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ n.message }}</p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap font-medium">{{ timeAgo(n.created_at) }}</span>
+                    <span v-if="!n.read_at" class="w-2 h-2 rounded-full bg-brand-primary flex-shrink-0"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1">
+                <button
+                  v-if="!n.read_at"
+                  class="flex-shrink-0 text-slate-300 dark:text-slate-600 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                  :title="t('notifications.markRead')"
+                  @click.stop="handleMarkRead(n)"
+                >
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                  </svg>
+                </button>
+                <button
+                  class="flex-shrink-0 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer disabled:opacity-30"
+                  :title="t('common.delete') || 'Delete'"
+                  :disabled="deleting === (n.uuid || n.id)"
+                  @click.stop="handleDelete(n)"
+                >
+                  <svg v-if="deleting === (n.uuid || n.id)" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                  <svg v-else class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
       </InfiniteScroll>
     </div>
+
+    <ConfirmModal
+      :show="!!pendingDelete"
+      :title="t('notifications.deleteConfirmTitle') || 'Delete notification'"
+      :message="t('notifications.deleteConfirmMessage') || 'Are you sure you want to delete this notification?'"
+      :confirm-text="t('common.delete') || 'Delete'"
+      :is-danger="true"
+      @confirm="confirmDelete"
+      @close="cancelDelete"
+    />
   </div>
 </template>
 

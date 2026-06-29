@@ -22,6 +22,39 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const BUFFER_FLUSH_MS = 500
   let echoChannel = null
 
+  // ── Toast trigger for real-time notifications ──────────────────────────────
+  const lastRealtime = ref(null)
+
+  // ── Sound preference (localStorage-backed) ─────────────────────────────────
+  const soundEnabled = ref(true)
+  try {
+    const stored = localStorage.getItem('hes_notification_sound')
+    if (stored !== null) soundEnabled.value = stored === 'true'
+  } catch {}
+
+  function persistSound(val) {
+    soundEnabled.value = val
+    try { localStorage.setItem('hes_notification_sound', String(val)) } catch {}
+  }
+
+  function playNotificationSound() {
+    if (!soundEnabled.value) return
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.frequency.setValueAtTime(800, ctx.currentTime)
+      osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.08)
+      osc.frequency.setValueAtTime(1200, ctx.currentTime + 0.16)
+      gain.gain.setValueAtTime(0.15, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.3)
+    } catch {}
+  }
+
   // ── Getters ────────────────────────────────────────────────────────────────
   const hasUnread = computed(() => unreadCount.value > 0)
   const last5 = computed(() => items.value.slice(0, 5))
@@ -130,6 +163,19 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
   }
 
+  async function deleteNotification(uuid) {
+    const idx = items.value.findIndex(n => n.uuid === uuid || n.id === uuid)
+    if (idx === -1) return
+    const removed = items.value.splice(idx, 1)[0]
+    if (!removed.read_at) unreadCount.value = Math.max(0, unreadCount.value - 1)
+    try {
+      await notificationService.deleteNotification(uuid)
+    } catch {
+      items.value.splice(idx, 0, removed)
+      if (!removed.read_at) unreadCount.value++
+    }
+  }
+
   async function refreshUnreadCount() {
     try {
       const { data } = await notificationService.getUnreadCount()
@@ -226,6 +272,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
         const n = normalize(evt.notification || evt)
         items.value.unshift(n)
         unreadCount.value++
+        lastRealtime.value = n
+        playNotificationSound()
+        lastRealtime.value = null
       }
     }
   }
@@ -252,12 +301,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
     hasUnread,
     last5,
     unreadOnly,
+    lastRealtime,
+    soundEnabled,
     typeConfig,
     getConfig,
+    persistSound,
     fetchNotifications,
     fetchMore,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     refreshUnreadCount,
     setFilterType,
     setFilterRead,

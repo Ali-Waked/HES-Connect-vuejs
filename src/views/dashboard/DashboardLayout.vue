@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import Sidebar from '../../components/dashboard/global/Sidebar.vue';
 import AppNavbar from '../../components/global/AppNavbar.vue';
 import ToastContainer from '../../components/dashboard/global/ToastContainer.vue';
+import NotificationToast from '../../components/dashboard/Notifications/NotificationToast.vue';
 import WorkspaceSwitcher from '../../components/global/WorkspaceSwitcher.vue';
 import WorkspaceSelectorModal from '../../components/global/WorkspaceSelectorModal.vue';
 import { RouterView } from 'vue-router';
@@ -40,5 +41,6 @@ const { locale } = useI18n()
 
     <!-- Central Toast notifications -->
     <ToastContainer />
+    <NotificationToast />
   </div>
 </template>

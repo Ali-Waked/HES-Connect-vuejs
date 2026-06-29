@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 import { useDashboardStore } from '../../stores/dashboard';
 import { useThemeStore } from '../../stores/useThemeStore';
+import { useNotificationsStore } from '../../stores/notifications';
 import { useI18n } from 'vue-i18n'
 import { resolveTranslatedValue } from '../../utils/locale'
 
@@ -10,6 +11,7 @@ const { t } = useI18n()
 const authStore = useAuthStore();
 const dashboardStore = useDashboardStore();
 const themeStore = useThemeStore();
+const notifStore = useNotificationsStore();
 
 const name = ref(resolveTranslatedValue(authStore.user?.name) || '');
 const saving = ref(false);
@@ -109,6 +111,37 @@ function handleSave() {
             </svg>
             <svg v-else class="w-3.5 h-3.5 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notifications Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs p-6 space-y-5">
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Notifications</h2>
+
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('notifications.sound') || 'Notification Sound' }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('notifications.soundDesc') || 'Play a sound when a new notification arrives' }}</p>
+        </div>
+        <button
+          class="relative w-14 h-7 rounded-full transition-colors duration-200 cursor-pointer"
+          :class="notifStore.soundEnabled ? 'bg-brand-primary' : 'bg-slate-300'"
+          @click="notifStore.persistSound(!notifStore.soundEnabled)"
+          role="switch"
+          :aria-checked="notifStore.soundEnabled"
+        >
+          <span
+            class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-200 flex items-center justify-center"
+            :class="notifStore.soundEnabled ? 'left-[calc(100%-1.75rem)]' : ''"
+          >
+            <svg v-if="notifStore.soundEnabled" class="w-3.5 h-3.5 text-brand-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
+            </svg>
+            <svg v-else class="w-3.5 h-3.5 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
             </svg>
           </span>
         </button>
