@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLocaleField } from '../../composables/useLocaleField'
 import { useI18n } from 'vue-i18n'
+import CategoryBadge from '../shared/CategoryBadge.vue'
 import { resolveTranslatedValue } from '../../utils/locale'
 
 const props = defineProps({
@@ -67,7 +68,8 @@ const authorName = computed(() => {
       <div v-else class="w-full h-full bg-gradient-to-br from-brand-primary/10 to-brand-accent/10 dark:from-slate-700 dark:to-slate-600"></div>
 
       <div class="absolute top-3 left-3 z-10">
-        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold text-white bg-brand-primary/90 backdrop-blur-sm shadow-sm">
+        <CategoryBadge v-if="article.category" :category="article.category" size="sm" class="shadow-sm" />
+        <span v-else-if="categoryName" class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold text-white bg-brand-primary/90 backdrop-blur-sm shadow-sm">
           {{ categoryName }}
         </span>
       </div>

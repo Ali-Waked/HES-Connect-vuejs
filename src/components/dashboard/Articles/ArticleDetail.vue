@@ -1,12 +1,19 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useDashboardStore } from '../../../stores/dashboard';
 import { useTagsStore } from '../../../stores/tags';
 import { useLocaleField } from '../../../composables/useLocaleField';
+import CategoryBadge from '../../shared/CategoryBadge.vue';
+import { useArticleComments } from '../../../composables/useArticleComments';
+import * as dashboardCommentService from '../../../services/dashboard/commentService';
+import CommentTable from './CommentTable.vue';
+import ConfirmModal from '../global/ConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const store = useDashboardStore();
 const tagsStore = useTagsStore();
 
@@ -21,6 +28,47 @@ const articleTags = computed(() => {
 });
 
 const goBack = () => router.push('/platform/articles');
+
+const articleUuid = computed(() => route.params.id);
+
+const {
+  comments,
+  loading: commentsLoading,
+  fetchComments,
+  deleteComment,
+  updateCommentStatus,
+} = useArticleComments(articleUuid, { service: dashboardCommentService })
+
+const confirmDeleteId = ref(null)
+const confirmStatusId = ref(null)
+const confirmStatusAction = ref('')
+
+onMounted(fetchComments)
+
+function requestDelete(commentId) {
+  confirmDeleteId.value = commentId
+}
+
+function confirmDelete() {
+  if (confirmDeleteId.value) {
+    deleteComment(confirmDeleteId.value)
+    confirmDeleteId.value = null
+  }
+}
+
+function requestStatusChange(commentId, action) {
+  confirmStatusId.value = commentId
+  confirmStatusAction.value = action
+}
+
+function confirmStatusChange() {
+  if (confirmStatusId.value) {
+    const newStatus = confirmStatusAction.value === 'hide' ? 'hidden' : 'visible'
+    updateCommentStatus(confirmStatusId.value, newStatus)
+    confirmStatusId.value = null
+    confirmStatusAction.value = ''
+  }
+}
 
 // ─── Status helpers ──────────────────────────────────────────────────────────
 const statusClass = (s) => ({
@@ -52,9 +100,10 @@ const statusLabel = (s) => {
       <div class="p-8 space-y-6">
         <div class="space-y-4">
           <div class="flex flex-wrap items-center gap-3">
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/10">
+            <span v-if="typeof article.category === 'string'" class="px-3 py-1 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/10">
               {{ article.category }}
             </span>
+            <CategoryBadge v-else-if="article.category" :category="article.category" size="sm" />
             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold" :class="statusClass(article.status)">
               {{ statusLabel(article.status) }}
             </span>
@@ -135,6 +184,37 @@ const statusLabel = (s) => {
         </button>
       </div>
     </div>
+
+    <div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">{{ t('comment.title') }}</h2>
+      <CommentTable
+        :comments="comments"
+        :loading="commentsLoading"
+        @hide="requestStatusChange($event, 'hide')"
+        @show="requestStatusChange($event, 'show')"
+        @delete="requestDelete($event)"
+      />
+    </div>
+
+    <ConfirmModal
+      :show="!!confirmDeleteId"
+      :title="t('comment.confirmDeleteTitle')"
+      :message="t('comment.confirmDeleteMessage')"
+      :confirm-text="t('common.delete')"
+      :is-danger="true"
+      @confirm="confirmDelete"
+      @close="confirmDeleteId = null"
+    />
+
+    <ConfirmModal
+      :show="!!confirmStatusId"
+      :title="confirmStatusAction === 'hide' ? t('comment.confirmHideTitle') : t('comment.confirmShowTitle')"
+      :message="confirmStatusAction === 'hide' ? t('comment.confirmHideMessage') : t('comment.confirmShowMessage')"
+      :confirm-text="confirmStatusAction === 'hide' ? t('comment.hide') : t('comment.show')"
+      :is-danger="confirmStatusAction === 'hide'"
+      @confirm="confirmStatusChange"
+      @close="confirmStatusId = null; confirmStatusAction = ''"
+    />
   </div>
 
   <!-- Loading State -->

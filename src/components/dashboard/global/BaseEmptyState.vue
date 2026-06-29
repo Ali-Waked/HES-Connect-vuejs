@@ -4,8 +4,6 @@ defineProps({
   title: { type: String, default: 'No results found' },
   description: { type: String, default: 'Try adjusting your search or filters to find what you are looking for.' }
 });
-
-defineEmits(['reset']);
 </script>
 
 <template>

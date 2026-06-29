@@ -128,37 +128,21 @@ const handleDelete = async () => {
 
 <template>
   <div class="space-y-6 animate-fade-in">
-    <!-- Page Header -->
-    <div class="flex justify-between items-start">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ $t('organizations.title') }}</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">{{ pagination.total || 0 }} {{ $t('organizations.registered') }} {{ $t('organizations.title').toLowerCase() }}</p>
-      </div>
-      <button 
-        class="inline-flex items-center justify-center gap-1.5 py-2.5 px-4.5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 hover:shadow-brand-primary/20 transition cursor-pointer"
-        @click="openAddModal"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        {{ $t('organizations.add') }}
-      </button>
-    </div>
-
     <!-- Controls Bar -->
-    <div class="flex flex-col sm:flex-row gap-3">
+    <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
       <div class="relative flex-grow">
         <svg class="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4.5 h-4.5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <input 
-          type="text" 
-          class="w-full pl-11 pr-4 rtl:pl-4 rtl:pr-11 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition" 
-          :placeholder="$t('organizations.searchPlaceholder')" 
+        <input
+          type="text"
+          class="w-full pl-11 pr-4 rtl:pl-4 rtl:pr-11 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition"
+          :placeholder="$t('organizations.searchPlaceholder')"
           :value="searchQuery"
           @input="onSearchInput($event.target.value)"
         />
       </div>
+      <div class="flex gap-2 shrink-0">
       <select 
         class="min-w-[150px] p-2.5 pr-9 rtl:pr-2.5 rtl:pl-9 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] rtl:bg-[left_12px_center] bg-[length:16px] transition" 
         style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
@@ -183,6 +167,16 @@ const handleDelete = async () => {
         <option value="25">25 / page</option>
         <option value="50">50 / page</option>
       </select>
+      <button
+        class="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 hover:shadow-brand-primary/20 transition cursor-pointer shrink-0"
+        @click="openAddModal"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        {{ $t('organizations.add') }}
+      </button>
+      </div>
     </div>
 
     <!-- Loading State -->

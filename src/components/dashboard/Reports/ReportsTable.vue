@@ -42,7 +42,7 @@ const viewReport = (report) => {
 };
 
 const confirmDelete = (report) => {
-  if (!can('reports.export')) return
+  if (!can('export_reports')) return
   selectedReport.value = report;
   showDeleteConfirm.value = true;
 };
@@ -69,7 +69,7 @@ const handleDelete = () => {
       <template #cell(actions)="{ item }">
         <div class="flex justify-end gap-1">
           <button
-            v-permission="'reports.view'"
+            v-permission="'view_reports'"
             @click="viewReport(item)"
             class="p-1.5 text-slate-400 dark:text-slate-500 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition"
             title="View Details"

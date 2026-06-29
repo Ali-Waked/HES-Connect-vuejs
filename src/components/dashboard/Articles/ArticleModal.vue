@@ -1,12 +1,9 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useLocaleField } from '../../../composables/useLocaleField';
 import { useArticles } from '../../../composables/useArticles';
-import { getCategories } from '../../../services/articleService';
 import { getTags } from '../../../services/articleService';
-import ImageUploader from '../global/ImageUploader.vue';
-import MultipleImageUploader from '../global/MultipleImageUploader.vue';
+import CategorySelect from '../../shared/CategorySelect.vue';
 import TagSelector from '../global/TagSelector.vue';
 import TipTapEditor from '../global/TipTapEditor.vue';
 
@@ -18,7 +15,6 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const { t } = useI18n();
-const { localField } = useLocaleField();
 const { createArticle, updateArticle, fetchArticle, saving } = useArticles();
 
 const contentTab = ref('en');
@@ -29,31 +25,20 @@ const content_en = ref('');
 const content_ar = ref('');
 const category_id = ref('');
 const status = ref('draft');
-const cover_image = ref(null);
-const gallery_images = ref([]);
 const tags = ref([]);
+const cover_image = ref(null);
+const cover_image_preview = ref('');
 const loadingArticle = ref(false);
 
-const categories = ref([]);
 const allTags = ref([]);
 
 watch(() => props.show, async (val) => {
-  if (val) {
-    if (categories.value.length === 0) {
-      try {
-        const { data } = await getCategories()
-        categories.value = data.data || data
-      } catch (e) {
-        // silently fail
-      }
-    }
-    if (allTags.value.length === 0) {
-      try {
-        const { data } = await getTags()
-        allTags.value = data.data || data
-      } catch (e) {
-        // silently fail
-      }
+  if (val && allTags.value.length === 0) {
+    try {
+      const { data } = await getTags()
+      allTags.value = data.data || data
+    } catch (e) {
+      // silently fail
     }
   }
 });
@@ -72,9 +57,9 @@ watch(
         content_ar.value = data.content?.ar || '';
         category_id.value = data.category?.uuid || data.category_id || '';
         status.value = data.status || 'draft';
-        cover_image.value = data.cover_image || data.image || null;
-        gallery_images.value = data.gallery_images || [];
         tags.value = data.tags?.map(t => t.uuid || t.id) || [];
+        cover_image.value = null;
+        cover_image_preview.value = data.cover_image || '';
       } catch (err) {
         resetForm();
       } finally {
@@ -94,10 +79,23 @@ function resetForm() {
   content_ar.value = '';
   category_id.value = '';
   status.value = 'draft';
-  cover_image.value = null;
-  gallery_images.value = [];
   tags.value = [];
+  cover_image.value = null;
+  cover_image_preview.value = '';
   contentTab.value = 'en';
+}
+
+function onCoverImageChange(e) {
+  const file = e.target.files[0];
+  if (file) {
+    cover_image.value = file;
+    cover_image_preview.value = URL.createObjectURL(file);
+  }
+}
+
+function removeCoverImage() {
+  cover_image.value = null;
+  cover_image_preview.value = '';
 }
 
 const submitForm = async () => {
@@ -108,9 +106,8 @@ const submitForm = async () => {
     content_ar: content_ar.value,
     category_id: category_id.value,
     status: status.value,
-    cover_image: cover_image.value,
-    gallery_images: gallery_images.value,
     tags: tags.value,
+    cover_image: cover_image.value,
   };
 
   let result;
@@ -176,10 +173,7 @@ const submitForm = async () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.category') }} *</label>
-              <select class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition cursor-pointer" required v-model="category_id">
-                <option value="" disabled>Select category</option>
-                <option v-for="cat in categories" :key="cat.uuid" :value="cat.uuid">{{ localField(cat, 'name') }}</option>
-              </select>
+              <CategorySelect v-model="category_id" type="article" :placeholder="$t('articles.selectCategory') || 'Select a category'" />
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.status') }}</label>
@@ -191,6 +185,23 @@ const submitForm = async () => {
                 <option value="rejected">{{ $t('statuses.rejected') }}</option>
               </select>
             </div>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('articles.coverImage') || 'Cover Image' }}</label>
+            <div v-if="cover_image_preview" class="relative group">
+              <img :src="cover_image_preview" class="w-full h-48 object-cover rounded-lg border border-slate-200 dark:border-slate-700" />
+              <button type="button" @click="removeCoverImage" class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <label v-else class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:border-brand-primary dark:hover:border-brand-primary transition">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg class="w-8 h-8 mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p class="text-xs text-slate-500">{{ $t('articles.clickToUpload') || 'Click to upload cover image' }}</p>
+              </div>
+              <input type="file" class="hidden" accept="image/*" @change="onCoverImageChange" />
+            </label>
           </div>
 
           <div>
@@ -208,23 +219,6 @@ const submitForm = async () => {
             <div v-show="contentTab === 'ar'">
               <TipTapEditor v-model="content_ar" placeholder="اكتب مقالتك باللغة العربية..." dir="rtl" />
             </div>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              Cover Image *
-            </h4>
-            <ImageUploader v-model="cover_image" :label="$t('articles.coverImage') || 'Upload Cover Image'" aspect-ratio="aspect-video" />
-            <p v-if="!article && !cover_image" class="text-xs text-amber-600 mt-1">Cover image is required</p>
-          </div>
-
-          <div>
-            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-              Gallery Images
-            </h4>
-            <MultipleImageUploader v-model="gallery_images" :label="$t('articles.galleryImages') || 'Upload Gallery Images'" />
           </div>
 
           <TagSelector v-model="tags" :tags="allTags" :label="$t('articles.tags')" />

@@ -18,20 +18,19 @@ const { can } = useAuthPermissions()
 
 const allLinks = [
   { label: 'Dashboard', icon: 'dashboard', to: '/organization/dashboard', permission: null },
-  { label: 'Facilities', icon: 'home_health', to: '/organization/facilities', permission: 'facilities.view' },
-  { label: 'Departments', icon: 'lan', to: '/organization/departments', permission: 'departments.view' },
-  { label: 'Staff', icon: 'badge', to: '/organization/staff', permission: 'staff.view' },
-  { label: 'Appointments', icon: 'calendar_month', to: '/organization/appointments', permission: 'appointments.view' },
-  { label: 'Patients', icon: 'group', to: '/organization/patients', permission: 'patients.view' },
-  { label: 'Reviews', icon: 'star', to: '/organization/reviews', permission: 'reviews.view' },
-  { label: 'Reports', icon: 'analytics', to: '/organization/reports', permission: 'reports.view' },
-  { label: 'Analytics', icon: 'insights', to: '/organization/analytics', permission: 'analytics.view' },
-  { label: 'Notifications', icon: 'notifications', to: '/organization/notifications', permission: 'notifications.view' },
-  { label: 'Settings', icon: 'settings', to: '/organization/settings', permission: 'settings.view' }
+  { label: 'Facilities', icon: 'home_health', to: '/organization/facilities', permission: 'view_facilities' },
+  { label: 'Departments', icon: 'lan', to: '/organization/departments', permission: 'view_departments' },
+  { label: 'Staff', icon: 'badge', to: '/organization/staff', permission: 'view_staff' },
+  { label: 'Appointments', icon: 'calendar_month', to: '/organization/appointments', permission: 'view_appointments' },
+  { label: 'Patients', icon: 'group', to: '/organization/patients', permission: 'view_patients' },
+  { label: 'Reviews', icon: 'star', to: '/organization/reviews', permission: 'view_reviews' },
+  { label: 'Reports', icon: 'analytics', to: '/organization/reports', permission: 'view_reports' },
+  { label: 'Analytics', icon: 'insights', to: '/organization/analytics', permission: 'view_dashboard_statistics' },
+  { label: 'Notifications', icon: 'notifications', to: '/organization/notifications', permission: 'view_notifications' },
+  { label: 'Settings', icon: 'settings', to: '/organization/settings', permission: 'view_settings' }
 ]
 
 const links = computed(() => {
-  if (authStore.isSuperAdmin()) return allLinks
   return allLinks.filter(link => !link.permission || can(link.permission))
 })
 
@@ -82,7 +81,13 @@ function isActive(to) {
 
     <div class="border-t border-slate-100 p-4">
       <div class="flex items-center gap-3">
-        <AvatarInitial :name="userName" />
+        <img
+          v-if="authStore.user?.avatar"
+          :src="authStore.user.avatar"
+          :alt="userName"
+          class="w-10 h-10 rounded-full object-cover ring-2 ring-brand-primary/15 shrink-0"
+        />
+        <AvatarInitial v-else :name="userName" />
         <div class="min-w-0 flex-1">
           <p class="text-sm font-bold text-slate-900 truncate">{{ userName }}</p>
           <p class="text-xs text-slate-500 truncate">{{ userEmail }}</p>

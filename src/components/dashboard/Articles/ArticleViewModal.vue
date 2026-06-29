@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocaleField } from '../../../composables/useLocaleField';
 import { useFormatDate } from '../../../composables/useFormatDate';
 import { useArticles } from '../../../composables/useArticles';
+import CategoryBadge from '../../shared/CategoryBadge.vue';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -76,10 +77,6 @@ const statusClass = (status) => {
 
       <div v-else-if="article" class="p-6 overflow-y-auto flex-1 space-y-6">
 
-        <div v-if="article.cover_image" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-          <img :src="article.cover_image" :alt="localField(article, 'title')" class="w-full h-64 object-cover" />
-        </div>
-
         <div class="flex flex-wrap gap-2">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="statusClass(article.status)">
             {{ $t(`statuses.${article.status}`) }}
@@ -101,7 +98,8 @@ const statusClass = (status) => {
           </div>
           <div>
             <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('articles.category') }}</p>
-            <p class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">{{ article.category ? localField(article.category, 'name') : '—' }}</p>
+            <CategoryBadge v-if="article.category" :category="article.category" size="sm" class="mt-0.5" />
+            <p v-else class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">—</p>
           </div>
           <div>
             <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('common.date') }}</p>
@@ -110,15 +108,6 @@ const statusClass = (status) => {
           <div>
             <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('common.updated') || 'Updated' }}</p>
             <p class="text-sm font-semibold text-slate-900 dark:text-white mt-0.5">{{ formatDate(article.updated_at) }}</p>
-          </div>
-        </div>
-
-        <div v-if="article.gallery_images && article.gallery_images.length > 0">
-          <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{{ $t('articles.galleryImages') || 'Gallery' }}</h4>
-          <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-            <div v-for="(img, i) in article.gallery_images" :key="i" class="aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-              <img :src="img.image_url || img" class="w-full h-full object-cover" />
-            </div>
           </div>
         </div>
 

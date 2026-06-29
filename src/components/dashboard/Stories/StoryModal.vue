@@ -1,7 +1,10 @@
 <script setup>
-import { ref, reactive, watch, computed } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDashboardStore } from '../../../stores/dashboard';
+import { useCategories } from '@/composables/useCategories';
+import CategorySelect from '@/components/shared/CategorySelect.vue';
+import CategoryBadge from '@/components/shared/CategoryBadge.vue';
 import LocalizedInput from '@/components/shared/localized/LocalizedInput.vue'
 
 const props = defineProps({
@@ -13,6 +16,8 @@ const emit = defineEmits(['close']);
 
 const store = useDashboardStore();
 const { t: $t } = useI18n();
+const { categories, fetchCategories } = useCategories();
+fetchCategories({ type: 'story', per_page: 100 })
 
 const activeMode = ref('add');
 const title      = reactive({ en: '', ar: '' });
@@ -20,6 +25,7 @@ const patient    = ref('');
 const status     = ref('Pending');
 const fundraising = ref(false);
 const goal       = ref(0);
+const categoryId = ref(null);
 
 watch(() => [props.show, props.story, props.mode], () => {
   activeMode.value = props.mode;
@@ -30,8 +36,9 @@ watch(() => [props.show, props.story, props.mode], () => {
     status.value     = props.story.status;
     fundraising.value = props.story.fundraising;
     goal.value       = props.story.goal || 0;
+    categoryId.value = props.story.category_id || props.story.category?.id || props.story.category?.uuid || null;
   } else {
-    title.en = ''; title.ar = ''; patient.value = ''; status.value = 'Pending'; fundraising.value = false; goal.value = 0;
+    title.en = ''; title.ar = ''; patient.value = ''; status.value = 'Pending'; fundraising.value = false; goal.value = 0; categoryId.value = null;
   }
 }, { immediate: true });
 
@@ -43,6 +50,7 @@ const statusClass = (s) => ({
 
 const submitForm = () => {
   const data = { title: { en: title.en, ar: title.ar }, patient: patient.value, status: status.value, fundraising: fundraising.value, goal: Number(goal.value) };
+  if (categoryId.value) data.category_id = categoryId.value
   if (activeMode.value === 'edit' && props.story?.id) {
     store.updateStory(props.story.id, data);
   } else if (activeMode.value === 'add') {
@@ -72,7 +80,10 @@ const submitForm = () => {
       <div v-if="activeMode === 'view'" class="p-6 space-y-5">
         <div>
           <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ story?.title?.en || story?.title }}</h2>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="statusClass(story?.status)">{{ story?.status }}</span>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" :class="statusClass(story?.status)">{{ story?.status }}</span>
+            <CategoryBadge v-if="story?.category_id || story?.category" size="xs" :category="story.category || { id: story.category_id }" />
+          </div>
         </div>
         <hr class="border-slate-100 dark:border-slate-700"/>
         <div class="grid grid-cols-2 gap-4">
@@ -108,6 +119,11 @@ const submitForm = () => {
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="sPatient">Patient Name *</label>
             <input id="sPatient" v-model="patient" type="text" required placeholder="e.g. Khalid Abu Amr" class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition"/>
+          </div>
+          <!-- Category -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('myStories.category') || 'Category' }}</label>
+            <CategorySelect v-model="categoryId" type="story" :placeholder="$t('myStories.selectCategory') || 'Select a category'" />
           </div>
           <!-- Status -->
           <div class="flex flex-col gap-1.5">

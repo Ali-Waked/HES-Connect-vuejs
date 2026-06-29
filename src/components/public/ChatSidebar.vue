@@ -268,8 +268,10 @@ async function send() {
   try {
     const { data } = await sendMessage(conversationId.value, { message: text })
     const msg = data.data || data
+    const msgId = msg.id || Date.now()
+    seenMessageIds.value.add(msgId)
     messages.value.push({
-      id: msg.id || Date.now(),
+      id: msgId,
       message: text,
       is_me: true,
       created_at: new Date().toISOString()

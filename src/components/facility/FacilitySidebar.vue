@@ -25,21 +25,20 @@ const { can } = useAuthPermissions()
 
 const MENU_DEFINITIONS = [
   { key: 'dashboard', icon: 'dashboard', permission: null, to: '/dashboard' },
-  { key: 'appointments', icon: 'calendar_month', permission: 'appointments.view', to: '/dashboard/appointments' },
-  { key: 'patients', icon: 'group', permission: 'patients.view', to: '/dashboard/patients' },
-  { key: 'prescriptions', icon: 'medication', permission: 'prescriptions.view', to: '/dashboard/prescriptions' },
-  { key: 'schedule', icon: 'event_available', permission: 'schedule.view', to: '/dashboard/schedule' },
-  { key: 'reviews', icon: 'star', permission: 'reviews.view', to: '/dashboard/reviews' },
-  { key: 'staff', icon: 'badge', permission: 'staff.view', to: '/dashboard/staff' },
-  { key: 'departments', icon: 'domain', permission: 'departments.view', to: '/dashboard/departments' },
-  { key: 'inventory', icon: 'inventory_2', permission: 'inventory.view', to: '/dashboard/inventory' },
-  { key: 'medicationRequests', icon: 'inbox', permission: 'medication_requests.view', to: '/dashboard/medication-requests' },
-  { key: 'medicines', icon: 'medication', permission: 'medicines.view', to: '/dashboard/medicines' },
-  { key: 'articles', icon: 'article', permission: 'articles.view', to: '/dashboard/articles' },
-  { key: 'documents', icon: 'description', permission: 'documents.view', to: '/dashboard/documents' },
-  { key: 'jobPosts', icon: 'work', permission: 'job_posts.view', to: '/dashboard/job-posts' },
-  { key: 'reports', icon: 'assessment', permission: 'reports.view', to: '/dashboard/reports' },
-  { key: 'messages', icon: 'mail', permission: 'messages.view', to: '/dashboard/messages' },
+  { key: 'appointments', icon: 'calendar_month', permission: 'view_appointments', to: '/dashboard/appointments' },
+  { key: 'patients', icon: 'group', permission: 'view_patients', to: '/dashboard/patients' },
+  { key: 'prescriptions', icon: 'medication', permission: 'view_prescriptions', to: '/dashboard/prescriptions' },
+  { key: 'schedule', icon: 'event_available', permission: 'view_staff_schedules', to: '/dashboard/schedule' },
+  { key: 'reviews', icon: 'star', permission: 'view_reviews', to: '/dashboard/reviews' },
+  { key: 'staff', icon: 'badge', permission: 'view_staff', to: '/dashboard/staff' },
+  { key: 'departments', icon: 'domain', permission: 'view_departments', to: '/dashboard/departments' },
+  { key: 'inventory', icon: 'inventory_2', permission: 'view_medicines', to: '/dashboard/inventory' },
+  { key: 'medicationRequests', icon: 'inbox', permission: 'view_medication_requests', to: '/dashboard/medication-requests' },
+  { key: 'medicines', icon: 'medication', permission: 'view_medicines', to: '/dashboard/medicines' },
+  { key: 'articles', icon: 'article', permission: 'view_articles', to: '/dashboard/articles' },
+  { key: 'jobPosts', icon: 'work', permission: 'view_reports', to: '/dashboard/job-posts' },
+  { key: 'reports', icon: 'assessment', permission: 'view_reports', to: '/dashboard/reports' },
+  { key: 'messages', icon: 'mail', permission: 'view_notifications', to: '/dashboard/messages' },
   { key: 'notifications', icon: 'notifications', permission: null, to: '/dashboard/notifications' },
   { key: 'profile', icon: 'person', permission: null, to: '/dashboard/profile' },
 ]
@@ -57,7 +56,6 @@ const MENU_LABELS = {
   medicationRequests: () => t('staffSidebar.medicationRequests'),
   medicines: () => 'Medicines',
   articles: () => 'Articles',
-  documents: () => 'Documents',
   jobPosts: () => 'Job Posts',
   reports: () => 'Reports',
   messages: () => 'Messages',
@@ -66,12 +64,6 @@ const MENU_LABELS = {
 }
 
 const visibleItems = computed(() => {
-  if (authStore.isSuperAdmin()) {
-    return MENU_DEFINITIONS.map(item => ({
-      ...item,
-      label: MENU_LABELS[item.key]?.() || item.key,
-    }))
-  }
   return MENU_DEFINITIONS
     .filter(item => !item.permission || can(item.permission))
     .map(item => ({
@@ -114,7 +106,13 @@ function navigate(to) {
 
     <div class="border-t border-slate-100 dark:border-slate-700 p-4">
       <div class="flex items-center gap-3">
-        <AvatarInitial :name="resolveTranslatedValue(staffStore.currentUser.name)" />
+        <img
+          v-if="authStore.user?.avatar"
+          :src="authStore.user.avatar"
+          :alt="resolveTranslatedValue(authStore.user?.name)"
+          class="w-10 h-10 rounded-full object-cover ring-2 ring-brand-primary/15 shrink-0"
+        />
+        <AvatarInitial v-else :name="resolveTranslatedValue(staffStore.currentUser.name)" />
         <div class="min-w-0 flex-1">
           <p class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ resolveTranslatedValue(staffStore.currentUser.name) }}</p>
           <p class="text-xs text-slate-500 dark:text-slate-400 truncate">

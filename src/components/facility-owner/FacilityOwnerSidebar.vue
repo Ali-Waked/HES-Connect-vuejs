@@ -16,18 +16,17 @@ const authStore = useAuthStore()
 
 const allLinks = [
   { label: 'Dashboard', icon: 'dashboard', to: '/facility/dashboard', permission: null },
-  { label: 'Appointments', icon: 'calendar_month', to: '/facility-owner/appointments', permission: 'appointments.view' },
-  { label: 'Doctors', icon: 'medical_information', to: '/facility-owner/doctors', permission: 'doctors.view' },
-  { label: 'Patients', icon: 'group', to: '/facility-owner/patients', permission: 'patients.view' },
-  { label: 'Schedule', icon: 'event_available', to: '/facility-owner/schedule', permission: 'schedule.view' },
-  { label: 'Analytics', icon: 'analytics', to: '/facility-owner/analytics', permission: 'analytics.view' },
-  { label: 'Alerts', icon: 'notifications_active', to: '/facility-owner/alerts', permission: 'alerts.view' },
-  { label: 'Messages', icon: 'chat', to: '/facility-owner/messages', permission: 'messages.view' },
-  { label: 'Settings', icon: 'settings', to: '/facility-owner/settings', permission: 'settings.view' }
+  { label: 'Appointments', icon: 'calendar_month', to: '/facility-owner/appointments', permission: 'view_appointments' },
+  { label: 'Doctors', icon: 'medical_information', to: '/facility-owner/doctors', permission: 'view_staff' },
+  { label: 'Patients', icon: 'group', to: '/facility-owner/patients', permission: 'view_patients' },
+  { label: 'Schedule', icon: 'event_available', to: '/facility-owner/schedule', permission: 'view_staff_schedules' },
+  { label: 'Analytics', icon: 'analytics', to: '/facility-owner/analytics', permission: 'view_dashboard_statistics' },
+  { label: 'Alerts', icon: 'notifications_active', to: '/facility-owner/alerts', permission: 'view_notifications' },
+  { label: 'Messages', icon: 'chat', to: '/facility-owner/messages', permission: 'view_notifications' },
+  { label: 'Settings', icon: 'settings', to: '/facility-owner/settings', permission: 'view_settings' }
 ]
 
 const links = computed(() => {
-  if (authStore.isSuperAdmin()) return allLinks
   return allLinks.filter(link => !link.permission || authStore.can(link.permission))
 })
 
@@ -80,7 +79,13 @@ function isActive(to) {
 
     <div class="border-t border-slate-100 p-4 dark:border-slate-800">
       <div class="flex items-center gap-3">
-        <AvatarInitial :name="userName" />
+        <img
+          v-if="authStore.user?.avatar"
+          :src="authStore.user.avatar"
+          :alt="userName"
+          class="w-10 h-10 rounded-full object-cover ring-2 ring-brand-primary/15 shrink-0"
+        />
+        <AvatarInitial v-else :name="userName" />
         <div class="min-w-0 flex-1">
           <p class="text-sm font-bold text-slate-900 truncate dark:text-white">{{ userName }}</p>
           <p class="text-xs text-slate-500 truncate dark:text-slate-400">{{ userEmail }}</p>

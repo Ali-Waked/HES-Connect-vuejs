@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDashboardStore } from '../../../stores/dashboard';
 import { resolveTranslatedValue } from '../../../utils/locale';
+import CategoryBadge from '@/components/shared/CategoryBadge.vue';
 
 const route  = useRoute();
 const router = useRouter();
@@ -182,6 +183,10 @@ onUnmounted(() => document.removeEventListener('click', closeStatusMenu));
               <span class="font-semibold">{{ story.patient }}</span>
               <span class="text-white/40">·</span>
               <span>{{ story.created }}</span>
+              <template v-if="story.category || story.category_id">
+                <span class="text-white/40">·</span>
+                <CategoryBadge size="xs" :category="story.category || { id: story.category_id }" />
+              </template>
             </div>
           </div>
         </div>

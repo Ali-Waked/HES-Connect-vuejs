@@ -16,7 +16,7 @@ const goToDashboard = () => {
 
 const goToProfile = () => {
   emit('close');
-  router.push('/profile');
+  router.push('/my-profile');
 };
 
 const goToSettings = () => {

@@ -7,6 +7,7 @@ import { useLocaleField } from '../../../composables/useLocaleField';
 import { useFormatDate } from '../../../composables/useFormatDate';
 import { useArticles } from '../../../composables/useArticles';
 import { getCategories, getTags, updateArticleStatus } from '../../../services/articleService';
+import CategoryBadge from '../../shared/CategoryBadge.vue';
 import { getStaff } from '../../../services/staffService';
 import ArticleModal from './ArticleModal.vue';
 import ArticleViewModal from './ArticleViewModal.vue';
@@ -355,7 +356,6 @@ const statusBadgeClass = (status) => {
         <table class="w-full border-collapse text-left rtl:text-right">
           <thead>
             <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[6%]">{{ $t('common.image') || 'Image' }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[18%]">{{ $t('common.name') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[12%]">{{ $t('articles.category') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[16%]">{{ $t('articles.tags') }}</th>
@@ -367,19 +367,12 @@ const statusBadgeClass = (status) => {
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
             <tr v-for="article in articles" :key="article.uuid || article.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="w-9 h-9 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                  <img v-if="article.cover_image || article.image" :src="article.cover_image || article.image" :alt="localField(article, 'title')" class="w-full h-full object-cover" />
-                  <svg v-else class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                  </svg>
-                </div>
-              </td>
               <td class="px-6 py-4">
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ localField(article, 'title') }}</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">
-                {{ article.category ? localField(article.category, 'name') : '—' }}
+              <td class="px-6 py-4 whitespace-nowrap">
+                <CategoryBadge v-if="article.category" :category="article.category" size="sm" />
+                <span v-else class="text-sm text-slate-400">—</span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex flex-wrap gap-1">

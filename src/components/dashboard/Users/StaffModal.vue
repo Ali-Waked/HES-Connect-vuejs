@@ -10,6 +10,7 @@ import { getDepartmentsLookup } from '../../../services/departmentService';
 import { getPositionsLookup } from '../../../services/positionService';
 import { staffApiToForm, staffFormToUpdatePayload } from '../../../utils/staffHelpers';
 import ImageUploader from '../global/ImageUploader.vue';
+import SymptomMultiSelect from '../Symptoms/SymptomMultiSelect.vue';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -25,6 +26,7 @@ const store = useDashboardStore();
 
 const isEdit = ref(false);
 const facilityRows = ref([]);
+const symptomIds = ref([]);
 let rowKeyCounter = 0;
 
 const form = reactive({
@@ -113,6 +115,7 @@ watch(
         form.avatar = f.avatar || null;
         form.cover_image = f.cover_image || null;
         form.staff_uuid = data.uuid || '';
+        symptomIds.value = f.symptoms || [];
         facilityRows.value = f.facilities.map(f => ({ ...f, departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }));
         for (const row of facilityRows.value) {
           if (row.facility_uuid) await onFacilityChange(row);
@@ -159,6 +162,7 @@ function resetForm() {
   form.consultation_fee = '';
   form.staff_uuid = '';
   form.mode = 'new_user';
+  symptomIds.value = [];
   formTouched.name = false;
   formTouched.email = false;
   formTouched.avatar = false;
@@ -240,6 +244,7 @@ async function handleCheckEmail() {
       form.avatar = f.avatar || null;
       form.cover_image = f.cover_image || null;
       form.staff_uuid = data.uuid || '';
+      symptomIds.value = f.symptoms || [];
       facilityRows.value = f.facilities.map(f => ({ ...f, departmentsOptions: [], loadingDepartments: false, key: ++rowKeyCounter }));
       for (const row of facilityRows.value) {
         if (row.facility_uuid) await onFacilityChange(row);
@@ -269,6 +274,7 @@ const submitForm = async () => {
   let result;
 
   const payload = staffFormToUpdatePayload({
+    symptoms: symptomIds.value,
     specialization_en: form.specialization.en,
     specialization_ar: form.specialization.ar,
     bio_en: form.bio.en,
@@ -570,7 +576,16 @@ const submitForm = async () => {
 
           </template>
 
-          <!-- Submit Error -->
+                  <!-- Symptoms Section -->
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-2">
+              <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">{{ $t('staff.symptoms') || 'Symptoms' }}</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-600 dark:text-slate-400">{{ $t('staff.symptoms') || 'Symptoms' }}</label>
+              <SymptomMultiSelect v-model="symptomIds" :placeholder="$t('staff.selectSymptoms') || 'Select symptoms...'" facility-only />
+            </div>
+
+            <!-- Submit Error -->
           <p v-if="submitError" class="text-xs text-rose-600 text-center">{{ submitError }}</p>
         </div>
 

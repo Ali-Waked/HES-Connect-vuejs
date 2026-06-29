@@ -12,6 +12,7 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   placeholder: { type: String, default: 'Start writing...' },
   dir: { type: String, default: 'ltr' },
+  noFocusBorder: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -77,24 +78,14 @@ function setLink() {
 }
 
 function addImage() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.onchange = () => {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      editor.value.chain().focus().setImage({ src: e.target.result }).run();
-    };
-    reader.readAsDataURL(file);
-  };
-  input.click();
+  const url = window.prompt('Enter image URL:', 'https://');
+  if (url === null || !url.trim()) return;
+  editor.value.chain().focus().setImage({ src: url.trim() }).run();
 }
 </script>
 
 <template>
-  <div class="tiptap-editor border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition focus-within:border-brand-primary focus-within:ring-3 focus-within:ring-brand-primary/10">
+  <div class="tiptap-editor border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition" :class="noFocusBorder ? '' : 'focus-within:border-brand-primary focus-within:ring-3 focus-within:ring-brand-primary/10'">
     <div class="flex flex-wrap gap-0.5 p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
       <button type="button" @click="editor.chain().focus().toggleBold().run()" :class="editor?.isActive('bold') ? 'bg-brand-primary/10 text-brand-primary' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'" class="p-1.5 rounded-lg transition cursor-pointer text-sm font-bold min-w-[30px] flex items-center justify-center" title="Bold">
         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>

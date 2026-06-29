@@ -1,13 +1,33 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { locale } = useI18n();
 
 const props = defineProps({
-  title: { type: String, required: true },
-  value: { type: [String, Number], required: true },
+  title: { type: [String, Object], required: true },
+  value: { type: [String, Number, Object], required: true },
   icon: { type: String, required: true },
   color: { type: String, default: 'primary' },
   subtitle: { type: String, default: '' }
 });
+
+function extractText(val) {
+  if (!val && val !== 0) return '';
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      if (typeof parsed === 'object') return parsed[locale.value] || parsed.en || parsed.ar || '';
+    } catch {}
+    return val;
+  }
+  if (typeof val === 'number') return String(val);
+  if (typeof val === 'object') return val[locale.value] || val.en || val.ar || '';
+  return '';
+}
+
+const displayValue = computed(() => extractText(props.value));
+const displayTitle = computed(() => extractText(props.title));
 
 const colorClasses = {
   primary: 'text-brand-primary bg-brand-primary/10 dark:text-brand-primary dark:bg-brand-primary/10',
@@ -30,8 +50,8 @@ const colorClasses = {
       </div>
     </div>
     <div class="min-w-0">
-      <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{{ title }}</p>
-      <h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ value }}</h3>
+      <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{{ displayTitle }}</p>
+      <h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ displayValue }}</h3>
       <p v-if="subtitle" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">{{ subtitle }}</p>
     </div>
   </div>

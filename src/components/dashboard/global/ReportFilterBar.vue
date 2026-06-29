@@ -1,0 +1,116 @@
+<script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+const props = defineProps({
+  filters: { type: Object, required: true },
+  facilities: { type: Array, default: () => [] },
+  departments: { type: Array, default: () => [] },
+});
+
+const emit = defineEmits(['update:filters', 'apply', 'reset']);
+
+function update(key, value) {
+  emit('update:filters', { ...props.filters, [key]: value });
+}
+</script>
+
+<template>
+  <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('reviews.dateFrom') }}
+        </label>
+        <input
+          type="date"
+          :value="filters.from_date"
+          @input="update('from_date', $event.target.value)"
+          class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        />
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('reviews.dateTo') }}
+        </label>
+        <input
+          type="date"
+          :value="filters.to_date"
+          @input="update('to_date', $event.target.value)"
+          class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        />
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('reviews.facility') }}
+        </label>
+        <select
+          :value="filters.facility_id"
+          @change="update('facility_id', $event.target.value)"
+          class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        >
+          <option value="">{{ t('common.all') }}</option>
+          <option v-for="f in facilities" :key="f.id" :value="f.id">{{ f.name }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('departments.title') }}
+        </label>
+        <select
+          :value="filters.department_id"
+          @change="update('department_id', $event.target.value)"
+          class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        >
+          <option value="">{{ t('common.all') }}</option>
+          <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('common.status') }}
+        </label>
+        <select
+          :value="filters.status"
+          @change="update('status', $event.target.value)"
+          class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        >
+          <option value="">{{ t('common.all') }}</option>
+          <option value="pending">{{ t('statuses.pending') }}</option>
+          <option value="approved">{{ t('statuses.approved') }}</option>
+          <option value="rejected">{{ t('statuses.rejected') }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
+          {{ t('articles.category') }}
+        </label>
+        <select
+          :value="filters.category"
+          @change="update('category', $event.target.value)"
+          class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+        >
+          <option value="">{{ t('common.all') }}</option>
+          <option value="medical">{{ t('articles.category') }} Medical</option>
+          <option value="financial">Financial</option>
+          <option value="administrative">Administrative</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 mt-4 pt-4 border-t border-slate-50 dark:border-slate-700">
+      <button
+        @click="$emit('apply')"
+        class="px-4 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl hover:bg-brand-primary-hover transition shadow-lg shadow-brand-primary/20"
+      >
+        {{ t('superAdmin.systemAction') }}
+      </button>
+      <button
+        @click="$emit('reset')"
+        class="px-4 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
+      >
+        {{ t('common.resetFilters') }}
+      </button>
+    </div>
+  </div>
+</template>

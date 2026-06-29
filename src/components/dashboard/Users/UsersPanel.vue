@@ -105,7 +105,7 @@ const handleStatClick = (card) => {
         </p>
       </div>
       <button
-        v-permission="'users.manage'"
+        v-permission="'create_user'"
         class="inline-flex items-center gap-2 py-2.5 px-5 bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-bold rounded-lg shadow-md shadow-brand-primary/15 transition cursor-pointer"
         @click="showCreateDialog = true"
       >

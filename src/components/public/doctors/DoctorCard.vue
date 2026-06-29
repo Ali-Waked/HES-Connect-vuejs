@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { resolveTranslatedValue, getNameInitial } from '@/utils/locale'
+import FavoriteButton from '@/components/favorites/FavoriteButton.vue'
 
 const props = defineProps({
   doctor: { type: Object, required: true }
@@ -42,7 +43,7 @@ function viewProfile() {
     @click="viewProfile"
   >
     <div class="p-5">
-      <div class="flex items-center gap-4">
+      <div class="flex items-start gap-4">
         <div class="w-14 h-14 rounded-full shrink-0 overflow-hidden bg-gradient-to-br from-brand-primary to-brand-primary-dark ring-2 ring-slate-100 dark:ring-slate-700 cursor-pointer" @click.stop="viewProfile">
           <img
             v-if="avatarSrc && !avatarError"
@@ -76,6 +77,7 @@ function viewProfile() {
             <span class="truncate">{{ doctor.city || t('common.notSpecified') }}</span>
           </div>
         </div>
+        <FavoriteButton :favoritable-id="doctor.uuid || doctor.id" favoritable-type="staff" size="sm" @click.stop />
       </div>
 
       <div v-if="doctor.facilities_count !== undefined || doctor.primary_facility" class="flex items-center gap-2 mt-3 flex-wrap">

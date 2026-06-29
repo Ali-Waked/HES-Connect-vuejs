@@ -14,29 +14,37 @@ const props = defineProps({
 const canvasRef = ref(null)
 let chartInstance = null
 
+const nonScalesTypes = ['doughnut', 'pie', 'polarArea', 'radar', 'bubble', 'scatter']
+
 function renderChart() {
   if (!canvasRef.value) return
   if (chartInstance) chartInstance.destroy()
+  const isNonScales = nonScalesTypes.includes(props.type)
+  const defaultOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    }
+  }
+  if (!isNonScales) {
+    defaultOpts.scales = {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#94a3b8', font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(0,0,0,0.04)' },
+        ticks: { color: '#94a3b8', font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
+      }
+    }
+  }
   chartInstance = new Chart(canvasRef.value, {
     type: props.type,
     data: props.data,
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#94a3b8', font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: { color: '#94a3b8', font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
-        }
-      },
+      ...defaultOpts,
       ...props.options
     }
   })

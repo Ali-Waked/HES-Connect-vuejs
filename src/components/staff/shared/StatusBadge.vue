@@ -4,20 +4,20 @@ const props = defineProps({
 });
 
 const styles = {
-  booked: 'bg-blue-100/30 text-blue-700',
-  completed: 'bg-green-100/30 text-green-700',
-  cancelled: 'bg-red-100/30 text-red-700',
-  rescheduled: 'bg-amber-100/30 text-amber-700',
-  pending: 'bg-amber-100/30 text-amber-700',
-  approved: 'bg-green-100/30 text-green-700',
-  rejected: 'bg-red-100/30 text-red-700',
-  draft: 'bg-slate-100 text-slate-600',
-  published: 'bg-green-100/30 text-green-700',
-  pending_review: 'bg-blue-100/30 text-blue-700',
-  archived: 'bg-slate-100 text-slate-500',
-  low: 'bg-red-100/30 text-red-700',
-  medium: 'bg-amber-100/30 text-amber-700',
-  good: 'bg-green-100/30 text-green-700'
+  booked: 'bg-blue-100/30 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  completed: 'bg-green-100/30 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  cancelled: 'bg-red-100/30 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  rescheduled: 'bg-amber-100/30 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  pending: 'bg-amber-100/30 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  approved: 'bg-green-100/30 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  rejected: 'bg-red-100/30 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  draft: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+  published: 'bg-green-100/30 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  pending_review: 'bg-blue-100/30 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  archived: 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400',
+  low: 'bg-red-100/30 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  medium: 'bg-amber-100/30 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  good: 'bg-green-100/30 text-green-700 dark:bg-green-900/30 dark:text-green-400'
 };
 
 function label(value) {
@@ -26,7 +26,7 @@ function label(value) {
 </script>
 
 <template>
-    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold" :class="styles[props.status] || 'bg-slate-100 text-slate-600'">
+  <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold" :class="styles[props.status] || 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'">
     {{ label(props.status) }}
   </span>
 </template>

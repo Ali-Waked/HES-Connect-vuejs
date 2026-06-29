@@ -1,113 +1,213 @@
 <script setup>
-import { reactive, ref, watch } from 'vue';
-import { useProfile } from '../../composables/useProfile';
+import { reactive, ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import AuthInput from '@/components/auth/AuthInput.vue'
+import AuthButton from '@/components/auth/AuthButton.vue'
+import AuthLabel from '@/components/auth/AuthLabel.vue'
+import { getCitiesLookup } from '@/services/cityService'
+
+const { locale } = useI18n()
 
 const props = defineProps({
-  profile: { type: Object, required: true },
-  saving: { type: Boolean, default: false }
-});
+  profile: { type: Object, default: null },
+  saving: { type: Boolean, default: false },
+  errors: { type: Object, default: () => ({}) },
+})
 
-const emit = defineEmits(['save']);
-const { validateProfile } = useProfile(ref(props.profile));
-const editMode = ref(false);
-const errors = ref({});
+const emit = defineEmits(['save'])
+
+const cities = ref([])
+const loadingCities = ref(false)
 
 const form = reactive({
-  fullName: '',
-  email: '',
+  name_en: '',
+  name_ar: '',
   phone: '',
-  gender: 'male',
-  birthDate: '',
-  address: ''
-});
+  address: '',
+  gender: '',
+  birth_date: '',
+  city_id: '',
+  locale: 'en',
+})
+
+function resolveName(obj) {
+  if (!obj) return ''
+  if (typeof obj === 'string') return obj
+  return obj[locale.value] || obj.en || obj.ar || ''
+}
 
 function syncForm() {
-  form.fullName = props.profile.fullName || '';
-  form.email = props.profile.email || '';
-  form.phone = props.profile.phone || '';
-  form.gender = props.profile.gender || 'male';
-  form.birthDate = props.profile.birthDate || '';
-  form.address = props.profile.address || '';
+  if (!props.profile) return
+  const name = props.profile.name
+  if (typeof name === 'object' && name !== null) {
+    form.name_en = name.en || ''
+    form.name_ar = name.ar || ''
+  } else {
+    form.name_en = name || ''
+    form.name_ar = ''
+  }
+  form.phone = props.profile.phone || ''
+  form.address = props.profile.address || ''
+  form.gender = props.profile.gender || ''
+  form.birth_date = props.profile.birth_date || ''
+  form.city_id = props.profile.city_id || ''
+  form.locale = props.profile.locale || 'en'
 }
 
-watch(() => props.profile, syncForm, { immediate: true, deep: true });
+watch(() => props.profile, syncForm, { immediate: true, deep: true })
 
-async function save() {
-  errors.value = validateProfile(form);
-  if (Object.keys(errors.value).length) return;
+onMounted(async () => {
+  loadingCities.value = true
+  try {
+    const { data } = await getCitiesLookup()
+    cities.value = data.data || data || []
+  } catch {
+    cities.value = []
+  } finally {
+    loadingCities.value = false
+  }
+})
 
-  emit('save', { ...form });
-  editMode.value = false;
+function fieldError(field) {
+  return props.errors?.[field]?.[0] || ''
 }
 
-function cancel() {
-  syncForm();
-  errors.value = {};
-  editMode.value = false;
+function handleSubmit() {
+  emit('save', {
+    ...form,
+    name: { en: form.name_en, ar: form.name_ar },
+  })
 }
 </script>
 
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h2 class="text-lg font-semibold text-slate-950">Personal Information</h2>
-        <p class="mt-1 text-sm text-slate-500">Manage contact details from the user profile record.</p>
-      </div>
-      <button
-        v-if="!editMode"
-        type="button"
-        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-        @click="editMode = true"
-      >
-        <span class="material-symbols-outlined text-[18px]">edit</span>
-        Edit
-      </button>
+  <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <!-- Section Header -->
+    <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-4 border-b border-slate-100 dark:border-slate-800">
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white">Personal Information</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Update your personal details and preferences.</p>
     </div>
 
-    <form class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2" @submit.prevent="save">
-      <label class="space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Full Name</span>
-        <input v-model="form.fullName" :disabled="!editMode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition disabled:bg-slate-50 disabled:text-slate-600 " />
-        <span v-if="errors.fullName" class="text-xs font-semibold text-rose-600">{{ errors.fullName }}</span>
-      </label>
+    <!-- Form -->
+    <form @submit.prevent="handleSubmit" class="p-6 sm:p-8 space-y-6">
+      <!-- Names -->
+      <div>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Full Name</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AuthInput
+            v-model="form.name_en"
+            id="name_en"
+            name="name_en"
+            label="English"
+            placeholder="John Doe"
+            :error="fieldError('name.en')"
+          />
+          <AuthInput
+            v-model="form.name_ar"
+            id="name_ar"
+            name="name_ar"
+            label="Arabic"
+            dir="rtl"
+            placeholder="جون دو"
+            :error="fieldError('name.ar')"
+          />
+        </div>
+      </div>
 
-      <label class="space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</span>
-        <input v-model="form.email" type="email" :disabled="!editMode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition disabled:bg-slate-50 disabled:text-slate-600 " />
-        <span v-if="errors.email" class="text-xs font-semibold text-rose-600">{{ errors.email }}</span>
-      </label>
+      <!-- Contact -->
+      <div>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Contact</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AuthInput
+            v-model="form.phone"
+            id="phone"
+            name="phone"
+            label="Phone"
+            placeholder="+970 59-XXX-XXXX"
+            :error="fieldError('phone')"
+          />
 
-      <label class="space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</span>
-        <input v-model="form.phone" :disabled="!editMode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition disabled:bg-slate-50 disabled:text-slate-600 " />
-        <span v-if="errors.phone" class="text-xs font-semibold text-rose-600">{{ errors.phone }}</span>
-      </label>
+          <div>
+            <AuthLabel for="locale" label="Language" />
+            <select
+              v-model="form.locale"
+              id="locale"
+              name="locale"
+              class="block w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-900 dark:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+            >
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <label class="space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gender</span>
-        <select v-model="form.gender" :disabled="!editMode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium outline-none transition disabled:bg-slate-50 disabled:text-slate-600 ">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-      </label>
+      <!-- Personal -->
+      <div>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Personal Details</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <AuthLabel for="gender" label="Gender" />
+            <select
+              v-model="form.gender"
+              id="gender"
+              name="gender"
+              class="block w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-900 dark:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+            >
+              <option value="" disabled>Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            <p v-if="fieldError('gender')" class="mt-1.5 text-xs text-red-500">{{ fieldError('gender') }}</p>
+          </div>
 
-      <label class="space-y-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Birth Date</span>
-        <input v-model="form.birthDate" type="date" :disabled="!editMode" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition disabled:bg-slate-50 disabled:text-slate-600 " />
-      </label>
+          <AuthInput
+            v-model="form.birth_date"
+            id="birth_date"
+            name="birth_date"
+            type="date"
+            label="Birth Date"
+            :error="fieldError('birth_date')"
+          />
 
-      <label class="space-y-2 sm:col-span-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Address</span>
-        <textarea v-model="form.address" rows="3" :disabled="!editMode" class="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium outline-none transition disabled:bg-slate-50 disabled:text-slate-600 "></textarea>
-      </label>
+          <div>
+            <AuthLabel for="city_id" label="City" />
+            <select
+              v-model="form.city_id"
+              id="city_id"
+              name="city_id"
+              :disabled="loadingCities"
+              class="block w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-900 dark:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 hover:bg-slate-100 dark:hover:bg-slate-700/50 disabled:opacity-50"
+            >
+              <option value="" disabled>{{ loadingCities ? 'Loading cities...' : 'Select city' }}</option>
+              <option v-for="city in cities" :key="city.uuid" :value="city.uuid">
+                {{ resolveName(city.name) }}
+              </option>
+            </select>
+            <p v-if="fieldError('city_id')" class="mt-1.5 text-xs text-red-500">{{ fieldError('city_id') }}</p>
+          </div>
+        </div>
+      </div>
 
-      <div v-if="editMode" class="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:col-span-2 sm:flex-row sm:justify-end">
-        <button type="button" class="h-10 rounded-lg border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" @click="cancel">Cancel</button>
-        <button type="submit" :disabled="saving" class="h-10 rounded-lg bg-brand-primary px-6 text-sm font-semibold text-white transition hover:bg-brand-primary-hover disabled:opacity-60">
+      <!-- Address -->
+      <div>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">Address</p>
+        <AuthInput
+          v-model="form.address"
+          id="address"
+          name="address"
+          label="Street Address"
+          placeholder="Your address"
+          :error="fieldError('address')"
+        />
+      </div>
+
+      <!-- Submit -->
+      <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+        <AuthButton type="submit" :loading="saving" size="lg">
           {{ saving ? 'Saving...' : 'Save Changes' }}
-        </button>
+        </AuthButton>
       </div>
     </form>
-  </section>
+  </div>
 </template>

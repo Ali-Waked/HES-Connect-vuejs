@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocaleField } from '../../../composables/useLocaleField';
 import { useDepartments } from '../../../composables/useDepartments';
 import { getFacilities } from '../../../services/facilityService';
-import { getStaff } from '../../../services/staffService';
+import axiosClient from '@/axiosClient';
 import ImageUploader from '../global/ImageUploader.vue';
 
 const props = defineProps({
@@ -23,13 +23,31 @@ const name_ar = ref('');
 const description_en = ref('');
 const description_ar = ref('');
 const facility_id = ref('');
-const head_id = ref('');
+const head_facility_staff_id = ref('');
 const image = ref(null);
 const is_active = ref(true);
 const loadingDep = ref(false);
 
 const facilities = ref([]);
 const staffList = ref([]);
+const staffLoading = ref(false);
+
+async function fetchStaffByFacility(facilityUuid) {
+  if (!facilityUuid) {
+    staffList.value = []
+    head_facility_staff_id.value = ''
+    return
+  }
+  staffLoading.value = true
+  try {
+    const { data } = await axiosClient.get(`/dashboard/${facilityUuid}/staffs`)
+    staffList.value = data.data || []
+  } catch {
+    staffList.value = []
+  } finally {
+    staffLoading.value = false
+  }
+}
 
 watch(() => props.show, async (val) => {
   if (val) {
@@ -41,14 +59,18 @@ watch(() => props.show, async (val) => {
         // silently fail for dropdown
       }
     }
-    if (staffList.value.length === 0) {
-      try {
-        const { data } = await getStaff({ per_page: 1000 })
-        staffList.value = data.data
-      } catch (e) {
-        // silently fail for dropdown
-      }
+    if (facility_id.value) {
+      await fetchStaffByFacility(facility_id.value)
     }
+  }
+});
+
+watch(facility_id, async (newFacilityId) => {
+  if (newFacilityId) {
+    await fetchStaffByFacility(newFacilityId)
+  } else {
+    staffList.value = []
+    head_facility_staff_id.value = ''
   }
 });
 
@@ -66,7 +88,7 @@ watch(
         description_en.value = data.description?.en || '';
         description_ar.value = data.description?.ar || '';
         facility_id.value = data.facility_id || '';
-        head_id.value = data.head_id || '';
+        head_facility_staff_id.value = data.head_facility_staff_id || '';
         image.value = data.image || null;
         is_active.value = data.is_active === 1 || data.is_active === true;
       } catch (err) {
@@ -87,7 +109,7 @@ function resetForm() {
   description_en.value = '';
   description_ar.value = '';
   facility_id.value = '';
-  head_id.value = '';
+  head_facility_staff_id.value = '';
   image.value = null;
   is_active.value = true;
 }
@@ -99,7 +121,7 @@ const submitForm = async () => {
     description_en: description_en.value,
     description_ar: description_ar.value,
     facility_id: facility_id.value,
-    head_id: head_id.value || null,
+    head_facility_staff_id: head_facility_staff_id.value || null,
     image: image.value,
     is_active: is_active.value,
   };
@@ -213,14 +235,15 @@ const submitForm = async () => {
 
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-slate-600 dark:text-slate-400" for="depHead">{{ $t('departments.head') }}</label>
-            <select 
+            <select
               id="depHead"
               class="w-full p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none transition cursor-pointer"
-              v-model="head_id"
+              v-model="head_facility_staff_id"
+              :disabled="!facility_id || staffLoading"
             >
-              <option value="">{{ $t('common.none') || 'None' }}</option>
-              <option v-for="staff in staffList" :key="staff.uuid || staff.id" :value="staff.uuid || staff.id">
-                {{ localField(staff, 'name') }}
+              <option value="">{{ staffLoading ? 'Loading...' : ($t('common.none') || 'None') }}</option>
+              <option v-for="staff in staffList" :key="staff.uuid" :value="staff.uuid">
+                {{ staff.name }}{{ staff.specialization ? ` (${staff.specialization})` : '' }}
               </option>
             </select>
           </div>
