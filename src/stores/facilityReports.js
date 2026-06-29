@@ -1,9 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { useAuthStore } from './auth';
-import { getReports, exportExcel, exportPdf } from '@/services/reportService';
+import { getReports, exportExcel, exportPdf } from '@/services/facilityReportService';
 
-export const useReportsStore = defineStore('reports', () => {
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export const useFacilityReportsStore = defineStore('facilityReports', () => {
   const data = ref(null);
   const loading = ref(false);
   const error = ref(null);
@@ -12,11 +20,9 @@ export const useReportsStore = defineStore('reports', () => {
   const filters = ref({
     from_date: '',
     to_date: '',
-    facility_id: '',
     department_id: '',
-    status: '',
-    category: '',
-    search: '',
+    doctor_id: '',
+    appointment_status: '',
   });
 
   const overview = computed(() => data.value?.overview ?? {});
@@ -24,15 +30,18 @@ export const useReportsStore = defineStore('reports', () => {
   const tables = computed(() => data.value?.tables ?? []);
   const hasData = computed(() => data.value !== null);
 
+  function activeParams() {
+    return Object.fromEntries(
+      Object.entries(filters.value).filter(([, v]) => v !== '')
+    );
+  }
+
   async function fetchReports() {
     if (loading.value) return;
     loading.value = true;
     error.value = null;
     try {
-      const params = Object.fromEntries(
-        Object.entries(filters.value).filter(([, v]) => v !== '')
-      );
-      const res = await getReports(params);
+      const res = await getReports(activeParams());
       data.value = res.data.data;
     } catch (err) {
       error.value = err.response?.data?.message || err.message || 'Failed to load reports';
@@ -41,7 +50,7 @@ export const useReportsStore = defineStore('reports', () => {
     }
   }
 
-  function setFilter(key, value) {
+  function updateFilter(key, value) {
     filters.value[key] = value;
   }
 
@@ -49,11 +58,9 @@ export const useReportsStore = defineStore('reports', () => {
     filters.value = {
       from_date: '',
       to_date: '',
-      facility_id: '',
       department_id: '',
-      status: '',
-      category: '',
-      search: '',
+      doctor_id: '',
+      appointment_status: '',
     };
   }
 
@@ -61,22 +68,10 @@ export const useReportsStore = defineStore('reports', () => {
     return fetchReports();
   }
 
-  function downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   async function exportToExcel() {
     exporting.value.excel = true;
     try {
-      const params = Object.fromEntries(
-        Object.entries(filters.value).filter(([, v]) => v !== '')
-      );
-      const res = await exportExcel(params);
+      const res = await exportExcel(activeParams());
       downloadBlob(res.data, `reports-${Date.now()}.xlsx`);
     } catch (err) {
       error.value = err.response?.data?.message || err.message || 'Export failed';
@@ -88,10 +83,7 @@ export const useReportsStore = defineStore('reports', () => {
   async function exportToPdf() {
     exporting.value.pdf = true;
     try {
-      const params = Object.fromEntries(
-        Object.entries(filters.value).filter(([, v]) => v !== '')
-      );
-      const res = await exportPdf(params);
+      const res = await exportPdf(activeParams());
       downloadBlob(res.data, `reports-${Date.now()}.pdf`);
     } catch (err) {
       error.value = err.response?.data?.message || err.message || 'Export failed';
@@ -103,7 +95,7 @@ export const useReportsStore = defineStore('reports', () => {
   return {
     data, loading, error, exporting, filters,
     overview, charts, tables, hasData,
-    fetchReports, setFilter, resetFilters, applyFilters,
+    fetchReports, updateFilter, resetFilters, applyFilters,
     exportToExcel, exportToPdf,
   };
 });

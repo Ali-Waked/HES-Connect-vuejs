@@ -1,70 +1,25 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axiosClient, { csrfCookie } from '@/axiosClient'
 import { getInitials } from '../utils/locale'
 import { useWorkspaceStore } from './workspace'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user                = ref(null)
-  const loading             = ref(false)
-  const authenticated       = ref(false)
-  const errors              = ref({})
-  const initCalled          = ref(false)
+  const user                        = ref(null)
+  const loading                     = ref(false)
+  const authenticated               = ref(false)
+  const errors                      = ref({})
+  const initCalled                  = ref(false)
 
-  const systemRoles         = ref([])
-  const systemPermissions   = ref([])
-  const staffMemberships    = ref([])
-
-  const hasSystemRole = (role) => systemRoles.value.some(r => r.slug === role)
-  const hasSystemPermission = (perm) => systemPermissions.value.some(p => typeof p === 'string' ? p === perm : p.key === perm)
-
-  const isSuperAdmin = () => hasSystemRole('super_admin')
-  const isModerator = () => hasSystemRole('moderator')
-  const isAdmin = () => isSuperAdmin() || hasSystemRole('admin')
-
-  function hasFacilityRole(role) {
-    const ws = useWorkspaceStore()
-    if (ws.currentWorkspace) return ws.currentRoleSlug === role
-    return staffMemberships.value.some(m => m.role?.slug === role)
-  }
-
-  const hasAnyRole = (...roles) => roles.some(r => hasSystemRole(r) || hasFacilityRole(r))
-
-  const userRoles = computed(() => {
-    const roles = []
-    for (const r of systemRoles.value) roles.push(r.slug)
-    const ws = useWorkspaceStore()
-    if (ws.currentRoleSlug) roles.push(ws.currentRoleSlug)
-    for (const m of staffMemberships.value) {
-      if (m.role?.slug && !roles.includes(m.role.slug)) roles.push(m.role.slug)
-    }
-    return roles
-  })
-
-  const dashboardRoute = computed(() => {
-    if (isSuperAdmin() || isAdmin()) return '/platform/dashboard'
-    if (isModerator()) return '/platform/dashboard'
-    const ws = useWorkspaceStore()
-    if (ws.currentWorkspace) return ws.resolveDashboardLanding()
-    if (staffMemberships.value.length > 0) return '/dashboard'
-    return '/'
-  })
+  const systemPermissions           = ref([])
+  const activeWorkspacePermissions  = ref([])
+  const staffMemberships            = ref([])
+  const activeWorkspace             = ref(null)
 
   function can(permission) {
-    if (isSuperAdmin() || isAdmin()) return true
-    if (hasSystemPermission(permission)) return true
-
-    const ws = useWorkspaceStore()
-    if (ws.currentWorkspace) {
-      return ws.hasPermission(permission)
-    }
-
-    for (const m of staffMemberships.value) {
-      const perms = m.permissions || []
-      if (perms.includes('*') || perms.includes(permission)) return true
-    }
-
-    return false
+    return systemPermissions.value.includes(permission) ||
+           activeWorkspacePermissions.value.includes(permission)
   }
 
   function canAny(permissions) {
@@ -75,23 +30,90 @@ export const useAuthStore = defineStore('auth', () => {
     return permissions.every(p => can(p))
   }
 
+  const dashboardRoute = computed(() => {
+    if (user.value?.dashboard_route) return user.value.dashboard_route
+    if (staffMemberships.value.length > 0 && !activeWorkspace.value) return '/select-workspace'
+    if (activeWorkspace.value) return '/dashboard'
+    return '/'
+  })
+
+  function setActiveWorkspace(facilityId) {
+    const found = staffMemberships.value.find(
+      ws => ws.facility?.id === facilityId || ws.facility?.uuid === facilityId
+    )
+    if (found) {
+      activeWorkspace.value = found
+      activeWorkspacePermissions.value = found.permissions || []
+      try { localStorage.setItem('hes_active_workspace_id', String(facilityId)) } catch {}
+      const ws = useWorkspaceStore()
+      ws.switchWorkspace(found)
+    }
+  }
+
+  function loadStaffMemberships(memberships) {
+    staffMemberships.value = memberships || []
+
+    if (staffMemberships.value.length === 0) {
+      activeWorkspace.value = null
+      activeWorkspacePermissions.value = []
+      return
+    }
+
+    const persistedId = (() => {
+      try { return localStorage.getItem('hes_active_workspace_id') } catch { return null }
+    })()
+
+    if (persistedId) {
+      const found = staffMemberships.value.find(
+        ws => String(ws.facility?.id) === persistedId || String(ws.facility?.uuid) === persistedId
+      )
+      if (found) {
+        activeWorkspace.value = found
+        activeWorkspacePermissions.value = found.permissions || []
+        return
+      }
+    }
+
+    const first = staffMemberships.value[0]
+    activeWorkspace.value = first
+    activeWorkspacePermissions.value = first.permissions || []
+    try { localStorage.setItem('hes_active_workspace_id', String(first.facility?.id || '')) } catch {}
+  }
+
   async function fetchUser() {
     try {
       const { data } = await axiosClient.get('/profile')
       const userData = data.user || data
+
       user.value = {
         ...userData,
+        avatar: userData.avatar || userData.profile_image || userData.image || '',
         initials: getInitials(typeof userData.name === 'string' ? userData.name : (userData.name?.en || userData.name?.ar || ''))
       }
-      systemRoles.value = userData.system_roles || []
+
       systemPermissions.value = userData.system_permissions || []
-      staffMemberships.value = userData.staff_memberships || []
+      loadStaffMemberships(userData.staff_memberships || [])
+
+      if (userData.active_workspace_permissions) {
+        activeWorkspacePermissions.value = userData.active_workspace_permissions
+      }
 
       const ws = useWorkspaceStore()
       ws.loadWorkspaces(userData.staff_memberships || [])
 
       if (userData.dashboard_route) {
         user.value.dashboard_route = userData.dashboard_route
+      }
+
+      if (userData.locale) {
+        const savedLang = localStorage.getItem('lang') || 'en'
+        if (userData.locale !== savedLang) {
+          localStorage.setItem('lang', userData.locale)
+          const { locale } = useI18n()
+          locale.value = userData.locale
+          document.documentElement.setAttribute('dir', userData.locale === 'ar' ? 'rtl' : 'ltr')
+          document.documentElement.setAttribute('lang', userData.locale)
+        }
       }
 
       authenticated.value = true
@@ -149,9 +171,11 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       user.value = null
       authenticated.value = false
-      systemRoles.value = []
       systemPermissions.value = []
+      activeWorkspacePermissions.value = []
       staffMemberships.value = []
+      activeWorkspace.value = null
+      try { localStorage.removeItem('hes_active_workspace_id') } catch {}
       const ws = useWorkspaceStore()
       ws.clearWorkspaces()
     }
@@ -183,21 +207,16 @@ export const useAuthStore = defineStore('auth', () => {
     authenticated,
     errors,
     initCalled,
-    systemRoles,
     systemPermissions,
+    activeWorkspacePermissions,
     staffMemberships,
-    hasSystemRole,
-    hasSystemPermission,
-    hasFacilityRole,
-    hasAnyRole,
-    isSuperAdmin,
-    isModerator,
-    isAdmin,
+    activeWorkspace,
     can,
     canAny,
     canAll,
-    userRoles,
     dashboardRoute,
+    setActiveWorkspace,
+    loadStaffMemberships,
     login,
     register,
     logout,

@@ -8,7 +8,7 @@ function toFormData(formData) {
   payload.append('description[en]', formData.description_en || '')
   payload.append('description[ar]', formData.description_ar || '')
   payload.append('facility_id', formData.facility_id)
-  payload.append('head_id', formData.head_id || '')
+  payload.append('head_facility_staff_id', formData.head_facility_staff_id || '')
   payload.append('is_active', formData.is_active ? 1 : 0)
 
   if (formData.image instanceof File) {

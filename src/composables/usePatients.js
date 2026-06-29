@@ -9,7 +9,7 @@ import { getFacilityStaff } from '@/services/appointmentService'
 export function usePatients() {
   const store = useDashboardStore()
   const workspaceStore = useWorkspaceStore()
-  const { can, isFacilityManager, currentRoleSlug } = useAuthPermissions()
+  const { can } = useAuthPermissions()
 
   const loading = ref(false)
   const error = ref(null)
@@ -32,7 +32,7 @@ export function usePatients() {
   })
 
   const showStaffFilter = computed(() => {
-    return can('patients.view-all') || isFacilityManager() || currentRoleSlug.value === 'facility_owner'
+    return can('view_patients')
   })
 
   const hasActiveFilters = computed(() => {

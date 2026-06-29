@@ -38,6 +38,7 @@
  * @property {StaffFacility[]} [facilities]
  * @property {Translation} [specialization]
  * @property {Translation} [bio]
+ * @property {Array<{uuid:string,name:Translation}>} [symptoms]
  */
 
 /**
@@ -72,6 +73,7 @@ export function staffApiToForm(data) {
       joined_at: f.joined_at || null,
       ended_at: f.ended_at || null,
     })),
+    symptoms: (data.symptoms || []).map(s => s.uuid || s.id),
   }
 }
 
@@ -93,6 +95,7 @@ export function emptyForm() {
     avatar: null,
     cover_image: null,
     facilities: [],
+    symptoms: [],
   }
 }
 
@@ -119,6 +122,7 @@ export function staffFormToUpdatePayload(form) {
       department_uuid: f.department_uuid || null,
       position_uuid: f.position_uuid || null,
     })),
+    symptom_ids: form.symptoms || [],
   }
 
   if (form.avatar instanceof File) {

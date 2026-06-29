@@ -1,4 +1,14 @@
 import axiosClient from '@/axiosClient'
+import { useWorkspaceStore } from '@/stores/workspace'
+
+function getFacilityUuid() {
+  try {
+    const store = useWorkspaceStore()
+    return store.currentFacility?.uuid
+  } catch {
+    return null
+  }
+}
 
 function hasFiles(data) {
   return Object.values(data).some(v => v instanceof File || v instanceof FileList) ||
@@ -77,4 +87,47 @@ export function terminateStaff(uuid) {
 
 export function terminateFacilityStaff(facilityStaffUuid) {
   return axiosClient.post(`/dashboard/facility-staff/${facilityStaffUuid}/terminate`)
+}
+
+export function updateStaffSymptoms(facilityStaffUuid, symptomIds) {
+  return axiosClient.put(`/dashboard/facility-staff/${facilityStaffUuid}/symptoms`, {
+    symptom_ids: symptomIds,
+  })
+}
+
+// ── Facility Staff ─────────────────────────
+
+export function getFacilityStaff(params = {}) {
+  const facilityUuid = getFacilityUuid()
+  return axiosClient.get(`/facility/${facilityUuid}/staff`, { params })
+}
+
+export function getFacilityStaffMember(staffUuid) {
+  const facilityUuid = getFacilityUuid()
+  return axiosClient.get(`/facility/${facilityUuid}/staff/${staffUuid}`)
+}
+
+export function createFacilityStaff(data) {
+  const facilityUuid = getFacilityUuid()
+  const payload = hasFiles(data) ? toFormData(data) : data
+  return axiosClient.post(`/facility/${facilityUuid}/staff`, payload)
+}
+
+export function updateFacilityStaff(staffUuid, data) {
+  const facilityUuid = getFacilityUuid()
+  if (hasFiles(data)) {
+    const fd = toFormData(data)
+    fd.append('_method', 'PUT')
+    return axiosClient.post(`/facility/${facilityUuid}/staff/${staffUuid}`, fd)
+  }
+  return axiosClient.patch(`/facility/${facilityUuid}/staff/${staffUuid}`, data)
+}
+
+export function deleteFacilityStaff(staffUuid) {
+  const facilityUuid = getFacilityUuid()
+  return axiosClient.delete(`/facility/${facilityUuid}/staff/${staffUuid}`)
+}
+
+export function getFacilityStaffSummary() {
+  return axiosClient.get('/facility/staff')
 }

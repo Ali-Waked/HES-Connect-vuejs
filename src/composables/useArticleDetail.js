@@ -30,9 +30,6 @@ export function useArticleDetail(uuid) {
   })
 
   const authorName = computed(() => article.value?.author?.name || article.value?.author_name || '')
-  const hasGallery = computed(() => (article.value?.images?.length || 0) > 0)
-  const galleryImages = computed(() => article.value?.images || [])
-  const currentGalleryIndex = ref(0)
 
   function formatDate(dateStr) {
     if (!dateStr) return ''
@@ -106,10 +103,6 @@ export function useArticleDetail(uuid) {
       setMeta('twitter:card', 'summary_large_image')
       setMeta('twitter:title', title.value)
       setMeta('twitter:description', desc)
-      if (articleData.cover_image) {
-        setMeta('og:image', articleData.cover_image)
-        setMeta('twitter:image', articleData.cover_image)
-      }
       if (articleData.published_at) setMeta('article:published_time', articleData.published_at)
       if (articleData.author?.name) setMeta('article:author', articleData.author.name)
       if (articleData.category?.name?.en) setMeta('article:section', articleData.category.name.en)
@@ -174,9 +167,6 @@ export function useArticleDetail(uuid) {
     excerpt,
     categoryName,
     authorName,
-    hasGallery,
-    galleryImages,
-    currentGalleryIndex,
     formatDate,
     goToTag,
     goToCategory,

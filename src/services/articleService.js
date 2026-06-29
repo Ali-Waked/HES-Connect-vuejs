@@ -10,22 +10,14 @@ function toFormData(formData) {
   payload.append('category_id', formData.category_id)
   payload.append('status', formData.status || 'draft')
 
-  if (formData.cover_image instanceof File) {
-    payload.append('cover_image', formData.cover_image)
-  }
-
-  if (formData.gallery_images && formData.gallery_images.length > 0) {
-    formData.gallery_images.forEach((file) => {
-      if (file instanceof File) {
-        payload.append('gallery_images[]', file)
-      }
-    })
-  }
-
   if (formData.tags && formData.tags.length > 0) {
     formData.tags.forEach((tagId) => {
       payload.append('tags[]', tagId)
     })
+  }
+
+  if (formData.cover_image) {
+    payload.append('cover_image', formData.cover_image)
   }
 
   return payload

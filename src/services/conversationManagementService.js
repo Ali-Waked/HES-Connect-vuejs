@@ -1,21 +1,21 @@
 import axiosClient from '@/axiosClient'
 
 export function getConversations(params = {}) {
-  return axiosClient.get('/admin/conversations', { params })
+  return axiosClient.get('/dashboard/conversations', { params })
 }
 
 export function getConversationDetails(id) {
-  return axiosClient.get(`/admin/conversations/${id}`)
+  return axiosClient.get(`/dashboard/conversations/${id}`)
 }
 
 export function getConversationStats() {
-  return axiosClient.get('/admin/conversations/stats')
+  return axiosClient.get('/dashboard/conversations/stats')
 }
 
 export function archiveConversation(id) {
-  return axiosClient.post(`/admin/conversations/${id}/archive`)
+  return axiosClient.patch(`/dashboard/conversations/${id}/archive`)
 }
 
 export function lockConversation(id) {
-  return axiosClient.post(`/admin/conversations/${id}/lock`)
+  return axiosClient.patch(`/dashboard/conversations/${id}/lock`)
 }

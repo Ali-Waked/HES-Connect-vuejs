@@ -9,7 +9,7 @@ import * as appointmentService from '@/services/appointmentService'
 export function useAppointments() {
   const store = useDashboardStore()
   const workspaceStore = useWorkspaceStore()
-  const { can, isFacilityManager, currentRoleSlug } = useAuthPermissions()
+  const { can } = useAuthPermissions()
   const { t } = useI18n()
 
   const loading = ref(false)
@@ -41,7 +41,7 @@ export function useAppointments() {
   let _lastParams = {}
 
   const showStaffFilter = computed(() => {
-    return can('appointments.view-all') || isFacilityManager() || currentRoleSlug.value === 'facility_owner'
+    return can('view_appointments')
   })
 
   const queryParams = computed(() => ({

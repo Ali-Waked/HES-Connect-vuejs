@@ -8,8 +8,8 @@ export function useConversationRealtime(options = {}) {
     onMessageReceived = null,
     onConversationListUpdated = null,
     enableUserChannel = false,
-    messageEvent = 'MessageSent',
-    listEvent = 'NewConversationMessage',
+    messageEvent = '.message.sent',
+    listEvent = '.new-conversation-message',
   } = options
 
   const isConnected = ref(false)
@@ -24,20 +24,19 @@ export function useConversationRealtime(options = {}) {
   }
 
   function on(el, event, handler) {
-    el.bind(event, handler)
-    cleanupFns.push(() => el.unbind(event, handler))
+    el.listen(event, handler)
+    cleanupFns.push(() => el.stopListening(event, handler))
   }
 
   function subscribeConversation(id) {
     if (!id) return
 
     if (conversationChannel) {
-      const prevId = conversationChannel._conversationId
-      echoInstance.leave(`private-conversation.${prevId}`)
+      echoInstance.leave(`conversation.${conversationChannel._conversationId}`)
       conversationChannel = null
     }
 
-    const channel = echoInstance.channel(`private-conversation.${id}`)
+    const channel = echoInstance.private(`conversation.${id}`)
     channel._conversationId = id
     conversationChannel = channel
 
@@ -50,8 +49,7 @@ export function useConversationRealtime(options = {}) {
 
   function subscribeUserChannel() {
     if (userChannel) {
-      const prevId = userChannel._userId
-      echoInstance.leave(`private-user.${prevId}`)
+      echoInstance.leave(`user.${userChannel._userId}`)
       userChannel = null
     }
 
@@ -59,7 +57,7 @@ export function useConversationRealtime(options = {}) {
     const userId = auth.user?.uuid
     if (!userId) return
 
-    const channel = echoInstance.channel(`private-user.${userId}`)
+    const channel = echoInstance.private(`user.${userId}`)
     channel._userId = userId
     userChannel = channel
 
@@ -132,15 +130,13 @@ export function useConversationRealtime(options = {}) {
   }
 
   onUnmounted(() => {
-    const id = conversationChannel?._conversationId
-    if (id) {
-      echoInstance.leave(`private-conversation.${id}`)
+    if (conversationChannel?._conversationId) {
+      echoInstance.leave(`conversation.${conversationChannel._conversationId}`)
     }
     conversationChannel = null
 
-    const uid = userChannel?._userId
-    if (uid) {
-      echoInstance.leave(`private-user.${uid}`)
+    if (userChannel?._userId) {
+      echoInstance.leave(`user.${userChannel._userId}`)
     }
     userChannel = null
 

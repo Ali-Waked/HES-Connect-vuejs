@@ -1,35 +1,65 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import * as paymentService from '../services/dashboard/paymentService'
 
 export const usePaymentsStore = defineStore('payments', () => {
-  const payments = ref([
-    { id: 'PAY-2001', invoice_id: 'INV-1001', amount: 150.00, method: 'Credit Card', created_at: '2026-06-01T10:30:00Z', transaction_ref: 'tx_987654321' },
-    { id: 'PAY-2002', invoice_id: 'INV-1003', amount: 75.50, method: 'PayPal', created_at: '2026-06-03T10:00:00Z', transaction_ref: 'pp_123456789' },
-    { id: 'PAY-2003', invoice_id: 'INV-1005', amount: 120.00, method: 'Cash', created_at: '2026-06-04T09:00:00Z', transaction_ref: 'CASH-001' },
-    { id: 'PAY-2004', invoice_id: 'INV-1006', amount: 50.00, method: 'Bank Transfer', created_at: '2026-06-05T15:20:00Z', transaction_ref: 'BT-998877' }
-  ]);
+  const payments = ref([])
+  const loading = ref(false)
+  const error = ref(null)
 
   const stats = computed(() => {
-    const totalAmount = payments.value.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalAmount = payments.value.reduce((acc, curr) => acc + curr.amount, 0)
     const byMethod = payments.value.reduce((acc, curr) => {
-      acc[curr.method] = (acc[curr.method] || 0) + 1;
-      return acc;
-    }, {});
-
+      acc[curr.method] = (acc[curr.method] || 0) + 1
+      return acc
+    }, {})
     return {
       total: payments.value.length,
       amount: totalAmount.toFixed(2),
-      methods: Object.keys(byMethod).length
-    };
-  });
+      methods: Object.keys(byMethod).length,
+    }
+  })
 
-  const deletePayment = (id) => {
-    payments.value = payments.value.filter(p => p.id !== id);
-  };
+  async function fetchPayments(params = {}) {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await paymentService.getPayments(params)
+      payments.value = (res.data.data || res.data).map(normalizePayment)
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Failed to load payments'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function normalizePayment(p) {
+    return {
+      id: p.id,
+      invoice_id: p.invoice_id || p.invoice?.id,
+      amount: Number(p.amount) || 0,
+      method: p.method || p.payment_method || 'Unknown',
+      created_at: p.created_at || p.createdAt,
+      transaction_ref: p.transaction_ref || p.transactionReference || '—',
+    }
+  }
+
+  async function deletePayment(id) {
+    const previous = payments.value
+    payments.value = payments.value.filter(p => p.id !== id)
+    try {
+      await paymentService.getPayment(id)
+    } catch {
+      payments.value = previous
+    }
+  }
 
   return {
     payments,
     stats,
-    deletePayment
-  };
-});
+    loading,
+    error,
+    fetchPayments,
+    deletePayment,
+  }
+})
