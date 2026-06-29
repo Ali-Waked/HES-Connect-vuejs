@@ -166,6 +166,21 @@ export const useFavoritesStore = defineStore('favorites', () => {
     return toggling.value.has(cacheKey(type, id))
   }
 
+  function syncFavorited(type, id, isFavorited, favoriteId) {
+    const key = cacheKey(type, id)
+    if (isFavorited) {
+      if (!favoritedIds.value[key]) {
+        favoritedIds.value = { ...favoritedIds.value, [key]: favoriteId || `synced-${Date.now()}` }
+      }
+    } else {
+      if (favoritedIds.value[key]) {
+        const newIds = { ...favoritedIds.value }
+        delete newIds[key]
+        favoritedIds.value = newIds
+      }
+    }
+  }
+
   async function removeFavoriteById(favoriteId) {
     try {
       await favoritesService.removeFavorite(favoriteId)
@@ -199,5 +214,6 @@ export const useFavoritesStore = defineStore('favorites', () => {
     loadMore,
     toggleFavorite,
     removeFavoriteById,
+    syncFavorited,
   }
 })
