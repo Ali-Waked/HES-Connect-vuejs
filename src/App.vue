@@ -4,6 +4,7 @@ import { RouterView } from 'vue-router';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useAuthStore } from '@/stores/auth';
 import { useLanguageStore } from '@/stores/language';
+import PublicToastContainer from '@/components/global/PublicToastContainer.vue';
 
 const themeStore = useThemeStore();
 const authStore = useAuthStore();
@@ -27,4 +28,5 @@ onMounted(async () => {
 
 <template>
   <RouterView />
+  <PublicToastContainer />
 </template>

@@ -38,7 +38,7 @@ axiosClient.interceptors.request.use(
 );
 
 export const csrfCookie = () =>
-  axios.get(`${import.meta.env.VITE_APP_URL}/sanctum/csrf-cookie`, {
+  axios.get(`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
     withCredentials: true,
   })
 

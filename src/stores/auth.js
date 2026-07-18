@@ -136,8 +136,10 @@ export const useAuthStore = defineStore('auth', () => {
         errors.value = err.response.data.errors ?? {}
       } else if (err.response?.status === 429) {
         errors.value = { email: ['Too many attempts. Please wait and try again.'] }
+      } else if (err.response?.status === 419) {
+        errors.value = { general: 'Session expired. Please refresh the page and try again.' }
       } else {
-        errors.value = { general: 'Invalid credentials. Please try again.' }
+        errors.value = { general: err.response?.data?.message || 'Invalid credentials. Please try again.' }
       }
       return { success: false }
     } finally {
