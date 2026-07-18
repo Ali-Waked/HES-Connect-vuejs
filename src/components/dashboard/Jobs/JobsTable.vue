@@ -16,6 +16,13 @@ const { t } = useI18n();
 const { localField } = useLocaleField();
 const store = useDashboardStore();
 const { formatDate } = useFormatDate();
+
+const applyMethodIcon = (method) => {
+  if (method === 'email') {
+    return { icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', label: 'Email' };
+  }
+  return { icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1', label: 'Link' };
+};
 const { jobs, loading, stats, statsLoading, deleteJob, pagination, fetchJobs, fetchJobStats } = useJobs();
 
 const searchQuery = ref('');
@@ -278,6 +285,7 @@ async function confirmStatusChange() {
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('jobs.details') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('jobs.facility') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('jobs.status') }}</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('jobs.applyMethod') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('jobs.dates') }}</th>
               <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left">{{ $t('common.actions') }}</th>
             </tr>
@@ -316,6 +324,15 @@ async function confirmStatusChange() {
                 <button type="button" @click="openStatusModal(job)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-slate-300 dark:hover:ring-slate-600 transition" :class="statusBadgeClass(job.status)">
                   {{ $t(`statuses.${job.status}`) }}
                 </button>
+              </td>
+
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" :d="applyMethodIcon(job.apply_method).icon"/>
+                  </svg>
+                  <span class="text-sm text-slate-700 dark:text-slate-300 font-medium capitalize">{{ job.apply_method || '—' }}</span>
+                </div>
               </td>
 
               <td class="px-6 py-4 whitespace-nowrap">

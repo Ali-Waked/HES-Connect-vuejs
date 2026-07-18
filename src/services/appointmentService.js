@@ -75,7 +75,7 @@ export function cancelMyAppointment(uuid, data = {}) {
 export function getLiveAppointments(params = {}) {
   const uuid = getFacilityUuid()
   if (!uuid) return Promise.resolve({ data: { data: [] } })
-  return axiosClient.get(`/facility/dashboard/appointments/live`, { params })
+  return axiosClient.get(`/facility/${uuid}/dashboard/appointments/live`, { params })
 }
 
 export function exportAppointments(params = {}) {

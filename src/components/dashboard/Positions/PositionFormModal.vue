@@ -134,7 +134,7 @@ const submitForm = async () => {
                 :class="validationErrors['name.ar'] ? 'border-rose-500 dark:border-rose-500' : 'border-slate-200 dark:border-slate-700'"
                 required
                 dir="rtl"
-                placeholder="مدير مستشفى"
+                placeholder="مدير منشأة"
                 v-model="name_ar"
               />
               <p v-if="validationErrors['name.ar']" class="text-xs text-rose-600">{{ validationErrors['name.ar'][0] }}</p>

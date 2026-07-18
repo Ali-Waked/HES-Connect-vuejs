@@ -49,6 +49,21 @@ const isExpiringSoon = computed(() => {
     class="group card-base overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col"
     @click="goToJob"
   >
+    <div v-if="job.cover_image" class="relative h-40 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
+      <img :src="job.cover_image" :alt="title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      <span v-if="job.employment_type" class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-brand-primary text-[10px] font-semibold rounded-md">
+        {{ job.employment_type.replace(/_/g, ' ') }}
+      </span>
+    </div>
+    <div v-else class="relative h-40 overflow-hidden bg-gradient-to-br from-brand-primary/5 to-brand-primary/10 dark:from-brand-primary/10 dark:to-brand-primary/5 flex items-center justify-center">
+      <svg class="w-16 h-16 text-brand-primary/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+        <path stroke-linecap="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>
+      <span v-if="job.employment_type" class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-brand-primary text-[10px] font-semibold rounded-md">
+        {{ job.employment_type.replace(/_/g, ' ') }}
+      </span>
+    </div>
+
     <div class="p-5 flex flex-col flex-1">
       <div class="flex items-start justify-between gap-3 mb-3">
         <div class="min-w-0 flex-1">
@@ -72,8 +87,11 @@ const isExpiringSoon = computed(() => {
           <span :class="isExpiringSoon ? 'text-red-500 font-semibold' : ''">{{ $t('jobs.ends') }}: {{ formatDate(job.end_date) }}</span>
         </span>
         <span class="flex items-center gap-1" v-if="job.apply_method">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg v-if="job.apply_method === 'email'" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+          </svg>
+          <svg v-else class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
           </svg>
           {{ job.apply_method === 'email' ? $t('jobs.applyByEmail') || 'Email' : $t('jobs.applyByLink') || 'Link' }}
         </span>
