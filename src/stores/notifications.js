@@ -12,9 +12,13 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const loading = ref(false)
   const loadingMore = ref(false)
   const saving = ref(false)
+  const error = ref(null)
   const pagination = ref({ page: 1, lastPage: 1, total: 0, perPage: 20 })
   const filterType = ref(null)
   const filterRead = ref(null)
+  const searchQuery = ref('')
+  const sortOrder = ref('desc')
+  const selectedNotification = ref(null)
 
   // ── Real-time buffer ───────────────────────────────────────────────────────
   const buffer = ref([])
@@ -24,6 +28,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   // ── Toast trigger for real-time notifications ──────────────────────────────
   const lastRealtime = ref(null)
+
+  // ── Polling fallback ───────────────────────────────────────────────────────
+  let pollTimer = null
+  const POLL_INTERVAL = 30000
+  const previousUnreadCount = ref(0)
 
   // ── Sound preference (localStorage-backed) ─────────────────────────────────
   const soundEnabled = ref(true)
@@ -58,7 +67,38 @@ export const useNotificationsStore = defineStore('notifications', () => {
   // ── Getters ────────────────────────────────────────────────────────────────
   const hasUnread = computed(() => unreadCount.value > 0)
   const last5 = computed(() => items.value.slice(0, 5))
-  const unreadOnly = computed(() => items.value.filter(n => !n.read_at))
+  const unreadNotifications = computed(() => items.value.filter(n => !n.read_at))
+  const isLoading = computed(() => loading.value)
+
+  const filteredAndSorted = computed(() => {
+    let result = [...items.value]
+
+    if (filterRead.value === true) {
+      result = result.filter(n => !n.read_at)
+    } else if (filterRead.value === false) {
+      result = result.filter(n => n.read_at)
+    }
+
+    if (filterType.value) {
+      result = result.filter(n => n.type === filterType.value)
+    }
+
+    if (searchQuery.value) {
+      const q = searchQuery.value.toLowerCase()
+      result = result.filter(n =>
+        n.title.toLowerCase().includes(q) ||
+        n.message.toLowerCase().includes(q)
+      )
+    }
+
+    result.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime()
+      const dateB = new Date(b.created_at).getTime()
+      return sortOrder.value === 'desc' ? dateB - dateA : dateA - dateB
+    })
+
+    return result
+  })
 
   // ── Icon config per notification type ──────────────────────────────────────
   const typeConfig = {
@@ -72,6 +112,13 @@ export const useNotificationsStore = defineStore('notifications', () => {
     prescription: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', icon: 'text-emerald-600 dark:text-emerald-400', svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>` },
     review:       { bg: 'bg-yellow-100 dark:bg-yellow-900/30', icon: 'text-yellow-600 dark:text-yellow-400', svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>` },
     article:      { bg: 'bg-cyan-100 dark:bg-cyan-900/30',    icon: 'text-cyan-600 dark:text-cyan-400',   svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"/>` },
+    doctor:       { bg: 'bg-pink-100 dark:bg-pink-900/30',    icon: 'text-pink-600 dark:text-pink-400',   svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>` },
+    payment:      { bg: 'bg-orange-100 dark:bg-orange-900/30', icon: 'text-orange-600 dark:text-orange-400', svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>` },
+    authentication: { bg: 'bg-violet-100 dark:bg-violet-900/30', icon: 'text-violet-600 dark:text-violet-400', svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>` },
+    ai:           { bg: 'bg-sky-100 dark:bg-sky-900/30',      icon: 'text-sky-600 dark:text-sky-400',     svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>` },
+    warning:      { bg: 'bg-red-100 dark:bg-red-900/30',      icon: 'text-red-600 dark:text-red-400',     svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>` },
+    success:      { bg: 'bg-green-100 dark:bg-green-900/30',  icon: 'text-green-600 dark:text-green-400', svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>` },
+    error:        { bg: 'bg-red-100 dark:bg-red-900/30',      icon: 'text-red-600 dark:text-red-400',     svg: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>` },
   }
 
   function getConfig(type) {
@@ -87,7 +134,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
       type: raw.type_name || data.type || 'system',
       title: data.title || raw.title || '',
       message: data.message || raw.message || '',
+      icon: raw.icon || data.icon || null,
+      color: raw.color || data.color || null,
+      group: raw.group || data.group || null,
       action_url: data.action_url || raw.action_url || null,
+      action_type: data.action_type || raw.action_type || null,
+      entity_uuid: data.entity_uuid || raw.entity_uuid || null,
       read_at: raw.read_at || null,
       created_at: raw.created_at || raw.createdAt,
       updated_at: raw.updated_at || raw.updatedAt,
@@ -98,12 +150,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
   // ── API Actions ────────────────────────────────────────────────────────────
   async function fetchNotifications(params = {}) {
     loading.value = true
+    error.value = null
     try {
       const query = {
         page: params.page || 1,
         per_page: params.perPage || pagination.value.perPage,
         ...(filterType.value ? { type: filterType.value } : {}),
         ...(filterRead.value !== null ? { read: filterRead.value } : {}),
+        ...(searchQuery.value ? { search: searchQuery.value } : {}),
+        ...(sortOrder.value ? { sort: sortOrder.value } : {}),
         ...params,
       }
       const { data } = await notificationService.getNotifications(query)
@@ -127,8 +182,24 @@ export const useNotificationsStore = defineStore('notifications', () => {
       } else {
         updateUnreadCount()
       }
-    } catch {
+    } catch (e) {
+      error.value = e?.response?.data?.message || e.message || 'Failed to load notifications'
       if (pagination.value.page === 1) items.value = []
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchUnread() {
+    loading.value = true
+    error.value = null
+    try {
+      const { data } = await notificationService.getUnread()
+      const list = (data.data || data.notifications || data || []).map(normalize)
+      items.value = list
+      unreadCount.value = list.length
+    } catch (e) {
+      error.value = e?.response?.data?.message || e.message || 'Failed to load unread notifications'
     } finally {
       loading.value = false
     }
@@ -139,6 +210,17 @@ export const useNotificationsStore = defineStore('notifications', () => {
     loadingMore.value = true
     await fetchNotifications({ page: pagination.value.page + 1 })
     loadingMore.value = false
+  }
+
+  async function fetchUnreadCount() {
+    try {
+      const { data } = await notificationService.getUnreadCount()
+      const newCount = typeof data === 'number' ? data : (data.count || data.unread_count || 0)
+      if (newCount !== unreadCount.value) {
+        previousUnreadCount.value = unreadCount.value
+        unreadCount.value = newCount
+      }
+    } catch {}
   }
 
   async function markAsRead(uuid) {
@@ -176,11 +258,17 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
   }
 
-  async function refreshUnreadCount() {
+  async function deleteAll() {
+    const prevItems = [...items.value]
+    const prevCount = unreadCount.value
+    items.value = []
+    unreadCount.value = 0
     try {
-      const { data } = await notificationService.getUnreadCount()
-      unreadCount.value = typeof data === 'number' ? data : (data.count || data.unread_count || 0)
-    } catch {}
+      await notificationService.deleteAll()
+    } catch {
+      items.value = prevItems
+      unreadCount.value = prevCount
+    }
   }
 
   // ── Optimistic updates ─────────────────────────────────────────────────────
@@ -219,9 +307,59 @@ export const useNotificationsStore = defineStore('notifications', () => {
     fetchNotifications({ page: 1 })
   }
 
+  function setSearch(query) {
+    searchQuery.value = query
+    fetchNotifications({ page: 1 })
+  }
+
+  function setSortOrder(order) {
+    sortOrder.value = order
+    fetchNotifications({ page: 1 })
+  }
+
+  function selectNotification(notification) {
+    selectedNotification.value = notification
+  }
+
+  function clearSelection() {
+    selectedNotification.value = null
+  }
+
+  async function refresh() {
+    await Promise.all([
+      fetchNotifications({ page: 1 }),
+      fetchUnreadCount(),
+    ])
+  }
+
+  // ── Polling fallback (when WebSocket not available) ────────────────────────
+  let isPolling = false
+
+  function startPolling() {
+    if (isPolling || pollTimer) return
+    isPolling = true
+    pollTimer = setInterval(async () => {
+      await fetchUnreadCount()
+      if (unreadCount.value > previousUnreadCount.value) {
+        await fetchNotifications({ page: 1 })
+      }
+    }, POLL_INTERVAL)
+  }
+
+  function stopPolling() {
+    if (pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
+    isPolling = false
+  }
+
   // ── WebSocket / Echo Integration ───────────────────────────────────────────
   function subscribeToChannel(userId) {
-    if (!userId || !import.meta.env.VITE_PUSHER_APP_KEY) return
+    if (!userId || !import.meta.env.VITE_PUSHER_APP_KEY) {
+      startPolling()
+      return
+    }
     import('@/services/echo').then(({ echo }) => {
       if (echoChannel) leaveChannel()
       echoChannel = echo.private(`user.${userId}`)
@@ -242,7 +380,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
           unreadCount.value = event.unread_count
         }
       })
-    }).catch(() => {})
+    }).catch(() => {
+      startPolling()
+    })
   }
 
   function leaveChannel() {
@@ -287,6 +427,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
     buffer.value = []
     leaveChannel()
+    stopPolling()
   }
 
   return {
@@ -295,27 +436,42 @@ export const useNotificationsStore = defineStore('notifications', () => {
     loading,
     loadingMore,
     saving,
+    error,
     pagination,
     filterType,
     filterRead,
+    searchQuery,
+    sortOrder,
+    selectedNotification,
     hasUnread,
     last5,
-    unreadOnly,
+    unreadOnly: unreadNotifications,
     lastRealtime,
     soundEnabled,
     typeConfig,
+    filteredAndSorted,
+    isLoading,
     getConfig,
     persistSound,
     fetchNotifications,
+    fetchUnread,
     fetchMore,
+    fetchUnreadCount,
     markAsRead,
     markAllAsRead,
     deleteNotification,
-    refreshUnreadCount,
+    deleteAll,
     setFilterType,
     setFilterRead,
+    setSearch,
+    setSortOrder,
+    selectNotification,
+    clearSelection,
+    refresh,
     subscribeToChannel,
     leaveChannel,
+    startPolling,
+    stopPolling,
     cleanup,
     pushToBuffer,
     flushBuffer,
