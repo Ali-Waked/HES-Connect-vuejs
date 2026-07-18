@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import HeroVisual3D from './HeroVisual3D.vue';
 
 const props = defineProps({
   stats: { type: Object, default: null },
@@ -28,7 +29,7 @@ function handleSearch() {
 </script>
 
 <template>
-  <section class="relative min-h-[90vh] flex items-center bg-slate-900 overflow-hidden">
+  <section class="relative min-h-[90vh] flex items-center bg-slate-900">
     <div class="absolute inset-0 dots-pattern opacity-40"></div>
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
     <div class="absolute top-0 left-1/3 w-[600px] h-[600px] bg-brand-primary/5 rounded-full blur-3xl"></div>
@@ -113,24 +114,8 @@ function handleSearch() {
           </div>
         </div>
 
-        <div class="hidden lg:flex lg:col-span-5 justify-center items-center">
-          <svg viewBox="0 0 400 400" class="w-full max-w-sm text-white/5" fill="currentColor">
-            <circle cx="200" cy="200" r="180" stroke="currentColor" stroke-width="0.5" fill="none" class="text-white/10"/>
-            <circle cx="200" cy="200" r="140" stroke="currentColor" stroke-width="0.5" fill="none" class="text-white/8"/>
-            <circle cx="200" cy="200" r="100" stroke="currentColor" stroke-width="0.5" fill="none" class="text-white/6"/>
-            <path d="M200 80 L200 120 M180 100 L220 100" stroke="currentColor" stroke-width="2" class="text-white/20"/>
-            <path d="M280 200 L320 200 M300 180 L300 220" stroke="currentColor" stroke-width="2" class="text-white/20"/>
-            <path d="M120 200 L80 200 M100 180 L100 220" stroke="currentColor" stroke-width="2" class="text-white/20"/>
-            <path d="M200 320 L200 280 M180 300 L220 300" stroke="currentColor" stroke-width="2" class="text-white/20"/>
-            <path d="M155 155 L245 245 M155 245 L245 155" stroke="currentColor" stroke-width="1" class="text-white/10"/>
-            <circle cx="200" cy="200" r="4" class="text-amber-400"/>
-            <circle cx="260" cy="150" r="3" class="text-white/20"/>
-            <circle cx="140" cy="160" r="2.5" class="text-white/15"/>
-            <circle cx="230" cy="260" r="2" class="text-white/15"/>
-            <circle cx="170" cy="240" r="2.5" class="text-white/10"/>
-            <circle cx="120" cy="220" r="1.5" class="text-white/10"/>
-            <circle cx="280" cy="230" r="2" class="text-white/10"/>
-          </svg>
+        <div class="hidden md:flex lg:col-span-5 justify-center items-center">
+          <HeroVisual3D />
         </div>
       </div>
 
