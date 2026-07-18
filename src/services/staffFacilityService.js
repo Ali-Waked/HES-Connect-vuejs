@@ -15,3 +15,7 @@ export function getAvailableDays(facilityId, staffId) {
 export function getAvailableSlots(facilityId, staffId, params = {}) {
   return axiosClient.get(`/doctors/${facilityId}/${staffId}/available-slots`, { params })
 }
+
+export function getStaffByFacility(facilityId) {
+  return axiosClient.get(`/dashboard/${facilityId}/staffs`)
+}

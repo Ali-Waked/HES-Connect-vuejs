@@ -8,15 +8,16 @@ export function useStaffUnavailability() {
   const auth = useAuthStore()
   const workspaceStore = useWorkspaceStore()
   const store = useStaffStore()
-  const staffUuid = computed(() => workspaceStore.currentWorkspace?.uuid || auth.user?.uuid)
+  const facilityUuid = computed(() => workspaceStore.currentFacility?.uuid)
   const unavailabilityList = ref([])
   const loading = ref(false)
   const saving = ref(false)
 
   async function fetchUnavailability(params = {}) {
+    if (!facilityUuid.value) return
     loading.value = true
     try {
-      const { data } = await scheduleService.getUnavailability(staffUuid.value, params)
+      const { data } = await scheduleService.getUnavailability(facilityUuid.value, params)
       unavailabilityList.value = data.data || data || []
     } catch {
       unavailabilityList.value = []
@@ -26,9 +27,10 @@ export function useStaffUnavailability() {
   }
 
   async function createUnavailability(formData) {
+    if (!facilityUuid.value) return { success: false }
     saving.value = true
     try {
-      await scheduleService.createUnavailability(staffUuid.value, formData)
+      await scheduleService.createUnavailability(facilityUuid.value, formData)
       store.showToast('Unavailability blocked successfully', 'success')
       await fetchUnavailability()
       return { success: true }
@@ -42,8 +44,9 @@ export function useStaffUnavailability() {
   }
 
   async function deleteUnavailability(id) {
+    if (!facilityUuid.value) return { success: false }
     try {
-      await scheduleService.deleteUnavailability(staffUuid.value, id)
+      await scheduleService.deleteUnavailability(facilityUuid.value, id)
       store.showToast('Unavailability removed', 'success')
       await fetchUnavailability()
       return { success: true }

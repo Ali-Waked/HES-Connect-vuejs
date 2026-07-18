@@ -70,10 +70,13 @@
         </div>
       </template>
       <template #cell-applyMethod="{ item }">
-        <span class="material-symbols-outlined text-[18px]" :class="item.apply_method === 'email' ? 'text-blue-600' : 'text-slate-600'">{{ item.apply_method === 'email' ? 'mail' : 'link' }}</span>
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]" :class="item.apply_method === 'email' ? 'text-blue-600' : 'text-slate-600'">{{ item.apply_method === 'email' ? 'mail' : 'link' }}</span>
+          <span class="text-sm capitalize">{{ item.apply_method || '—' }}</span>
+        </div>
       </template>
       <template #cell-endDate="{ item }">
-        <span :class="isNearEnd(item.end_date) ? 'text-red-600 font-bold' : 'text-slate-700 dark:text-slate-300'" class="text-sm">{{ item.end_date }}</span>
+        <span :class="isNearEnd(item.end_date) ? 'text-red-600 font-bold' : 'text-slate-700 dark:text-slate-300'" class="text-sm">{{ formatDate(item.end_date) }}</span>
       </template>
       <template #cell-status="{ item }">
         <StatusBadge :status="item.status" />
@@ -105,6 +108,7 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocaleField } from '@/composables/useLocaleField'
+import { useFormatDate } from '@/composables/useFormatDate'
 import { useFacilityJobs } from '@/composables/useFacilityJobs'
 import DataTable from '@/components/staff/shared/DataTable.vue'
 import StatusBadge from '@/components/staff/shared/StatusBadge.vue'
@@ -113,6 +117,7 @@ import ConfirmModal from '@/components/staff/modals/ConfirmModal.vue'
 
 const { t } = useI18n()
 const { localField } = useLocaleField()
+const { formatDate } = useFormatDate()
 const { jobPosts, loading, pagination, stats, statsLoading, fetchJobPosts, fetchJobPostStats, deleteJobPost } = useFacilityJobs()
 
 const searchQuery = ref('')

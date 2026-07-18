@@ -15,8 +15,9 @@ defineEmits(['confirm', 'close']);
 </script>
 
 <template>
-  <div 
-    v-if="show" 
+  <Teleport to="body">
+  <div
+    v-if="show"
     class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] p-4"
     @click.self="$emit('close')"
   >
@@ -61,6 +62,7 @@ defineEmits(['confirm', 'close']);
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <style scoped>

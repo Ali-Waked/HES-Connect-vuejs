@@ -68,6 +68,7 @@ const menuGroups = computed(() => {
         { id: 'permissions', label: () => t('sidebar.permissions'), icon: 'vpn_key', permission: 'view_permissions' },
         { id: 'tags', label: () => t('sidebar.tags'), icon: 'tag', permission: 'view_settings' },
         { id: 'symptoms', label: () => t('sidebar.symptoms'), icon: 'monitor_heart', permission: 'view_settings' },
+        { id: 'specializations', label: () => t('sidebar.specializations'), icon: 'medical_services', permission: 'view_settings' },
         { id: 'search', label: () => t('sidebar.searchHistory'), icon: 'manage_search', permission: 'view_settings' }
       ]
     },

@@ -7,6 +7,7 @@ import AddStaffScheduleModal from '@/components/staff/schedule/AddStaffScheduleM
 import UnavailabilityCard from '@/components/staff/schedule/UnavailabilityCard.vue'
 import WeeklyPreviewCard from '@/components/staff/schedule/WeeklyPreviewCard.vue'
 import ScheduleEditDrawer from '@/components/staff/schedule/ScheduleEditDrawer.vue'
+import ConfirmModal from '@/components/dashboard/global/ConfirmModal.vue'
 
 const { t } = useI18n()
 const staffStore = useStaffStore()
@@ -16,15 +17,16 @@ function toast(msg, type = 'success') {
 }
 
 const {
-  schedules, loading, saving, facilities, selectedFacility,
-  fetchSchedules, createSchedule, updateSchedule, deleteSchedule, toggleScheduleStatus, changeFacility,
+  schedules, loading, saving,
+  fetchSchedules, createSchedule, updateSchedule, deleteSchedule, toggleScheduleStatus,
 } = useSchedules({ toast: toast })
 
 const addModalOpen = ref(false)
 const activeTab = ref('all')
 const editingSchedule = ref(null)
 const editDrawerOpen = ref(false)
-const deleteConfirmId = ref(null)
+const showDeleteModal = ref(false)
+const scheduleToDelete = ref(null)
 
 const weekDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const weekDayShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -78,17 +80,22 @@ function handleToggle(id, isActive) {
   toggleScheduleStatus(id, isActive)
 }
 
-function handleDeleteStart(id) {
-  deleteConfirmId.value = id
+function handleDeleteStart(schedule) {
+  scheduleToDelete.value = schedule
+  showDeleteModal.value = true
 }
 
 function handleDeleteCancel() {
-  deleteConfirmId.value = null
+  showDeleteModal.value = false
+  scheduleToDelete.value = null
 }
 
-async function handleDeleteConfirm(id) {
-  await deleteSchedule(id)
-  deleteConfirmId.value = null
+async function handleDeleteConfirm() {
+  if (scheduleToDelete.value) {
+    await deleteSchedule(scheduleToDelete.value.id)
+  }
+  showDeleteModal.value = false
+  scheduleToDelete.value = null
 }
 
 function handleEdit(schedule) {
@@ -106,12 +113,6 @@ async function handleEditDrawerSave(formData) {
   await updateSchedule(editingSchedule.value.id, formData)
   editDrawerOpen.value = false
   editingSchedule.value = null
-}
-
-function handleFacilityChange(value) {
-  if (!value) return
-  const facility = facilities.value.find(f => (f.uuid || f.id) === value)
-  if (facility) changeFacility(facility)
 }
 
 async function handleSaveSchedule(formData) {
@@ -134,9 +135,6 @@ const groupedByDay = computed(() => {
 
 onMounted(async () => {
   await fetchSchedules()
-  if (facilities.length > 0 && !selectedFacility.value) {
-    changeFacility(facilities[0])
-  }
 })
 </script>
 
@@ -194,7 +192,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Tabs + Facility Filter -->
+    <!-- Tabs -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
         <button
@@ -207,19 +205,6 @@ onMounted(async () => {
         >
           {{ t(tab.label) }}
         </button>
-      </div>
-      <div v-if="facilities.length > 1" class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm text-slate-400">business</span>
-        <select
-          class="input-base py-2 px-3 text-sm min-w-[180px]"
-          :value="selectedFacility?.uuid || selectedFacility?.id"
-          @change="handleFacilityChange($event.target.value)"
-        >
-          <option value="">{{ t('schedule.selectFacility') }}</option>
-          <option v-for="f in facilities" :key="f.uuid || f.id" :value="f.uuid || f.id">
-            {{ f.name }}
-          </option>
-        </select>
       </div>
     </div>
 
@@ -278,42 +263,39 @@ onMounted(async () => {
                   <button
                     class="p-1.5 rounded-lg transition cursor-pointer"
                     :class="item.is_active !== false
+                      ? 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      : 'text-slate-400 hover:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                    :title="t('common.edit')"
+                    @click="handleEdit(item)"
+                  >
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button
+                    class="p-1.5 rounded-lg transition cursor-pointer"
+                    :class="item.is_active !== false
                       ? 'text-brand-primary hover:bg-brand-primary/10'
                       : 'text-slate-400 hover:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'"
                     :title="item.is_active !== false ? t('schedule.inactive') : t('schedule.active')"
                     @click="handleToggle(item.id, item.is_active === false)"
                   >
-                    <span class="material-symbols-outlined text-lg">{{ item.is_active !== false ? 'toggle_on' : 'toggle_off' }}</span>
+                    <svg v-if="item.is_active !== false" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <svg v-else class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
                   </button>
-                  <div class="relative">
-                    <button
-                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition cursor-pointer"
-                      :title="t('common.delete')"
-                      @click="handleDeleteStart(item.id)"
-                    >
-                      <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                    <div
-                      v-if="deleteConfirmId === item.id"
-                      class="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 p-3 min-w-[200px] animate-fade-in"
-                    >
-                      <p class="text-xs text-slate-600 dark:text-slate-300 mb-2 font-medium">{{ t('schedule.deleteConfirm') }}</p>
-                      <div class="flex gap-2">
-                        <button
-                          class="flex-1 px-3 py-1.5 text-xs font-semibold text-white bg-rose-500 hover:bg-rose-600 rounded-lg transition cursor-pointer"
-                          @click="handleDeleteConfirm(item.id)"
-                        >
-                          {{ t('common.delete') }}
-                        </button>
-                        <button
-                          class="flex-1 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 rounded-lg transition cursor-pointer"
-                          @click="handleDeleteCancel"
-                        >
-                          {{ t('common.cancel') }}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <button
+                    class="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer"
+                    :title="$t('common.delete')"
+                    @click="handleDeleteStart(item)"
+                  >
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -348,7 +330,17 @@ onMounted(async () => {
       @close="handleEditDrawerClose"
       @save="handleEditDrawerSave"
       @toggle="(id, isActive) => handleToggle(id, isActive)"
-      @delete="(id) => handleDeleteConfirm(id)"
+      @delete="(id) => handleDeleteStart({ id })"
+    />
+
+    <!-- Delete Confirm Modal -->
+    <ConfirmModal
+      :show="showDeleteModal"
+      :title="$t('common.delete') + ' ' + $t('schedule.title')"
+      :message="$t('schedule.deleteConfirm') || 'Are you sure you want to delete this schedule? This action cannot be undone.'"
+      :confirm-text="$t('common.delete')"
+      @confirm="handleDeleteConfirm"
+      @close="handleDeleteCancel"
     />
   </div>
 </template>

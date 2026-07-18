@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import axiosClient from '@/axiosClient'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useRefetchOnLanguageChange } from './useRefetchOnLanguageChange'
 import * as scheduleService from '@/services/scheduleService'
@@ -19,25 +18,14 @@ export function useSchedules({ toast: toastFn } = {}) {
   const error = ref(null)
   const schedules = ref([])
   const calendarEvents = ref([])
-  const selectedFacility = ref(null)
-  const facilities = ref([])
   const currentMonth = ref(new Date())
 
   let _lastParams = {}
 
-  async function fetchFacilities() {
-    try {
-      const { data } = await axiosClient.get('/dashboard/schedules')
-      facilities.value = data.facilities || data.data || []
-    } catch {
-      facilities.value = []
-    }
-  }
-
   async function fetchSchedules(params = {}) {
     loading.value = true
     error.value = null
-    _lastParams = { ...params, facility_uuid: selectedFacility.value?.uuid }
+    _lastParams = params
     try {
       const { data } = await scheduleService.getSchedules(_lastParams)
       schedules.value = data.schedules || data.data || (Array.isArray(data) ? data : [])
@@ -51,11 +39,8 @@ export function useSchedules({ toast: toastFn } = {}) {
   }
 
   async function fetchCalendarEvents(params = {}) {
-    const facilityUuid = selectedFacility.value?.uuid
-    if (!facilityUuid) return
     try {
       const { data } = await scheduleService.getCalendarEvents({
-        facility_uuid: facilityUuid,
         month: currentMonth.value.getMonth() + 1,
         year: currentMonth.value.getFullYear(),
         ...params
@@ -68,19 +53,14 @@ export function useSchedules({ toast: toastFn } = {}) {
 
   async function createSchedule(formData) {
     saving.value = true
-    const facilityUuid = formData.facility_uuid || selectedFacility.value?.uuid
     const optimistic = {
       id: 'temp-' + Date.now(),
       ...formData,
-      is_active: true,
-      facility_uuid: facilityUuid
+      is_active: true
     }
     schedules.value.push(optimistic)
     try {
-      const { data } = await scheduleService.createSchedule({
-        ...formData,
-        facility_uuid: facilityUuid
-      })
+      const { data } = await scheduleService.createSchedule(formData)
       const idx = schedules.value.findIndex(s => s.id === optimistic.id)
       if (idx !== -1) schedules.value[idx] = data.data || data
       notify('Schedule created successfully', 'success')
@@ -151,12 +131,6 @@ export function useSchedules({ toast: toastFn } = {}) {
     }
   }
 
-  function changeFacility(facility) {
-    selectedFacility.value = facility
-    fetchSchedules()
-    fetchCalendarEvents()
-  }
-
   const weekDays = computed(() => {
     const start = new Date(currentMonth.value)
     start.setDate(start.getDate() - start.getDay())
@@ -178,17 +152,13 @@ export function useSchedules({ toast: toastFn } = {}) {
     loading,
     saving,
     error,
-    facilities,
-    selectedFacility,
     currentMonth,
     weekDays,
-    fetchFacilities,
     fetchSchedules,
     fetchCalendarEvents,
     createSchedule,
     updateSchedule,
     deleteSchedule,
     toggleScheduleStatus,
-    changeFacility,
   }
 }

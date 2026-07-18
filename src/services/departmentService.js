@@ -7,9 +7,11 @@ function toFormData(formData) {
   payload.append('name[ar]', formData.name_ar)
   payload.append('description[en]', formData.description_en || '')
   payload.append('description[ar]', formData.description_ar || '')
-  payload.append('facility_id', formData.facility_id)
-  payload.append('head_facility_staff_id', formData.head_facility_staff_id || '')
   payload.append('is_active', formData.is_active ? 1 : 0)
+
+  if (formData.head_facility_staff_id) {
+    payload.append('head_facility_staff_id', formData.head_facility_staff_id)
+  }
 
   if (formData.image instanceof File) {
     payload.append('image', formData.image)
@@ -17,6 +19,8 @@ function toFormData(formData) {
 
   return payload
 }
+
+// ── Platform (admin) endpoints ──
 
 export function getDepartments(params = {}) {
   return axiosClient.get('/dashboard/departments', { params })
@@ -47,4 +51,49 @@ export function getDepartmentStats() {
 
 export function getDepartmentsLookup(params = {}) {
   return axiosClient.get('/dashboard/departments/lookup', { params })
+}
+
+// ── Facility-scoped endpoints ──
+
+function facilityToFormData(formData) {
+  const payload = new FormData()
+
+  payload.append('name[en]', formData.name_en || '')
+  payload.append('name[ar]', formData.name_ar || '')
+  payload.append('description[en]', formData.description_en || '')
+  payload.append('description[ar]', formData.description_ar || '')
+  payload.append('is_active', formData.is_active ? 1 : 0)
+
+  if (formData.head_facility_staff_uuid) {
+    payload.append('head_facility_staff_uuid', formData.head_facility_staff_uuid)
+  }
+
+  if (formData.image instanceof File) {
+    payload.append('image', formData.image)
+  }
+
+  return payload
+}
+
+export function getFacilityDepartments(facilityId, params = {}) {
+  return axiosClient.get(`/facility/${facilityId}/departments`, { params })
+}
+
+export function getFacilityDepartment(facilityId, departmentId) {
+  return axiosClient.get(`/facility/${facilityId}/departments/${departmentId}`)
+}
+
+export function createFacilityDepartment(facilityId, data) {
+  const payload = facilityToFormData(data)
+  return axiosClient.post(`/facility/${facilityId}/departments`, payload)
+}
+
+export function updateFacilityDepartment(facilityId, departmentId, data) {
+  const payload = facilityToFormData(data)
+  payload.append('_method', 'PUT')
+  return axiosClient.post(`/facility/${facilityId}/departments/${departmentId}`, payload)
+}
+
+export function deleteFacilityDepartment(facilityId, departmentId) {
+  return axiosClient.delete(`/facility/${facilityId}/departments/${departmentId}`)
 }
