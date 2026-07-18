@@ -43,12 +43,22 @@ function closeDetails() {
 function resolveName(field) {
   if (!field) return '—'
   if (typeof field === 'string') return field
-  return resolveTranslatedValue(field.name || field, locale.value) || '—'
+  const f = resolveUserField(field)
+  if (!f) return '—'
+  if (typeof f === 'string') return f
+  if (f.name) return resolveTranslatedValue(f.name, locale.value)
+  return f.uuid ? f.uuid.slice(0, 8) + '...' : '—'
+}
+
+function resolveUserField(field) {
+  return field?.user || field
 }
 
 function getAvatar(field) {
-  if (!field || typeof field === 'string') return null
-  return field.avatar || null
+  if (!field) return null
+  const f = resolveUserField(field)
+  if (!f || typeof f === 'string') return null
+  return f.avatar || null
 }
 
 function getInitials(name) {
@@ -62,11 +72,13 @@ function shortUuid(uuid) {
 
 const statusVariants = {
   active: 'success',
+  accepted: 'success',
   dispensed: 'info',
+  pharmacy_selected: 'info',
   cancelled: 'danger',
+  rejected: 'danger',
   pending: 'warning',
   completed: 'primary',
-  pharmacy_selected: 'info',
 }
 
 function getStatusVariant(status) {
@@ -75,11 +87,13 @@ function getStatusVariant(status) {
 
 const statusDotColors = {
   active: 'bg-emerald-500',
+  accepted: 'bg-emerald-500',
   dispensed: 'bg-blue-500',
+  pharmacy_selected: 'bg-blue-500',
   cancelled: 'bg-rose-500',
+  rejected: 'bg-rose-500',
   pending: 'bg-amber-500',
   completed: 'bg-brand-primary',
-  pharmacy_selected: 'bg-blue-500',
 }
 
 function getStatusDotColor(status) {
@@ -120,20 +134,20 @@ onMounted(() => {
         color="primary"
       />
       <StatisticsCard
-        :title="t('prescriptions.active') || 'Active Prescriptions'"
-        :value="analytics.active"
-        icon="play_circle"
+        :title="t('prescriptions.pending') || 'Pending Prescriptions'"
+        :value="analytics.pending"
+        icon="schedule"
+        color="warning"
+      />
+      <StatisticsCard
+        :title="t('prescriptions.approved') || 'Approved Prescriptions'"
+        :value="analytics.approved"
+        icon="check_circle"
         color="success"
       />
       <StatisticsCard
-        :title="t('prescriptions.dispensed') || 'Dispensed Prescriptions'"
-        :value="analytics.dispensed"
-        icon="medication"
-        color="info"
-      />
-      <StatisticsCard
-        :title="t('prescriptions.cancelled') || 'Cancelled Prescriptions'"
-        :value="analytics.cancelled"
+        :title="t('prescriptions.rejected') || 'Rejected Prescriptions'"
+        :value="analytics.rejected"
         icon="cancel"
         color="danger"
       />
@@ -154,10 +168,12 @@ onMounted(() => {
         @change="setFilter('status', $event.target.value)"
       >
         <option value="">{{ t('pageTitles.allStatus') || 'All Status' }}</option>
-        <option value="active">{{ t('prescriptions.active') || 'Active' }}</option>
-        <option value="dispensed">{{ t('prescriptions.dispensed') || 'Dispensed' }}</option>
-        <option value="cancelled">{{ t('prescriptions.cancelled') || 'Cancelled' }}</option>
-        <option value="pending">{{ t('statuses.pending') || 'Pending' }}</option>
+        <option value="active">{{ t('statuses.active') || 'Active' }}</option>
+        <option value="accepted">{{ t('statuses.accepted') || 'Accepted' }}</option>
+        <option value="pharmacy_selected">{{ t('statuses.pharmacy_selected') || 'Pharmacy Selected' }}</option>
+        <option value="dispensed">{{ t('statuses.dispensed') || 'Dispensed' }}</option>
+        <option value="rejected">{{ t('statuses.rejected') || 'Rejected' }}</option>
+        <option value="cancelled">{{ t('statuses.cancelled') || 'Cancelled' }}</option>
       </select>
       <button
         v-if="hasActiveFilters"
@@ -209,8 +225,8 @@ onMounted(() => {
             <tr class="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[130px]">{{ t('prescriptions.uuid') || 'UUID' }}</th>
               <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('prescriptions.patient') || 'Patient' }}</th>
-              <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('prescriptions.pharmacist') || 'Pharmacist' }}</th>
-              <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('prescriptions.pharmacy') || 'Pharmacy' }}</th>
+              <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('prescriptions.doctor') || 'Doctor' }}</th>
+              <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ t('prescriptions.facility') || 'Facility' }}</th>
               <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[100px]">{{ t('prescriptions.status') || 'Status' }}</th>
               <th class="px-6 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[130px]">{{ t('prescriptions.createdAt') || 'Created' }}</th>
               <th class="px-6 py-3.5 w-[50px]"></th>
@@ -238,17 +254,39 @@ onMounted(() => {
                     <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ resolveName(item.patient) }}</span>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">{{ resolveName(item.pharmacist) }}</td>
-                <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 max-w-[160px] truncate">{{ resolveName(item.pharmacy) }}</td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2.5">
+                    <div v-if="getAvatar(item.doctor)" class="w-7 h-7 rounded-full overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-900">
+                      <img :src="getAvatar(item.doctor)" :alt="resolveName(item.doctor)" class="w-full h-full object-cover" />
+                    </div>
+                    <div v-else class="w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center shrink-0 ring-2 ring-white dark:ring-slate-900">
+                      <span class="text-[10px] font-bold text-purple-600 dark:text-purple-400">{{ getInitials(resolveName(item.doctor)) }}</span>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ resolveName(item.doctor) }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <div v-if="item.facility?.cover_image" class="w-7 h-7 rounded-lg overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-900">
+                      <img :src="item.facility.cover_image" :alt="resolveName(item.facility)" class="w-full h-full object-cover" />
+                    </div>
+                    <div v-else class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/20 flex items-center justify-center shrink-0 ring-2 ring-white dark:ring-slate-900">
+                      <svg class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">{{ resolveName(item.facility) }}</span>
+                  </div>
+                </td>
                 <td class="px-6 py-4">
                   <span
                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize"
                     :class="{
-                      'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400': item.status === 'active',
+                      'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400': item.status === 'active' || item.status === 'accepted',
                       'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400': item.status === 'dispensed' || item.status === 'pharmacy_selected',
                       'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400': item.status === 'pending',
-                      'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400': item.status === 'cancelled',
-                      'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400': !['active','dispensed','pharmacy_selected','pending','cancelled'].includes(item.status),
+                      'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400': item.status === 'cancelled' || item.status === 'rejected',
+                      'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400': !['active','accepted','dispensed','pharmacy_selected','pending','cancelled','rejected'].includes(item.status),
                     }"
                   >
                     <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotColor(item.status)"></span>
@@ -317,11 +355,11 @@ onMounted(() => {
             <span
               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize"
               :class="{
-                'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400': item.status === 'active',
+                'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400': item.status === 'active' || item.status === 'accepted',
                 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400': item.status === 'dispensed' || item.status === 'pharmacy_selected',
                 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400': item.status === 'pending',
-                'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400': item.status === 'cancelled',
-                'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400': !['active','dispensed','pharmacy_selected','pending','cancelled'].includes(item.status),
+                'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400': item.status === 'cancelled' || item.status === 'rejected',
+                'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400': !['active','accepted','dispensed','pharmacy_selected','pending','cancelled','rejected'].includes(item.status),
               }"
             >
               <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotColor(item.status)"></span>
@@ -331,12 +369,30 @@ onMounted(() => {
 
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <p class="text-slate-400 dark:text-slate-500 mb-0.5">{{ t('prescriptions.pharmacist') || 'Pharmacist' }}</p>
-              <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ resolveName(item.pharmacist) }}</p>
+              <p class="text-slate-400 dark:text-slate-500 mb-0.5">{{ t('prescriptions.doctor') || 'Doctor' }}</p>
+              <div class="flex items-center gap-1.5">
+                <div v-if="getAvatar(item.doctor)" class="w-5 h-5 rounded-full overflow-hidden shrink-0">
+                  <img :src="getAvatar(item.doctor)" :alt="resolveName(item.doctor)" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
+                  <span class="text-[9px] font-bold text-purple-600 dark:text-purple-400">{{ getInitials(resolveName(item.doctor)) }}</span>
+                </div>
+                <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ resolveName(item.doctor) }}</p>
+              </div>
             </div>
             <div>
-              <p class="text-slate-400 dark:text-slate-500 mb-0.5">{{ t('prescriptions.pharmacy') || 'Pharmacy' }}</p>
-              <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ resolveName(item.pharmacy) }}</p>
+              <p class="text-slate-400 dark:text-slate-500 mb-0.5">{{ t('prescriptions.facility') || 'Facility' }}</p>
+              <div class="flex items-center gap-1.5">
+                <div v-if="item.facility?.cover_image" class="w-5 h-5 rounded overflow-hidden shrink-0">
+                  <img :src="item.facility.cover_image" alt="" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="w-5 h-5 rounded bg-sky-100 dark:bg-sky-900/20 flex items-center justify-center shrink-0">
+                  <svg class="w-3 h-3 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <p class="font-medium text-slate-700 dark:text-slate-300 truncate">{{ resolveName(item.facility) }}</p>
+              </div>
             </div>
             <div>
               <p class="text-slate-400 dark:text-slate-500 mb-0.5">{{ t('prescriptions.createdAt') || 'Created' }}</p>

@@ -15,10 +15,12 @@ export function usePrescriptions(role = 'admin') {
 
   const analytics = ref({
     total: 0,
-    active: 0,
-    dispensed: 0,
-    cancelled: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    approval_rate: 0,
   })
+  const analyticsRaw = ref(null)
 
   const pagination = ref({
     current_page: 1,
@@ -87,14 +89,16 @@ export function usePrescriptions(role = 'admin') {
         : role === 'facility_owner' ? prescriptionsService.getFacilityOwnerPrescriptionAnalytics
         : prescriptionsService.getAdminPrescriptionAnalytics
       const { data } = await fn(params)
+      analyticsRaw.value = data
       analytics.value = {
-        total: data.total_prescriptions ?? data.total ?? 0,
-        active: data.active_prescriptions ?? data.active ?? 0,
-        dispensed: data.dispensed_prescriptions ?? data.dispensed ?? 0,
-        cancelled: data.cancelled_prescriptions ?? data.cancelled ?? 0,
+        total: data.summary?.total_requests ?? 0,
+        pending: data.summary?.pending_requests ?? 0,
+        approved: data.summary?.approved_requests ?? 0,
+        rejected: data.summary?.rejected_requests ?? 0,
+        approval_rate: data.summary?.approval_rate ?? 0,
       }
     } catch {
-      analytics.value = { total: 0, active: 0, dispensed: 0, cancelled: 0 }
+      analytics.value = { total: 0, pending: 0, approved: 0, rejected: 0, approval_rate: 0 }
     }
   }
 
@@ -157,6 +161,7 @@ export function usePrescriptions(role = 'admin') {
     pagination,
     filters,
     analytics,
+    analyticsRaw,
     selectedPrescription,
     hasActiveFilters,
     queryParams,
