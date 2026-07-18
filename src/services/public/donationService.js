@@ -13,5 +13,5 @@ export function createDonation(data) {
 }
 
 export function createDonationCheckout(storyId, data) {
-  return axiosClient.post(`/public/donations/${storyId}/checkout`, data)
+  return axiosClient.post(`/donations/${storyId}/checkout`, data)
 }

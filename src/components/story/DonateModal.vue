@@ -2,11 +2,12 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDonationFlowStore } from '@/stores/useDonationFlowStore'
+import { resolveTranslatedValue } from '@/utils/locale'
 
 const props = defineProps({ show: Boolean, story: Object })
 const emit = defineEmits(['close'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useDonationFlowStore()
 
 const quickAmounts = [10, 25, 50, 100]
@@ -86,7 +87,7 @@ watch(() => props.show, (v) => {
                   {{ t('donations.supportStory') || 'Support Story' }}
                 </h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {{ story?.title || '' }}
+                  {{ story?.title ? resolveTranslatedValue(story.title, locale.value) : '' }}
                 </p>
               </div>
             </div>
@@ -139,7 +140,7 @@ watch(() => props.show, (v) => {
             <!-- Message -->
             <div>
               <label class="mb-1 block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {{ t('donations.message') || 'Message' }} <span class="font-normal normal-case">({{ t('common.optional') || 'optional' }})</span>
+                {{ t('donations.message') || 'Message' }} <span class="font-normal normal-case">(optional)</span>
               </label>
               <textarea
                 v-model="message"

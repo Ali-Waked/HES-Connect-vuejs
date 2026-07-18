@@ -16,6 +16,10 @@ const progress = computed(() => {
   return Math.min(100, Math.round((props.story.collectedAmount / props.story.targetAmount) * 100));
 });
 
+const goalReached = computed(() => {
+  return props.story.collectedAmount >= props.story.targetAmount;
+});
+
 const fmt = (n) => '$' + (n || 0).toLocaleString();
 
 onMounted(() => {
@@ -54,16 +58,24 @@ onMounted(() => {
           </span>
         </div>
 
-        <button
-          class="mt-5 w-full rounded-lg bg-brand-primary py-3 text-sm font-bold text-white transition hover:bg-brand-primary-hover animate-pulse-once"
-          @click="showDonate = true">
-          Donate Now
-        </button>
-        <button
-          class="mt-2 w-full rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-          @click="showShare = true">
-          Share This Story
-        </button>
+        <template v-if="goalReached">
+          <div class="mt-5 w-full rounded-lg bg-green-50 border border-green-200 py-3 px-4 text-center">
+            <span class="text-sm font-bold text-green-700">Goal Reached</span>
+            <p class="text-xs text-green-600 mt-0.5">Thank you for your amazing support!</p>
+          </div>
+        </template>
+        <template v-else>
+          <button
+            class="mt-5 w-full rounded-lg bg-brand-primary py-3 text-sm font-bold text-white transition hover:bg-brand-primary-hover animate-pulse-once"
+            @click="showDonate = true">
+            Donate Now
+          </button>
+          <button
+            class="mt-2 w-full rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            @click="showShare = true">
+            Share This Story
+          </button>
+        </template>
 
         <div class="mt-5 border-t border-slate-100 pt-4 text-center">
           <p class="text-sm text-slate-500">
