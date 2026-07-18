@@ -5,7 +5,6 @@ import { useReportsStore } from '../../stores/reports';
 import ReportFilterBar from '../../components/dashboard/global/ReportFilterBar.vue';
 import OverviewCards from '../../components/dashboard/global/OverviewCards.vue';
 import ChartCard from '../../components/dashboard/global/ChartCard.vue';
-import ExportButtons from '../../components/dashboard/global/ExportButtons.vue';
 import BaseTable from '../../components/dashboard/global/BaseTable.vue';
 import SectionHeader from '../../components/dashboard/global/SectionHeader.vue';
 import BaseLoading from '../../components/dashboard/global/BaseLoading.vue';
@@ -13,9 +12,9 @@ import BaseLoading from '../../components/dashboard/global/BaseLoading.vue';
 const { t } = useI18n();
 const store = useReportsStore();
 
-onMounted(() => {
+onMounted(async() => {
   if (!store.hasData) {
-    store.fetchReports();
+    await store.fetchReports();
   }
 });
 </script>
@@ -23,17 +22,9 @@ onMounted(() => {
 <template>
   <div class="space-y-6 animate-fade-in">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.systemReports') }}</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('pageTitles.reportsDesc') }}</p>
-      </div>
-      <ExportButtons
-        :loading-excel="store.exporting.excel"
-        :loading-pdf="store.exporting.pdf"
-        @export-excel="store.exportToExcel()"
-        @export-pdf="store.exportToPdf()"
-      />
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ t('pageTitles.systemReports') }}</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('pageTitles.reportsDesc') }}</p>
     </div>
 
     <!-- Filters -->
@@ -97,11 +88,12 @@ onMounted(() => {
               :key="col.key"
               #[`cell(${col.key})`]="{ item }"
             >
-              <span v-if="col.type === 'badge'" class="inline-flex items-center gap-1.5">
+            <!-- {{ col }} -->
+              <span v-if="col.key === 'status'" class="inline-flex items-center gap-1.5">
                 <span
                   class="w-1.5 h-1.5 rounded-full"
                   :class="{
-                    'bg-emerald-500': item[col.key] === 'active' || item[col.key] === 'approved' || item[col.key] === 'completed',
+                    'bg-emerald-500': item[col.key] === 'active' || item[col.key] === 'approved' || item[col.key] === 'completed' || item[col.key] === 'published',
                     'bg-amber-500': item[col.key] === 'pending',
                     'bg-rose-500': item[col.key] === 'cancelled' || item[col.key] === 'rejected',
                     'bg-slate-300 dark:bg-slate-600': !item[col.key],

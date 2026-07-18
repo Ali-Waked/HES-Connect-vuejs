@@ -2,14 +2,30 @@ import axiosClient from '@/axiosClient';
 
 export const getReports = (params) => axiosClient.get('/dashboard/reports', { params });
 
-export const exportExcel = (filters) =>
-  axiosClient.get('/dashboard/reports/export/excel', {
+export async function exportExcel(filters) {
+  const res = await axiosClient.get('/dashboard/reports/export/excel', {
     params: filters,
     responseType: 'blob',
   });
+  const contentType = res.headers['content-type'] || '';
+  if (contentType.includes('application/json') || contentType.includes('text/html')) {
+    const text = await res.data.text();
+    const json = JSON.parse(text);
+    throw { response: { data: json } };
+  }
+  return res;
+}
 
-export const exportPdf = (filters) =>
-  axiosClient.get('/dashboard/reports/export/pdf', {
+export async function exportPdf(filters) {
+  const res = await axiosClient.get('/dashboard/reports/export/pdf', {
     params: filters,
     responseType: 'blob',
   });
+  const contentType = res.headers['content-type'] || '';
+  if (contentType.includes('application/json') || contentType.includes('text/html')) {
+    const text = await res.data.text();
+    const json = JSON.parse(text);
+    throw { response: { data: json } };
+  }
+  return res;
+}

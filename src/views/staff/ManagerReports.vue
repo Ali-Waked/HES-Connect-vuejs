@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFacilityReportsStore } from '@/stores/facilityReports';
 import FacilityReportFilters from '@/components/facility/FacilityReportFilters.vue';
@@ -7,66 +7,51 @@ import ExportButtons from '@/components/dashboard/global/ExportButtons.vue';
 import SectionHeader from '@/components/dashboard/global/SectionHeader.vue';
 import ChartCard from '@/components/dashboard/global/ChartCard.vue';
 import BaseTable from '@/components/dashboard/global/BaseTable.vue';
-import BaseSearch from '@/components/dashboard/global/BaseSearch.vue';
-import BasePagination from '@/components/dashboard/global/BasePagination.vue';
 import BaseLoading from '@/components/dashboard/global/BaseLoading.vue';
 import BaseEmptyState from '@/components/dashboard/global/BaseEmptyState.vue';
 
 const { t } = useI18n();
 const store = useFacilityReportsStore();
 
-const searchQueries = ref({});
+const cardMeta = {
+  total_appointments: { icon: 'calendar_month', label: 'Appointments' },
+  total_articles: { icon: 'article', label: 'Articles' },
+  total_categories: { icon: 'category', label: 'Categories' },
+  total_departments: { icon: 'business', label: 'Departments' },
+  total_doctors: { icon: 'stethoscope', label: 'Doctors' },
+  total_donations: { icon: 'volunteer_activism', label: 'Donations' },
+  total_job_posts: { icon: 'work', label: 'Job Posts' },
+  total_patients: { icon: 'group', label: 'Patients' },
+  total_staff: { icon: 'badge', label: 'Staff' },
+  total_stories: { icon: 'auto_stories', label: 'Stories' },
+};
 
-function getSearchKey(tIdx) {
-  return `table_${tIdx}`;
-}
+const growthMap = {
+  appointments_growth: { label: 'Appointments' },
+  articles_growth: { label: 'Articles' },
+  categories_growth: { label: 'Categories' },
+  departments_growth: { label: 'Departments' },
+  doctors_growth: { label: 'Doctors' },
+  donations_growth: { label: 'Donations' },
+  job_posts_growth: { label: 'Job Posts' },
+  patients_growth: { label: 'Patients' },
+  staff_growth: { label: 'Staff' },
+  stories_growth: { label: 'Stories' },
+};
 
-const filteredTables = computed(() => {
-  return (store.tables || []).map((table, tIdx) => {
-    const q = (searchQueries.value[getSearchKey(tIdx)] || '').toLowerCase();
-    if (!q) return { ...table, filteredRows: table.rows || [] };
-    const cols = (table.columns || []).map(c => c.key);
-    const filtered = (table.rows || []).filter(row =>
-      cols.some(key => String(row[key] || '').toLowerCase().includes(q))
-    );
-    return { ...table, filteredRows: filtered };
+const overviewEntries = computed(() => {
+  return Object.entries(store.overview).map(([key, value]) => {
+    const meta = cardMeta[key] || {};
+    return { key, value, icon: meta.icon || 'bar_chart', label: meta.label || key.replace(/_/g, ' ') };
   });
 });
 
-function sortTable(table, colKey) {
-  const sort = table._sort;
-  if (sort?.key === colKey) {
-    sort.asc = !sort.asc;
-  } else {
-    table._sort = { key: colKey, asc: true };
-  }
-  const dir = table._sort.asc ? 1 : -1;
-  table.filteredRows.sort((a, b) => {
-    const va = a[colKey], vb = b[colKey];
-    if (va == null) return 1;
-    if (vb == null) return -1;
-    return String(va).localeCompare(String(vb), undefined, { numeric: true }) * dir;
+const growthEntries = computed(() => {
+  return Object.entries(store.growthPercentages).map(([key, value]) => {
+    const meta = growthMap[key] || {};
+    return { key, value: Number(value), label: meta.label || key.replace(/_/g, ' ') };
   });
-}
-
-const tablePage = ref({});
-
-function setPage(tIdx, page) {
-  tablePage.value[tIdx] = page;
-}
-
-function pageRows(table, tIdx) {
-  const p = tablePage.value[tIdx] || 1;
-  const per = table.pagination?.perPage || 10;
-  const start = (p - 1) * per;
-  return (table.filteredRows || []).slice(start, start + per);
-}
-
-function totalPages(table) {
-  const total = (table.filteredRows || []).length;
-  const per = table.pagination?.perPage || 10;
-  return Math.max(1, Math.ceil(total / per));
-}
+});
 
 onMounted(() => {
   if (!store.hasData) {
@@ -117,21 +102,39 @@ onMounted(() => {
     <!-- Content -->
     <template v-else-if="store.hasData">
       <!-- Overview Cards -->
-      <div v-if="Object.keys(store.overview).length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div v-if="overviewEntries.length" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div
-          v-for="(value, key) in store.overview"
-          :key="key"
+          v-for="card in overviewEntries"
+          :key="card.key"
           class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm"
         >
-          <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
-            {{ key.replace(/_/g, ' ') }}
-          </p>
-          <h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ value }}</h3>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="material-symbols-outlined text-lg text-slate-400 dark:text-slate-500">{{ card.icon }}</span>
+            <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ card.label }}</p>
+          </div>
+          <h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{{ card.value }}</h3>
+        </div>
+      </div>
+
+      <!-- Growth Percentages -->
+      <div v-if="growthEntries.length" class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+        <SectionHeader title="Growth" subtitle="Percentage change compared to previous period" />
+        <div class="flex flex-wrap gap-3 mt-4">
+          <div
+            v-for="g in growthEntries"
+            :key="g.key"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold"
+            :class="g.value >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400'"
+          >
+            <span class="text-slate-500 dark:text-slate-400 font-medium">{{ g.label }}</span>
+            <span>{{ g.value >= 0 ? '+' : '' }}{{ g.value }}%</span>
+          </div>
         </div>
       </div>
 
       <!-- Charts -->
-      <template v-if="store.charts.length > 0">
+      <template v-if="store.charts.length">
+        <SectionHeader title="Charts" subtitle="Visual analytics" />
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <ChartCard
             v-for="(chart, idx) in store.charts"
@@ -141,77 +144,43 @@ onMounted(() => {
         </div>
       </template>
 
-      <!-- Tables -->
-      <template v-for="(table, tIdx) in filteredTables" :key="tIdx">
-        <div class="space-y-4">
-          <SectionHeader :title="table.title || `Report Table ${tIdx + 1}`">
-            <template #actions>
-              <div class="flex items-center gap-3">
-                <BaseSearch
-                  v-model="searchQueries[getSearchKey(tIdx)]"
-                  placeholder="Search table..."
-                />
-              </div>
-            </template>
-          </SectionHeader>
-
-          <BaseTable
-            :columns="table.columns || []"
-            :items="pageRows(table, tIdx)"
-            :loading="store.loading"
-          >
-            <template
-              v-for="col in (table.columns || [])"
-              :key="col.key"
-              #[`cell(${col.key})`]="{ item }"
-            >
-              <button
-                v-if="col.sortable"
-                class="inline-flex items-center gap-1 text-sm text-slate-700 dark:text-slate-300"
-                @click="sortTable(table, col.key)"
-              >
-                {{ item[col.key] }}
-                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-              </button>
-              <span
-                v-else-if="col.type === 'badge'"
-                class="inline-flex items-center gap-1.5"
-              >
-                <span
-                  class="w-1.5 h-1.5 rounded-full"
-                  :class="{
-                    'bg-emerald-500': ['active','approved','completed'].includes(item[col.key]),
-                    'bg-amber-500': item[col.key] === 'pending',
-                    'bg-rose-500': ['cancelled','rejected'].includes(item[col.key]),
-                    'bg-slate-300 dark:bg-slate-600': !item[col.key],
-                  }"
-                />
-                <span class="text-sm capitalize text-slate-700 dark:text-slate-300">{{ item[col.key] }}</span>
-              </span>
-              <span v-else class="text-sm text-slate-700 dark:text-slate-300">{{ item[col.key] }}</span>
-            </template>
-
-            <template #empty>
-              <BaseEmptyState />
-            </template>
-          </BaseTable>
-
-          <BasePagination
-            v-if="totalPages(table) > 1"
-            :current-page="tablePage[tIdx] || 1"
-            :total-pages="totalPages(table)"
-            :total-items="(table.filteredRows || []).length"
-            :items-per-page="table.pagination?.perPage || 10"
-            @change="setPage(tIdx, $event)"
-          />
+      <!-- Top Items Tables -->
+      <template v-if="store.topTables.length">
+        <SectionHeader title="Top Rankings" subtitle="Leading items by count" />
+        <div class="space-y-6">
+          <div v-for="(table, tIdx) in store.topTables" :key="'top-' + tIdx" class="space-y-3">
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ table.title }}</h4>
+            <BaseTable :columns="table.columns" :items="table.rows" :loading="false">
+              <template #empty>
+                <BaseEmptyState />
+              </template>
+            </BaseTable>
+          </div>
         </div>
       </template>
 
-      <!-- Empty overview + charts + tables -->
+      <!-- Recent Data Tables -->
+      <template v-if="store.recentTables.length">
+        <SectionHeader title="Recent Data" subtitle="Latest records across modules" />
+        <div class="space-y-6">
+          <div v-for="(table, tIdx) in store.recentTables" :key="'recent-' + tIdx" class="space-y-3">
+            <SectionHeader :title="table.title">
+              <template #actions>
+                <span class="text-xs text-slate-400">Total: {{ table.rows.length }}</span>
+              </template>
+            </SectionHeader>
+            <BaseTable :columns="table.columns" :items="table.rows" :loading="false">
+              <template #empty>
+                <BaseEmptyState />
+              </template>
+            </BaseTable>
+          </div>
+        </div>
+      </template>
+
+      <!-- Empty State -->
       <div
-        v-if="Object.keys(store.overview).length === 0 && store.charts.length === 0 && store.tables.length === 0"
+        v-if="!overviewEntries.length && !store.charts.length && !store.recentTables.length"
         class="text-center py-16"
       >
         <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-4">bar_chart</span>

@@ -11,6 +11,8 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
+const palette = ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#e11d48'];
+
 export const useFacilityReportsStore = defineStore('facilityReports', () => {
   const data = ref(null);
   const loading = ref(false);
@@ -25,10 +27,83 @@ export const useFacilityReportsStore = defineStore('facilityReports', () => {
     appointment_status: '',
   });
 
-  const overview = computed(() => data.value?.overview ?? {});
-  const charts = computed(() => data.value?.charts ?? []);
-  const tables = computed(() => data.value?.tables ?? []);
   const hasData = computed(() => data.value !== null);
+
+  const overview = computed(() => data.value?.cards ?? {});
+
+  const growthPercentages = computed(() => data.value?.growth_percentages ?? {});
+
+  const charts = computed(() => {
+    const c = data.value?.charts;
+    if (!c || typeof c !== 'object') return [];
+    const result = [];
+
+    function pick(arr) {
+      if (!Array.isArray(arr) || !arr.length) return null;
+      return arr;
+    }
+
+    function labelOf(item) {
+      return item.label ?? item.month ?? item.name ?? item.status ?? '';
+    }
+
+    function valueOf(item) {
+      return item.value ?? item.count ?? item.total ?? item.staff_count ?? 0;
+    }
+
+    function addChart(key, type, title) {
+      const arr = pick(c[key]);
+      if (!arr) return;
+      const labels = arr.map(labelOf);
+      const values = arr.map(valueOf);
+      const colors = values.map((_, i) => palette[i % palette.length]);
+      result.push({
+        type,
+        title,
+        labels,
+        datasets: [{ label: title, data: values, backgroundColor: type === 'doughnut' || type === 'pie' ? colors : palette[0], borderColor: palette[0] }],
+      });
+    }
+
+    addChart('appointment_status', 'doughnut', 'Appointment Status');
+    addChart('appointments_per_month', 'line', 'Appointments per Month');
+    addChart('articles_published', 'bar', 'Articles Published');
+    addChart('patients_growth', 'line', 'Patients Growth');
+    addChart('doctors_growth', 'line', 'Doctors Growth');
+    addChart('stories_published', 'bar', 'Stories Published');
+    addChart('top_departments', 'horizontalBar', 'Top Departments');
+
+    return result;
+  });
+
+  function buildTables(source) {
+    if (!source || typeof source !== 'object') return [];
+    return Object.entries(source)
+      .filter(([, items]) => Array.isArray(items) && items.length)
+      .map(([key, items]) => {
+        const columns = Object.keys(items[0]).map(k => ({
+          key: k,
+          label: k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        }));
+        return {
+          title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          columns,
+          rows: items,
+        };
+      });
+  }
+
+  const recentTables = computed(() => buildTables(data.value?.recent_data));
+
+  const topTables = computed(() => {
+    const c = data.value?.charts;
+    if (!c) return [];
+    const map = {};
+    if (Array.isArray(c.top_departments) && c.top_departments.length) map['top_departments'] = c.top_departments;
+    if (Array.isArray(c.top_doctors) && c.top_doctors.length) map['top_doctors'] = c.top_doctors;
+    if (Array.isArray(c.top_symptoms) && c.top_symptoms.length) map['top_symptoms'] = c.top_symptoms;
+    return buildTables(map);
+  });
 
   function activeParams() {
     return Object.fromEntries(
@@ -94,7 +169,7 @@ export const useFacilityReportsStore = defineStore('facilityReports', () => {
 
   return {
     data, loading, error, exporting, filters,
-    overview, charts, tables, hasData,
+    overview, charts, hasData, growthPercentages, recentTables, topTables,
     fetchReports, updateFilter, resetFilters, applyFilters,
     exportToExcel, exportToPdf,
   };
