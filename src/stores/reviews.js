@@ -43,7 +43,7 @@ export const useReviewsStore = defineStore('reviews', () => {
       const { data } = await reviewService.getReviewStats();
       stats.value = {
         total: data.total || 0,
-        visible: data.visible || data.approved || 0,
+        visible: data.visible || 0,
         hidden: data.hidden || 0,
         average_rating: data.average_rating ?? data.averageRating ?? 0,
       };
@@ -52,12 +52,12 @@ export const useReviewsStore = defineStore('reviews', () => {
     }
   }
 
-  async function showReview(uuid) {
+  async function showReview(id) {
     actionLoading.value = true;
     try {
-      await reviewService.showReview(uuid);
-      const review = reviews.value.find(r => r.uuid === uuid || r.id === uuid);
-      if (review) review.is_visible = true;
+      await reviewService.showReview(id);
+      const review = reviews.value.find(r => (r.id === id || r.uuid === id));
+      if (review) review.status = 'approved';
       useDashboardStore().addToast('Review is now visible', 'success');
       await fetchStats();
     } catch (err) {
@@ -68,12 +68,12 @@ export const useReviewsStore = defineStore('reviews', () => {
     }
   }
 
-  async function hideReview(uuid) {
+  async function hideReview(id) {
     actionLoading.value = true;
     try {
-      await reviewService.hideReview(uuid);
-      const review = reviews.value.find(r => r.uuid === uuid || r.id === uuid);
-      if (review) review.is_visible = false;
+      await reviewService.hideReview(id);
+      const review = reviews.value.find(r => (r.id === id || r.uuid === id));
+      if (review) review.status = 'hidden';
       useDashboardStore().addToast('Review is now hidden', 'success');
       await fetchStats();
     } catch (err) {
@@ -84,11 +84,26 @@ export const useReviewsStore = defineStore('reviews', () => {
     }
   }
 
-  async function deleteReview(uuid) {
+  async function toggleFeatured(id, isFeatured) {
     actionLoading.value = true;
     try {
-      await reviewService.deleteReview(uuid);
-      reviews.value = reviews.value.filter(r => r.uuid !== uuid && r.id !== uuid);
+      await reviewService.updateReview(id, { is_featured: isFeatured });
+      const review = reviews.value.find(r => (r.id === id || r.uuid === id));
+      if (review) review.is_featured = isFeatured;
+      useDashboardStore().addToast(isFeatured ? 'Review featured' : 'Review unfeatured', 'success');
+    } catch (err) {
+      useDashboardStore().addToast(err.response?.data?.message || 'Failed to update review', 'error');
+      throw err;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
+  async function deleteReview(id) {
+    actionLoading.value = true;
+    try {
+      await reviewService.deleteReview(id);
+      reviews.value = reviews.value.filter(r => r.id !== id && r.uuid !== id);
       useDashboardStore().addToast('Review deleted successfully', 'success');
       await fetchStats();
     } catch (err) {
@@ -110,6 +125,7 @@ export const useReviewsStore = defineStore('reviews', () => {
     fetchStats,
     showReview,
     hideReview,
+    toggleFeatured,
     deleteReview,
   };
 });

@@ -20,7 +20,7 @@ const { can } = useAuthPermissions();
 
 const searchQuery = ref('');
 const ratingFilter = ref('all');
-const visibilityFilter = ref('all');
+const statusFilter = ref('all');
 const dateFrom = ref('');
 const dateTo = ref('');
 const pageNumber = ref(1);
@@ -34,7 +34,7 @@ function parseParams(query) {
   return {
     search: query.search || '',
     rating: query.rating && query.rating !== 'all' ? query.rating : '',
-    is_visible: query.is_visible !== undefined && query.is_visible !== '' && query.is_visible !== 'all' ? query.is_visible : '',
+    status: query.status && query.status !== 'all' ? query.status : '',
     date_from: query.date_from || '',
     date_to: query.date_to || '',
     page: parseInt(query.page) || 1,
@@ -48,7 +48,7 @@ watch(
     const params = parseParams(query)
     searchQuery.value = params.search
     ratingFilter.value = params.rating || 'all'
-    visibilityFilter.value = params.is_visible !== '' ? params.is_visible : 'all'
+    statusFilter.value = params.status || 'all'
     dateFrom.value = params.date_from
     dateTo.value = params.date_to
     pageNumber.value = params.page
@@ -87,9 +87,9 @@ function onRatingChange(val) {
   pushQuery({ rating: val, page: undefined })
 }
 
-function onVisibilityChange(val) {
-  visibilityFilter.value = val
-  pushQuery({ is_visible: val, page: undefined })
+function onStatusChange(val) {
+  statusFilter.value = val
+  pushQuery({ status: val, page: undefined })
 }
 
 function onDateFromChange(val) {
@@ -116,7 +116,7 @@ function resetFilters() {
   clearTimeout(searchTimeout)
   pushQuery({
     search: undefined, rating: undefined,
-    is_visible: undefined, date_from: undefined, date_to: undefined, page: undefined
+    status: undefined, date_from: undefined, date_to: undefined, page: undefined
   })
 }
 
@@ -128,17 +128,17 @@ function viewReview(review) {
 function confirmToggleVisibility(review) {
   if (!can('reviews.manage')) return
   selectedReview.value = review
-  toggleAction.value = review.is_visible ? 'hide' : 'show'
+  toggleAction.value = review.status === 'hidden' ? 'show' : 'hide'
   showToggleConfirm.value = true
 }
 
 async function handleToggleVisibility() {
   if (!selectedReview.value) return
-  const uuid = selectedReview.value.uuid || selectedReview.value.id
+  const id = selectedReview.value.id
   if (toggleAction.value === 'hide') {
-    await store.hideReview(uuid)
+    await store.hideReview(id)
   } else {
-    await store.showReview(uuid)
+    await store.showReview(id)
   }
   showToggleConfirm.value = false
   selectedReview.value = null
@@ -154,15 +154,39 @@ const showDeleteConfirm = ref(false)
 
 async function handleDelete() {
   if (selectedReview.value) {
-    const uuid = selectedReview.value.uuid || selectedReview.value.id
-    await store.deleteReview(uuid)
+    const id = selectedReview.value.id
+    await store.deleteReview(id)
     showDeleteConfirm.value = false
     selectedReview.value = null
   }
 }
 
-function statusLabel(review) {
-  return review.is_visible ? t('reviews.visible') : t('reviews.hidden')
+const statusBadge = {
+  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  approved: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+  rejected: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400',
+  hidden: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-400',
+}
+
+function statusClass(status) {
+  return statusBadge[status?.toLowerCase()] || 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+}
+
+function statusLabel(status) {
+  return t(`reviews.${status}`) || status || '—'
+}
+
+function isVisible(status) {
+  return status === 'approved'
+}
+
+function hasAvatar(review) {
+  return review.user?.avatar
+}
+
+function getUserInitials(review) {
+  const name = localField(review.user, 'name') || review.user?.name || review.user?.email || '?'
+  return name.charAt(0).toUpperCase()
 }
 </script>
 
@@ -173,13 +197,13 @@ function statusLabel(review) {
       <div class="px-5 pt-5 pb-3">
         <div class="flex flex-col lg:flex-row gap-3 flex-wrap">
           <div class="relative flex-grow min-w-[180px]">
-            <svg class="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg class="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
               class="w-full pl-10 pr-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none transition"
-              :placeholder="t('reviews.searchPlaceholder')"
+              :placeholder="t('reviews.searchPlaceholder') || 'Search reviews...'"
               :value="searchQuery"
               @input="onSearchInput($event.target.value)"
             />
@@ -188,20 +212,22 @@ function statusLabel(review) {
             class="min-w-[120px] p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none transition"
             :value="ratingFilter" @change="onRatingChange($event.target.value)"
           >
-            <option value="all">{{ t('reviews.allRatings') }}</option>
-            <option value="5">5 {{ $t('reviews.stars', { n: 5 }).replace(/^\d+\s/, '') }}</option>
-            <option value="4">4 {{ $t('reviews.stars', { n: 4 }).replace(/^\d+\s/, '') }}</option>
-            <option value="3">3 {{ $t('reviews.stars', { n: 3 }).replace(/^\d+\s/, '') }}</option>
-            <option value="2">2 {{ $t('reviews.stars', { n: 2 }).replace(/^\d+\s/, '') }}</option>
-            <option value="1">1 {{ $t('reviews.star', { n: 1 }).replace(/^\d+\s/, '') }}</option>
+            <option value="all">{{ t('reviews.allRatings') || 'All Ratings' }}</option>
+            <option value="5">5 {{ t('reviews.stars', { n: 5 }).replace(/^\d+\s/, '') }}</option>
+            <option value="4">4 {{ t('reviews.stars', { n: 4 }).replace(/^\d+\s/, '') }}</option>
+            <option value="3">3 {{ t('reviews.stars', { n: 3 }).replace(/^\d+\s/, '') }}</option>
+            <option value="2">2 {{ t('reviews.stars', { n: 2 }).replace(/^\d+\s/, '') }}</option>
+            <option value="1">1 {{ t('reviews.star', { n: 1 }).replace(/^\d+\s/, '') }}</option>
           </select>
           <select
             class="min-w-[130px] p-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer appearance-none transition"
-            :value="visibilityFilter" @change="onVisibilityChange($event.target.value)"
+            :value="statusFilter" @change="onStatusChange($event.target.value)"
           >
-            <option value="all">{{ t('reviews.allVisibility') || 'All Visibility' }}</option>
-            <option value="1">{{ t('reviews.visible') }}</option>
-            <option value="0">{{ t('reviews.hidden') }}</option>
+            <option value="all">{{ t('reviews.allStatus') || 'All Status' }}</option>
+            <option value="pending">{{ t('reviews.pending') || 'Pending' }}</option>
+            <option value="approved">{{ t('reviews.approved') || 'Approved' }}</option>
+            <option value="rejected">{{ t('reviews.rejected') || 'Rejected' }}</option>
+            <option value="hidden">{{ t('reviews.hidden') }}</option>
           </select>
           <input
             type="date"
@@ -231,8 +257,8 @@ function statusLabel(review) {
       <!-- Error state -->
       <div v-if="store.error" class="mx-5 mb-3 p-4 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800/40 rounded-lg flex items-center justify-between">
         <div class="flex items-center gap-2 text-sm text-rose-700 dark:text-rose-400">
-          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>{{ store.error }}</span>
         </div>
@@ -246,7 +272,7 @@ function statusLabel(review) {
 
       <!-- Loading state -->
       <div v-if="store.loading" class="flex flex-col items-center justify-center py-12 px-6 text-center gap-4">
-        <svg class="w-8 h-8 text-brand-primary animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="w-8 h-8 text-brand-primary animate-spin" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
         </svg>
@@ -258,18 +284,17 @@ function statusLabel(review) {
         <table class="w-full border-collapse text-left rtl:text-right">
           <thead>
             <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[16%]">{{ t('reviews.facility') || 'Facility' }}</th>
-              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[14%]">{{ t('reviews.patient') || 'Patient' }}</th>
+              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[18%]">{{ t('reviews.user') || 'User' }}</th>
               <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[10%]">{{ t('reviews.rating') }}</th>
               <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[28%]">{{ t('reviews.comment') }}</th>
-              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[11%]">{{ t('reviews.visibility') || 'Visibility' }}</th>
-              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[13%]">{{ t('reviews.createdAt') }}</th>
-              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left w-[12%]">{{ t('reviews.actions') }}</th>
+              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[16%]">{{ t('reviews.status') || 'Status' }}</th>
+              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[12%]">{{ t('reviews.createdAt') }}</th>
+              <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right rtl:text-left w-[16%]">{{ t('reviews.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
             <tr v-if="store.reviews.length === 0">
-              <td colspan="7" class="px-5 py-12 text-center">
+              <td colspan="6" class="px-5 py-12 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -277,22 +302,23 @@ function statusLabel(review) {
                     </svg>
                   </div>
                   <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ t('reviews.noResults') }}</p>
-                  <button class="text-xs font-semibold text-brand-primary hover:underline cursor-pointer" @click="resetFilters">{{ t('common.resetFilters') }}</button>
+                  <button class="text-xs font-semibold text-brand-primary hover:underline cursor-pointer" @click="resetFilters">{{ t('common.resetFilters') || 'Reset Filters' }}</button>
                 </div>
               </td>
             </tr>
-            <tr v-for="review in store.reviews" :key="review.uuid || review.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-              <td class="px-5 py-3.5">
-                <span class="text-sm font-medium text-slate-900 dark:text-white">
-                  {{ review.facility ? localField(review.facility, 'name') : '—' }}
-                </span>
-              </td>
+            <tr v-for="review in store.reviews" :key="review.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
               <td class="px-5 py-3.5">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-7 h-7 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xs font-bold shrink-0">
-                    {{ (review.user?.name || '?').charAt(0).toUpperCase() }}
+                  <div v-if="hasAvatar(review)" class="w-8 h-8 rounded-full overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-700">
+                    <img :src="review.user.avatar" :alt="localField(review.user, 'name')" class="w-full h-full object-cover" />
                   </div>
-                  <span class="text-sm text-slate-700 dark:text-slate-300 truncate max-w-[140px]">{{ review.user?.name || '—' }}</span>
+                  <div v-else class="w-8 h-8 rounded-full bg-brand-primary/10 dark:bg-brand-primary/20 flex items-center justify-center shrink-0 ring-2 ring-white dark:ring-slate-700">
+                    <span class="text-xs font-bold text-brand-primary">{{ getUserInitials(review) }}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">{{ localField(review.user, 'name') || '—' }}</p>
+                    <p v-if="review.user?.email" class="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-[160px]">{{ review.user.email }}</p>
+                  </div>
                 </div>
               </td>
               <td class="px-5 py-3.5">
@@ -317,17 +343,11 @@ function statusLabel(review) {
               </td>
               <td class="px-5 py-3.5 whitespace-nowrap">
                 <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
-                    'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400': review.is_visible,
-                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': !review.is_visible,
-                  }">
-                    {{ statusLabel(review) }}
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="statusClass(review.status)">
+                    {{ statusLabel(review.status) }}
                   </span>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" :class="{
-                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': review.is_replied,
-                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': !review.is_replied,
-                  }">
-                    {{ review.is_replied ? t('reviews.replied') || 'Replied' : t('reviews.awaitingReply') || 'Awaiting Reply' }}
+                  <span v-if="review.is_featured" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                    {{ t('reviews.featured') || 'Featured' }}
                   </span>
                 </div>
               </td>
@@ -348,14 +368,14 @@ function statusLabel(review) {
                   <button
                     v-permission="'reviews.manage'"
                     class="p-1.5 rounded-lg transition cursor-pointer"
-                    :class="review.is_visible
+                    :class="isVisible(review.status)
                       ? 'text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                       : 'text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'"
-                    :title="review.is_visible ? t('reviews.hideAction') : t('reviews.showAction')"
+                    :title="isVisible(review.status) ? t('reviews.hideAction') : t('reviews.showAction')"
                     :disabled="store.actionLoading"
                     @click="confirmToggleVisibility(review)"
                   >
-                    <svg v-if="review.is_visible" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg v-if="isVisible(review.status)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                     </svg>
                     <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -411,7 +431,7 @@ function statusLabel(review) {
     <ConfirmModal
       :show="showDeleteConfirm"
       :title="t('reviews.deleteTitle')"
-      :message="t('reviews.deleteConfirm', { user: selectedReview?.user?.name || selectedReview?.user || '' })"
+      :message="t('reviews.deleteConfirm', { user: localField(selectedReview?.user, 'name') || selectedReview?.user?.name || '' })"
       :confirm-text="t('common.delete')"
       @confirm="handleDelete"
       @close="showDeleteConfirm = false"

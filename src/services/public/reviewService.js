@@ -1,11 +1,11 @@
 import axiosClient from '@/axiosClient'
 
-export function getPlatformReviews(params = {}) {
-  return axiosClient.get('/platform-review', { params })
+export function getPublicPlatformReviews(params = {}) {
+  return axiosClient.get('/public/platform-reviews', { params })
 }
 
 export function getMyReview() {
-  return axiosClient.get('/platform-review/my-review')
+  return axiosClient.get('/platform-review')
 }
 
 export function createReview(data) {
@@ -14,4 +14,8 @@ export function createReview(data) {
 
 export function updateReview(data) {
   return axiosClient.put('/platform-review', data)
+}
+
+export function deleteReview() {
+  return axiosClient.delete('/platform-review')
 }
