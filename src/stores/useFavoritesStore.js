@@ -4,24 +4,37 @@ import { useI18n } from 'vue-i18n'
 import * as favoritesService from '@/services/favoritesService'
 import { usePublicToast } from '@/composables/usePublicToast'
 
+const TYPE_MAP = {
+  'App\\Models\\Facility': 'facility',
+  'App\\Models\\Article': 'article',
+  'App\\Models\\Story': 'story',
+  'App\\Models\\Staff': 'staff',
+  'App\\Models\\Doctor': 'staff',
+  'App\\Models\\JobPost': 'job',
+}
+
+function normalizeType(rawType) {
+  if (!rawType) return 'unknown'
+  return TYPE_MAP[rawType] || rawType.toLowerCase().replace(/^app\\models\\/, '').replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '')
+}
+
 export const useFavoritesStore = defineStore('favorites', () => {
   const { t } = useI18n()
   const { addToast } = usePublicToast()
 
   const favorites = ref([])
   const loading = ref(false)
-  const loadingMore = ref(false)
   const error = ref(null)
-  const page = ref(1)
-  const hasMore = ref(true)
+  const currentPage = ref(1)
+  const lastPage = ref(1)
+  const total = ref(0)
   const filter = ref('all')
   const toggling = ref(new Set())
-
   const favoritedIds = ref({})
 
   const filteredFavorites = computed(() => {
     if (filter.value === 'all') return favorites.value
-    return favorites.value.filter(f => f.type === filter.value)
+    return favorites.value.filter(f => f.normalizedType === filter.value)
   })
 
   function cacheKey(type, id) {
@@ -32,84 +45,84 @@ export const useFavoritesStore = defineStore('favorites', () => {
     return !!favoritedIds.value[cacheKey(type, id)]
   }
 
+  function isToggling(type, id) {
+    return toggling.value.has(cacheKey(type, id))
+  }
+
   function setFilter(newFilter) {
     if (filter.value === newFilter) return
     filter.value = newFilter
-    favorites.value = []
-    page.value = 1
-    hasMore.value = true
-    error.value = null
-    loadFavorites(true)
   }
 
-  async function loadFavorites(reset = false) {
-    if (reset) {
-      page.value = 1
-      hasMore.value = true
-    }
-    if (loading.value || loadingMore.value) return
-    if (!hasMore.value && !reset) return
-
-    const isInitial = page.value === 1
-
-    if (isInitial) {
-      loading.value = true
-    } else {
-      loadingMore.value = true
-    }
+  async function loadFavorites() {
+    loading.value = true
     error.value = null
-
     try {
-      const params = { page: page.value }
-      if (filter.value !== 'all') {
-        params.type = filter.value
-      }
+      const params = { page: 1, per_page: 20 }
+      if (filter.value !== 'all') params.type = filter.value
       const { data } = await favoritesService.getFavorites(params)
-      const responseData = data?.data || data || []
-      const meta = data?.meta || data?.pagination || {}
-
-      const items = Array.isArray(responseData) ? responseData : []
-
-      if (reset || page.value === 1) {
-        favorites.value = items
-      } else {
-        favorites.value = [...favorites.value, ...items]
-      }
+      const items = (data.data || []).map(normalizeItem)
+      favorites.value = items
+      currentPage.value = data.meta?.current_page || 1
+      lastPage.value = data.meta?.last_page || 1
+      total.value = data.meta?.total || 0
 
       items.forEach(item => {
-        if (item.type && item.entity?.id) {
-          const key = cacheKey(item.type, item.entity.id)
-          const existing = favoritedIds.value[key]
-          favoritedIds.value = { ...favoritedIds.value, [key]: existing || item.id }
-        }
-        if (item.type && item.entity?.uuid) {
-          const key = cacheKey(item.type, item.entity.uuid)
-          const existing = favoritedIds.value[key]
-          favoritedIds.value = { ...favoritedIds.value, [key]: existing || item.id }
-        }
-        if (item.type && item.id && !item.entity) {
-          const key = cacheKey(item.type, item.id)
-          const existing = favoritedIds.value[key]
-          favoritedIds.value = { ...favoritedIds.value, [key]: existing || item.id }
+        if (item.normalizedType && item.entityId) {
+          const key = cacheKey(item.normalizedType, item.entityId)
+          favoritedIds.value = { ...favoritedIds.value, [key]: item.id }
         }
       })
-
-      const lastPage = meta.last_page || meta.lastPage || data?.last_page || 1
-      hasMore.value = page.value < lastPage
-      if (items.length === 0) hasMore.value = false
     } catch (err) {
       error.value = err.response?.data?.message || t('favorites.errorGeneric')
-      if (reset) favorites.value = []
+      favorites.value = []
     } finally {
       loading.value = false
-      loadingMore.value = false
     }
   }
 
-  function loadMore() {
-    if (!hasMore.value || loadingMore.value || loading.value) return
-    page.value++
-    loadFavorites()
+  async function loadMore() {
+    if (loading.value || currentPage.value >= lastPage.value) return
+    loading.value = true
+    try {
+      const nextPage = currentPage.value + 1
+      const params = { page: nextPage, per_page: 20 }
+      if (filter.value !== 'all') params.type = filter.value
+      const { data } = await favoritesService.getFavorites(params)
+      const items = (data.data || []).map(normalizeItem)
+      favorites.value = [...favorites.value, ...items]
+      currentPage.value = data.meta?.current_page || nextPage
+      lastPage.value = data.meta?.last_page || 1
+      total.value = data.meta?.total || total.value
+
+      items.forEach(item => {
+        if (item.normalizedType && item.entityId) {
+          const key = cacheKey(item.normalizedType, item.entityId)
+          if (!favoritedIds.value[key]) {
+            favoritedIds.value = { ...favoritedIds.value, [key]: item.id }
+          }
+        }
+      })
+    } catch {
+      // silently fail for load more
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function normalizeItem(raw) {
+    const rawType = raw.type || ''
+    const normalizedType = normalizeType(rawType)
+    const itemData = raw.item || raw.entity || raw
+    return {
+      id: raw.id,
+      favoriteId: raw.id,
+      rawType,
+      normalizedType,
+      entity: itemData,
+      entityId: itemData?.uuid || itemData?.id,
+      created_at: raw.created_at,
+    }
   }
 
   async function toggleFavorite(type, entityId) {
@@ -125,9 +138,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       delete newIds[key]
       favoritedIds.value = newIds
       favorites.value = favorites.value.filter(f => {
-        if (f.type === type && f.entity?.id === entityId) return false
-        if (f.type === type && f.entity?.uuid === entityId) return false
-        if (f.type === type && f.id === entityId) return false
+        if (f.normalizedType === type && f.entityId === entityId) return false
         return true
       })
     } else {
@@ -135,20 +146,25 @@ export const useFavoritesStore = defineStore('favorites', () => {
     }
 
     try {
-      if (wasFavorited && favoriteId && !String(favoriteId).startsWith('temp-') && !String(favoriteId).startsWith('restored-')) {
+      if (wasFavorited && favoriteId && !String(favoriteId).startsWith('temp-')) {
         await favoritesService.removeFavorite(favoriteId)
       } else {
-        await favoritesService.addFavorite({ type, id: entityId })
+        const { data } = await favoritesService.addFavorite({ type, id: entityId })
+        const resp = data?.data || data
+        const realId = resp?.id || resp?.favorite?.id
+        if (realId) {
+          favoritedIds.value = { ...favoritedIds.value, [key]: realId }
+        }
       }
-      if (wasFavorited) {
-        addToast(t('favorites.removeSuccess'), 'success')
-      } else {
-        addToast(t('favorites.addSuccess'), 'success')
-      }
+      addToast(
+        wasFavorited
+          ? (t('favorites.removeSuccess') || 'Removed from favorites.')
+          : (t('favorites.addSuccess') || 'Added to favorites.'),
+        'success'
+      )
     } catch (err) {
       if (wasFavorited) {
-        const key2 = cacheKey(type, entityId)
-        favoritedIds.value = { ...favoritedIds.value, [key2]: favoriteId || `restored-${Date.now()}` }
+        favoritedIds.value = { ...favoritedIds.value, [key]: favoriteId || `restored-${Date.now()}` }
       } else {
         const newIds = { ...favoritedIds.value }
         delete newIds[key]
@@ -162,50 +178,13 @@ export const useFavoritesStore = defineStore('favorites', () => {
     }
   }
 
-  function isToggling(type, id) {
-    return toggling.value.has(cacheKey(type, id))
-  }
-
-  function syncFavorited(type, id, isFavorited, favoriteId) {
-    const key = cacheKey(type, id)
-    if (isFavorited) {
-      if (!favoritedIds.value[key]) {
-        favoritedIds.value = { ...favoritedIds.value, [key]: favoriteId || `synced-${Date.now()}` }
-      }
-    } else {
-      if (favoritedIds.value[key]) {
-        const newIds = { ...favoritedIds.value }
-        delete newIds[key]
-        favoritedIds.value = newIds
-      }
-    }
-  }
-
-  async function removeFavoriteById(favoriteId) {
-    try {
-      await favoritesService.removeFavorite(favoriteId)
-      favorites.value = favorites.value.filter(f => f.id !== favoriteId)
-      const newIds = { ...favoritedIds.value }
-      for (const [k, v] of Object.entries(newIds)) {
-        if (v === favoriteId) delete newIds[k]
-      }
-      favoritedIds.value = newIds
-      addToast(t('favorites.removeSuccess'), 'success')
-    } catch (err) {
-      addToast(err.response?.data?.message || t('favorites.errorGeneric'), 'error')
-    }
-  }
-
   return {
     favorites,
     loading,
-    loadingMore,
     error,
-    page,
-    hasMore,
+    total,
+    lastPage,
     filter,
-    toggling,
-    favoritedIds,
     filteredFavorites,
     isFavorited,
     isToggling,
@@ -213,7 +192,5 @@ export const useFavoritesStore = defineStore('favorites', () => {
     loadFavorites,
     loadMore,
     toggleFavorite,
-    removeFavoriteById,
-    syncFavorited,
   }
 })

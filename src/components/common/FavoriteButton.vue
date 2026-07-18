@@ -62,7 +62,6 @@ async function handleClick() {
     localFav.value = !localFav.value
     emit('update:isFavorited', localFav.value)
   }
-  favStore.syncFavorited(props.resourceType, props.resourceId, !prev)
   try {
     await favStore.toggleFavorite(props.resourceType, props.resourceId)
     emit('changed', { type: props.resourceType, id: props.resourceId, isFavorited: !prev })
@@ -71,7 +70,6 @@ async function handleClick() {
       localFav.value = prev
       emit('update:isFavorited', prev)
     }
-    favStore.syncFavorited(props.resourceType, props.resourceId, prev)
   }
 }
 </script>
