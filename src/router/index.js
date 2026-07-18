@@ -13,9 +13,10 @@ import ProfileView from '../views/ProfileView.vue';
 
 const routes = [
   {
-    path: '/ai-consultation',
+    path: '/ai-consultation/:id?',
     name: 'ai-consultation',
     component: () => import('../views/front/AiConsultationView.vue'),
+    props: true,
     meta: { requiresAuth: true }
   },
   {
@@ -165,7 +166,14 @@ const routes = [
   {
     path: '/donations/success',
     name: 'donation-success',
+    alias: '/donation/success',
     component: () => import('../views/front/DonationSuccessView.vue'),
+  },
+  {
+    path: '/donations/cancel',
+    name: 'donation-cancel',
+    alias: '/donation/cancel',
+    component: () => import('../views/front/DonationCancelView.vue'),
   },
   {
     path: '/donations/failed',
@@ -197,6 +205,11 @@ const routes = [
     path: '/stories',
     name: 'public-stories',
     component: () => import('../views/front/StoriesView.vue')
+  },
+  {
+    path: '/testimonials',
+    name: 'testimonials',
+    component: () => import('../views/front/TestimonialsView.vue')
   },
   {
     path: '/facilities/:id',
@@ -288,6 +301,18 @@ const routes = [
         meta: { permission: 'view_staff_schedules' }
       },
       {
+        path: 'manage-schedules',
+        name: 'dashboard-manage-schedules',
+        component: () => import('../views/facility/FacilityManageSchedulesView.vue'),
+        meta: { permission: 'view_staff_schedules' }
+      },
+      {
+        path: 'unavailability-management',
+        name: 'dashboard-unavailability',
+        component: () => import('../views/facility/FacilityUnavailabilityView.vue'),
+        meta: { permission: 'view_staff_schedules' }
+      },
+      {
         path: 'reviews',
         name: 'dashboard-reviews',
         component: () => import('../views/facility/FacilityReviewsView.vue'),
@@ -310,6 +335,12 @@ const routes = [
         name: 'dashboard-departments',
         component: () => import('../views/facility/FacilityDepartmentsView.vue'),
         meta: { permission: 'view_departments' }
+      },
+      {
+        path: 'calendar',
+        name: 'dashboard-calendar',
+        component: () => import('../views/facility/calendar/index.vue'),
+        meta: { permission: 'view_staff_schedules' }
       },
       {
         path: 'job-posts',
@@ -608,6 +639,12 @@ const routes = [
         meta: { permission: 'view_settings' }
       },
       {
+        path: 'specializations',
+        name: 'platform-specializations',
+        component: () => import('../views/dashboard/SpecializationsView.vue'),
+        meta: { permission: 'view_settings' }
+      },
+      {
         path: 'search',
         name: 'platform-search-history',
         component: () => import('../views/dashboard/SearchHistoryView.vue'),
@@ -677,7 +714,10 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior() {
+    return { top: 0 }
+  }
 });
 
 function hasPermission(permissions) {
