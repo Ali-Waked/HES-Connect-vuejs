@@ -43,7 +43,7 @@ function formatDate(dateStr) {
 }
 
 function goToArticle() {
-  router.push(`/articles/${props.article.id}`)
+  router.push(`/articles/${props.article.uuid || props.article.id}`)
 }
 
 const authorName = computed(() => {

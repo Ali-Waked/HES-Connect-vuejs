@@ -5,15 +5,14 @@ import { useLocaleField } from '../../composables/useLocaleField'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
-  popularArticles: { type: Array, default: () => [] },
-  tags: { type: Array, default: () => [] },
+  mostRead: { type: Array, default: () => [] },
+  popularTopics: { type: Array, default: () => [] },
   categories: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
-  activeTag: { type: String, default: '' },
   activeCategory: { type: String, default: '' }
 })
 
-const emit = defineEmits(['selectTag', 'selectCategory'])
+const emit = defineEmits(['selectCategory'])
 
 const router = useRouter()
 const { localField } = useLocaleField()
@@ -53,16 +52,16 @@ function goToArticle(id) {
         </div>
       </div>
 
-      <div v-else-if="popularArticles.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+      <div v-else-if="mostRead.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
         {{ t('articlesListing.noArticles') }}
       </div>
 
       <ul v-else class="space-y-3">
         <li
-          v-for="(article, i) in popularArticles"
-          :key="article.id"
+          v-for="(article, i) in mostRead"
+          :key="article.uuid"
           class="flex gap-3 group cursor-pointer"
-          @click="goToArticle(article.id)"
+          @click="goToArticle(article.uuid)"
         >
           <span class="text-xs font-bold text-slate-300 dark:text-slate-600 w-5 leading-none pt-0.5 shrink-0">{{ i + 1 }}</span>
           <div class="w-16 h-14 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700">
@@ -99,22 +98,19 @@ function goToArticle(id) {
         <div v-for="n in 8" :key="n" class="h-7 w-16 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse"></div>
       </div>
 
-      <div v-else-if="tags.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+      <div v-else-if="popularTopics.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
         {{ t('common.noResults') }}
       </div>
 
       <div v-else class="flex flex-wrap gap-2">
         <button
-          v-for="tag in tags"
-          :key="tag.id"
-          class="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer"
-          :class="activeTag === tag.slug
-            ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/20'
-            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-primary/10 hover:text-brand-primary dark:hover:text-brand-primary'"
-          @click="$emit('selectTag', activeTag === tag.slug ? '' : tag.slug)"
+          v-for="topic in popularTopics"
+          :key="topic.uuid"
+          class="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-brand-primary/10 hover:text-brand-primary dark:hover:text-brand-primary"
+          @click="router.push(`/articles?category=${topic.uuid}`)"
         >
-          {{ tag.name?.en || tag.name }}
-          <span v-if="tag.article_count !== undefined" class="ml-1 opacity-60">({{ tag.article_count }})</span>
+          {{ localField(topic, 'name') }}
+          <span v-if="topic.articles_count !== undefined" class="ml-1 opacity-60">({{ topic.articles_count }})</span>
         </button>
       </div>
     </div>
@@ -138,21 +134,21 @@ function goToArticle(id) {
       <ul v-else class="space-y-1">
         <li
           v-for="cat in categories"
-          :key="cat.id"
+          :key="cat.uuid"
           class="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200"
-          :class="activeCategory === cat.slug
+          :class="activeCategory === cat.uuid
             ? 'bg-brand-primary/10 text-brand-primary font-semibold'
             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-800 dark:hover:text-slate-200'"
-          @click="$emit('selectCategory', activeCategory === cat.slug ? '' : cat.slug)"
+          @click="$emit('selectCategory', cat.uuid)"
         >
-          <span class="text-sm">{{ cat.name?.en || cat.name }}</span>
+          <span class="text-sm">{{ localField(cat, 'name') }}</span>
           <span
             class="text-xs font-medium px-2 py-0.5 rounded-full"
-            :class="activeCategory === cat.slug
+            :class="activeCategory === cat.uuid
               ? 'bg-brand-primary/20 text-brand-primary'
               : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'"
           >
-            {{ cat.article_count || 0 }}
+            {{ cat.articles_count || 0 }}
           </span>
         </li>
       </ul>

@@ -14,7 +14,7 @@ const copied = ref(false)
 
 const shareUrl = computed(() => {
   const base = window.location.origin
-  return `${base}/articles/${props.article.id}`
+  return `${base}/articles/${props.article.uuid || props.article.id}`
 })
 
 const shareTitle = computed(() => {

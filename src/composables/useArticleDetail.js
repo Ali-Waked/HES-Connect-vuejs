@@ -15,21 +15,19 @@ export function useArticleDetail(uuid) {
   const notFound = ref(false)
 
   const sidebarLoading = ref(true)
-  const popularArticles = ref([])
-  const latestArticles = ref([])
+  const mostRead = ref([])
+  const popularTopics = ref([])
   const categories = ref([])
 
   const title = computed(() => localField(article.value, 'title'))
   const content = computed(() => localField(article.value, 'content'))
   const excerpt = computed(() => localField(article.value, 'excerpt'))
 
-  const categoryName = computed(() => {
-    const cat = article.value?.category
-    if (!cat) return ''
-    return localField(cat, 'name') || cat.name || ''
+  const authorName = computed(() => {
+    const author = article.value?.author
+    if (!author) return ''
+    return localField(author, 'name') || author.name || ''
   })
-
-  const authorName = computed(() => article.value?.author?.name || article.value?.author_name || '')
 
   function formatDate(dateStr) {
     if (!dateStr) return ''
@@ -104,7 +102,7 @@ export function useArticleDetail(uuid) {
       setMeta('twitter:title', title.value)
       setMeta('twitter:description', desc)
       if (articleData.published_at) setMeta('article:published_time', articleData.published_at)
-      if (articleData.author?.name) setMeta('article:author', articleData.author.name)
+      if (articleData.author?.name) setMeta('article:author', localField(articleData.author, 'name'))
       if (articleData.category?.name?.en) setMeta('article:section', articleData.category.name.en)
       setCanonical(window.location.href)
     } catch (err) {
@@ -118,15 +116,10 @@ export function useArticleDetail(uuid) {
   async function fetchSidebar() {
     sidebarLoading.value = true
     try {
-      const [popularRes, latestRes, catsRes] = await Promise.all([
-        articleService.getPopularArticles(5),
-        articleService.getArticles({ sort: 'latest', per_page: 5 }),
-        articleService.getCategoriesPublic(),
-      ])
-      popularArticles.value = popularRes?.data?.data || popularRes?.data || []
-      const latestData = latestRes?.data?.data || latestRes?.data || []
-      latestArticles.value = Array.isArray(latestData) ? latestData.slice(0, 5) : []
-      categories.value = catsRes?.data?.data || catsRes?.data || []
+      const { data } = await articleService.getArticles({ per_page: 1 })
+      mostRead.value = data?.most_read || []
+      popularTopics.value = data?.popular_topics || []
+      categories.value = data?.categories || []
     } catch {
       // silent
     } finally {
@@ -134,12 +127,13 @@ export function useArticleDetail(uuid) {
     }
   }
 
-  function goToTag(slug) {
-    router.push({ path: '/articles', query: { tag: slug } })
+  function goToTag(/* slug */) {
+    // Navigate to articles list with tag filter — not supported directly by backend
+    router.push('/articles')
   }
 
-  function goToCategory(slug) {
-    router.push({ path: '/articles', query: { category: slug } })
+  function goToCategory(uuid) {
+    router.push({ path: '/articles', query: { category: uuid } })
   }
 
   function goToArticle(id) {
@@ -159,13 +153,12 @@ export function useArticleDetail(uuid) {
     error,
     notFound,
     sidebarLoading,
-    popularArticles,
-    latestArticles,
+    mostRead,
+    popularTopics,
     categories,
     title,
     content,
     excerpt,
-    categoryName,
     authorName,
     formatDate,
     goToTag,

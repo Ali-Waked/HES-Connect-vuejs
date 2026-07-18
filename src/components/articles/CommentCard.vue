@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useLocaleField } from '../../composables/useLocaleField'
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -18,6 +19,17 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { localField } = useLocaleField()
+
+const userName = computed(() => {
+  if (props.comment.user_name) return props.comment.user_name
+  if (props.comment.user?.name) return localField(props.comment.user, 'name') || props.comment.user.name
+  return ''
+})
+
+const userAvatar = computed(() => {
+  return props.comment.user_avatar || props.comment.user?.avatar || null
+})
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -53,21 +65,21 @@ function handleConfirmDelete() {
   <div class="flex gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
     <div class="shrink-0">
       <img
-        v-if="comment.user_avatar"
-        :src="comment.user_avatar"
-        :alt="comment.user_name"
+        v-if="userAvatar"
+        :src="userAvatar"
+        :alt="userName"
         class="w-10 h-10 rounded-full object-cover"
       />
       <div
         v-else
         class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-400"
       >
-        {{ userInitial(comment.user_name) }}
+        {{ userInitial(userName) }}
       </div>
     </div>
     <div class="min-w-0 flex-1">
       <div class="flex items-center gap-2 mb-1">
-        <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ comment.user_name }}</span>
+        <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ userName }}</span>
         <span class="text-xs text-slate-400 dark:text-slate-500">{{ formatDate(comment.created_at) }}</span>
       </div>
 

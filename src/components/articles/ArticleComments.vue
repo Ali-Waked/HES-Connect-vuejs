@@ -17,6 +17,7 @@ const {
   commentText,
   submitting,
   submitError,
+  successMessage,
   commentCount,
   isAuthenticated,
   currentUser,
@@ -25,6 +26,7 @@ const {
   editing,
   fetchComments,
   submitComment,
+  clearSuccessMessage,
   userOwnsComment,
   startEdit,
   cancelEdit,
@@ -46,6 +48,16 @@ function handleDelete(commentId) {
       <span class="text-sm font-normal text-slate-400 dark:text-slate-500">({{ commentCount }})</span>
     </h3>
     <div class="card-base p-6 space-y-6">
+      <div
+        v-if="successMessage"
+        class="flex items-center gap-2 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-sm font-medium text-emerald-700 dark:text-emerald-300"
+      >
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="flex-1">{{ successMessage }}</span>
+        <button class="shrink-0 text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-200 cursor-pointer" @click="clearSuccessMessage">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
       <CommentForm
         v-model="commentText"
         :submitting="submitting"

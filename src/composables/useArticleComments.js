@@ -14,7 +14,12 @@ export function useArticleComments(articleId, options = {}) {
   const commentText = ref('')
   const submitting = ref(false)
   const submitError = ref('')
+  const successMessage = ref('')
   const commentCount = ref(0)
+
+  function clearSuccessMessage() {
+    successMessage.value = ''
+  }
 
   const editingCommentId = ref(null)
   const editText = ref('')
@@ -25,9 +30,10 @@ export function useArticleComments(articleId, options = {}) {
 
   function userOwnsComment(comment) {
     if (!currentUser.value) return false
-    return comment.user_id === currentUser.value.id ||
-           comment.user_uuid === currentUser.value.uuid ||
-           (comment.is_owner === true)
+    const commentUserUuid = comment.user?.uuid || comment.user_uuid
+    return commentUserUuid === currentUser.value.uuid ||
+           comment.user_id === currentUser.value.id ||
+           comment.is_owner === true
   }
 
   async function fetchComments() {
@@ -56,31 +62,14 @@ export function useArticleComments(articleId, options = {}) {
     }
     submitError.value = ''
     submitting.value = true
-
-    const optimistic = {
-      id: `temp-${Date.now()}`,
-      content: text,
-      user_name: currentUser.value?.name || 'You',
-      user_avatar: currentUser.value?.avatar || null,
-      user_id: currentUser.value?.id,
-      created_at: new Date().toISOString(),
-      is_owner: true,
-    }
-    comments.value.unshift(optimistic)
-    commentCount.value++
     commentText.value = ''
 
     try {
-      const { data } = await service.createComment(articleId, { content: text })
-      const saved = data?.data || data
-      if (saved) {
-        const idx = comments.value.findIndex((c) => c.id === optimistic.id)
-        if (idx !== -1) comments.value[idx] = saved
-      }
+      await service.createComment(articleId, { content: text })
+      await fetchComments()
+      successMessage.value = t('comment.commentSuccess') || 'Comment posted successfully!'
+      setTimeout(clearSuccessMessage, 4000)
     } catch (err) {
-      const idx = comments.value.findIndex((c) => c.id === optimistic.id)
-      if (idx !== -1) comments.value.splice(idx, 1)
-      commentCount.value--
       submitError.value = err.response?.data?.message || t('contactPage.errorGeneric')
     } finally {
       submitting.value = false
@@ -159,6 +148,7 @@ export function useArticleComments(articleId, options = {}) {
     commentText,
     submitting,
     submitError,
+    successMessage,
     commentCount,
     isAuthenticated,
     currentUser,
@@ -167,6 +157,7 @@ export function useArticleComments(articleId, options = {}) {
     editing,
     fetchComments,
     submitComment,
+    clearSuccessMessage,
     userOwnsComment,
     startEdit,
     cancelEdit,
