@@ -83,7 +83,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.dashboard = true
     errors.dashboard = null
     try {
-      const res = await getDashboard()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getDashboard(facilityUuid)
       const d = unwrap(res)
       dashboard.total_appointments_today = d.total_appointments_today ?? 0
       dashboard.total_appointments_month = d.total_appointments_month ?? 0
@@ -104,7 +106,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.liveAppointments = true
     errors.liveAppointments = null
     try {
-      const res = await getLiveAppointments()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getLiveAppointments(facilityUuid)
       liveAppointments.value = unwrap(res) || []
     } catch (err) {
       errors.liveAppointments = err.response?.data?.message || err.message || 'Failed to load live appointments'
@@ -119,7 +123,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.doctors = true
     errors.doctors = null
     try {
-      const res = await getDoctorsPerformance()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getDoctorsPerformance(facilityUuid)
       doctorsPerformance.value = unwrap(res) || []
     } catch (err) {
       errors.doctors = err.response?.data?.message || err.message || 'Failed to load doctors performance'
@@ -134,7 +140,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.patients = true
     errors.patients = null
     try {
-      const res = await getPatientsOverview()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getPatientsOverview(facilityUuid)
       const d = unwrap(res)
       patientsOverview.total = d.total ?? 0
       patientsOverview.new = d.new ?? 0
@@ -156,7 +164,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.schedules = true
     errors.schedules = null
     try {
-      const res = await getSchedules()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getSchedules(facilityUuid)
       schedules.value = unwrap(res) || []
     } catch (err) {
       errors.schedules = err.response?.data?.message || err.message || 'Failed to load schedules'
@@ -171,7 +181,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.analytics = true
     errors.analytics = null
     try {
-      const res = await getAnalytics()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getAnalytics(facilityUuid)
       const d = unwrap(res)
       analytics.appointments_per_day = d.appointments_per_day ?? []
       analytics.peak_hours = d.peak_hours ?? []
@@ -191,7 +203,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.alerts = true
     errors.alerts = null
     try {
-      const res = await getAlerts()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getAlerts(facilityUuid)
       alerts.value = unwrap(res) || []
     } catch (err) {
       errors.alerts = err.response?.data?.message || err.message || 'Failed to load alerts'
@@ -206,7 +220,9 @@ export const useFacilityDashboardStore = defineStore('facilityDashboard', () => 
     loading.staff = true
     errors.staff = null
     try {
-      const res = await getStaff()
+      const facilityUuid = workspaceStore.currentFacility?.uuid
+      if (!facilityUuid) throw new Error('No facility selected')
+      const res = await getStaff(facilityUuid)
       staff.value = unwrap(res) || []
     } catch (err) {
       errors.staff = err.response?.data?.message || err.message || 'Failed to load staff'

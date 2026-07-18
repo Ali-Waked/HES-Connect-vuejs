@@ -45,6 +45,19 @@ const chartDefs = {
   top_facilities: { title: 'Top Facilities', type: 'bar', valueKey: 'staff_count', nameKey: 'name' },
 };
 
+const chartColors = [
+  { bg: 'rgba(2, 122, 117, 0.8)', border: '#027a75' },
+  { bg: 'rgba(234, 88, 12, 0.8)', border: '#ea580c' },
+  { bg: 'rgba(99, 102, 241, 0.8)', border: '#6366f1' },
+  { bg: 'rgba(225, 29, 72, 0.8)', border: '#e11d48' },
+  { bg: 'rgba(34, 197, 94, 0.8)', border: '#22c55e' },
+  { bg: 'rgba(168, 85, 247, 0.8)', border: '#a855f7' },
+  { bg: 'rgba(236, 72, 153, 0.8)', border: '#ec4899' },
+  { bg: 'rgba(20, 184, 166, 0.8)', border: '#14b8a6' },
+  { bg: 'rgba(245, 158, 11, 0.8)', border: '#f59e0b' },
+  { bg: 'rgba(59, 130, 246, 0.8)', border: '#3b82f6' },
+];
+
 export const useDashboardApiStore = defineStore('dashboardApi', () => {
   const data = ref(null);
   const loading = ref(false);
@@ -69,6 +82,7 @@ export const useDashboardApiStore = defineStore('dashboardApi', () => {
   const charts = computed(() => {
     const c = data.value?.charts;
     if (!c || typeof c !== 'object') return [];
+    let chartIdx = 0;
     return Object.entries(chartDefs)
       .filter(([key]) => Array.isArray(c[key]) && c[key].length > 0)
       .map(([key, def]) => {
@@ -76,17 +90,39 @@ export const useDashboardApiStore = defineStore('dashboardApi', () => {
         const labels = items.map(item => {
           if (def.nameKey) {
             const name = item[def.nameKey];
-            return name?.en || name?.ar || name || '';
+            if (name && typeof name === 'object') return name.en || name.ar || Object.values(name)[0] || '';
+            return name || '';
           }
           return item.label || '';
         });
         const values = items.map(item => item[def.valueKey] ?? 0);
+        const isPieLike = ['doughnut', 'pie', 'polarArea'].includes(def.type);
+
+        let backgroundColor, borderColor;
+        if (isPieLike) {
+          backgroundColor = values.map((_, i) => chartColors[i % chartColors.length].bg);
+          borderColor = values.map((_, i) => chartColors[i % chartColors.length].border);
+        } else if (def.type === 'bar') {
+          backgroundColor = values.map((_, i) => chartColors[i % chartColors.length].bg);
+          borderColor = values.map((_, i) => chartColors[i % chartColors.length].border);
+        } else {
+          const color = chartColors[chartIdx % chartColors.length];
+          backgroundColor = color.bg;
+          borderColor = color.border;
+        }
+        chartIdx++;
+
         return {
           key,
           title: def.title,
           type: def.type,
           labels,
-          datasets: [{ label: def.title, data: values }],
+          datasets: [{
+            label: def.title,
+            data: values,
+            backgroundColor,
+            borderColor,
+          }],
         };
       });
   });

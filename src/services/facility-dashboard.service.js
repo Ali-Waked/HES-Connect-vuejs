@@ -1,33 +1,33 @@
 import axiosClient from '@/axiosClient'
 
-export function getDashboard(params = {}) {
-  return axiosClient.get('/facility/dashboard', { params })
+export function getDashboard(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard`, { params })
 }
 
-export function getLiveAppointments(params = {}) {
-  return axiosClient.get('/facility/dashboard/appointments/live', { params })
+export function getLiveAppointments(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/appointments/live`, { params })
 }
 
-export function getDoctorsPerformance(params = {}) {
-  return axiosClient.get('/facility/dashboard/doctors-performance', { params })
+export function getDoctorsPerformance(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/doctors-performance`, { params })
 }
 
-export function getPatientsOverview(params = {}) {
-  return axiosClient.get('/facility/dashboard/patients', { params })
+export function getPatientsOverview(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/patients`, { params })
 }
 
-export function getSchedules(params = {}) {
-  return axiosClient.get('/facility/dashboard/schedules', { params })
+export function getSchedules(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/schedules`, { params })
 }
 
-export function getAnalytics(params = {}) {
-  return axiosClient.get('/facility/dashboard/analytics', { params })
+export function getAnalytics(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/analytics`, { params })
 }
 
-export function getAlerts(params = {}) {
-  return axiosClient.get('/facility/dashboard/alerts', { params })
+export function getAlerts(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/dashboard/alerts`, { params })
 }
 
-export function getStaff(params = {}) {
-  return axiosClient.get('/facility/staff', { params })
+export function getStaff(facilityUuid, params = {}) {
+  return axiosClient.get(`/facility/${facilityUuid}/staff`, { params })
 }

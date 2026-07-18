@@ -8,15 +8,15 @@ import { resolveTranslatedValue } from '@/utils/locale';
 import StatisticsCard from '@/components/dashboard/global/StatisticsCard.vue';
 import GrowthBadge from '@/components/dashboard/global/GrowthBadge.vue';
 import ChartCard from '@/components/dashboard/global/ChartCard.vue';
-import RecentActivityCard from '@/components/dashboard/global/RecentActivityCard.vue';
+import SectionHeader from '@/components/dashboard/global/SectionHeader.vue';
+import BaseTable from '@/components/dashboard/global/BaseTable.vue';
 import BaseLoading from '@/components/dashboard/global/BaseLoading.vue';
-import { useAuthPermissions } from '@/composables/useAuthPermissions';
+import BaseEmptyState from '@/components/dashboard/global/BaseEmptyState.vue';
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
 const staffStore = useStaffStore();
 const dash = useFacilityDashboardStore();
-const { can } = useAuthPermissions();
 
 const userName = computed(() => {
   const user = authStore.user || staffStore.currentUser;
@@ -30,16 +30,21 @@ const welcomeGreeting = computed(() => {
   return 'Good evening';
 });
 
-const quickLinks = computed(() => [
-  { label: t('staffSidebar.appointments'), icon: 'calendar_month', to: '/dashboard/appointments', permission: 'view_appointments' },
-  { label: t('staffSidebar.myPatients'), icon: 'group', to: '/dashboard/patients', permission: 'view_patients' },
-  { label: t('staffSidebar.prescriptions'), icon: 'description', to: '/dashboard/prescriptions', permission: 'view_prescriptions' },
-  { label: t('staffSidebar.mySchedule'), icon: 'schedule', to: '/dashboard/schedule', permission: 'view_staff_schedules' },
-  { label: t('departments.title'), icon: 'domain', to: '/dashboard/departments', permission: 'view_departments' },
-  { label: t('staffSidebar.reports'), icon: 'bar_chart', to: '/dashboard/reports', permission: 'view_reports' },
-]);
+function cellValue(item, key) {
+  const val = item[key];
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(val)) {
+    return new Date(val).toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  return resolveTranslatedValue(val, locale.value);
+}
 
-const recentKeys = computed(() => dash.hasData ? Object.keys(dash.recentData) : []);
+function statusClass(val) {
+  const v = String(resolveTranslatedValue(val, locale.value)).toLowerCase();
+  if (['active', 'approved', 'completed', 'confirmed'].includes(v)) return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300';
+  if (['pending', 'scheduled', 'booked'].includes(v)) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
+  if (['cancelled', 'rejected', 'suspended', 'archived'].includes(v)) return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300';
+  return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+}
 
 onMounted(() => {
   if (!dash.hasData) {
@@ -96,81 +101,94 @@ onMounted(() => {
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <div
-          v-for="(card, idx) in dash.cards"
+          v-for="(card, idx) in dash.combinedCards"
           :key="idx"
           class="relative"
         >
           <StatisticsCard
             :title="card.title"
             :value="card.value"
-            :icon="card.icon || 'bar_chart'"
-            :color="card.color || 'primary'"
-            :subtitle="card.subtitle"
+            :icon="card.icon"
+            :color="card.color"
           />
           <div
-            v-if="dash.growthPercentages[card.key || card.title] !== undefined"
+            v-if="card.growth !== null"
             class="absolute top-3 right-3"
           >
-            <GrowthBadge :value="dash.growthPercentages[card.key || card.title]" />
+            <GrowthBadge :value="card.growth" />
           </div>
         </div>
       </div>
 
-      <!-- Charts + Recent Data -->
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <!-- Charts -->
-        <div class="xl:col-span-2 space-y-6">
-          <template v-if="dash.charts.length > 0">
-            <ChartCard
-              v-for="(chart, idx) in dash.charts"
-              :key="idx"
-              :chart="chart"
-            />
-          </template>
-          <div
-            v-else
-            class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[300px] flex items-center justify-center"
-          >
-            <div class="text-center">
-              <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-2">monitoring</span>
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-500">Chart Data</p>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Analytics charts will appear here</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Data Sidebar -->
-        <div class="space-y-6">
-          <RecentActivityCard
-            v-if="recentKeys.length > 0"
-            :sections="dash.recentData"
+      <!-- Charts -->
+      <template v-if="dash.charts.length">
+        <SectionHeader title="Charts & Analytics" subtitle="Visual overview of your data" />
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <ChartCard
+            v-for="(chart, idx) in dash.charts"
+            :key="idx"
+            :chart="chart"
           />
-          <div
-            v-else
-            class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm text-center"
-          >
-            <span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600 mb-2">history</span>
-            <p class="text-sm font-bold text-slate-400 dark:text-slate-500">No recent activity</p>
+        </div>
+      </template>
+
+      <!-- Top Rankings Tables -->
+      <template v-if="dash.topTables.length">
+        <SectionHeader title="Top Rankings" subtitle="Leading items by count" />
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div v-for="(table, tIdx) in dash.topTables" :key="'top-' + tIdx" class="space-y-3">
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ table.title }}</h4>
+            <BaseTable :columns="table.columns" :items="table.rows" :loading="false">
+              <template v-for="col in table.columns" :key="col.key" #[`cell(${col.key})`]="{ item }">
+                <span
+                  v-if="col.key === 'status'"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                  :class="statusClass(item[col.key])"
+                >
+                  {{ cellValue(item, col.key) }}
+                </span>
+                <span v-else class="text-sm text-slate-700 dark:text-slate-300">
+                  {{ cellValue(item, col.key) }}
+                </span>
+              </template>
+              <template #empty>
+                <BaseEmptyState />
+              </template>
+            </BaseTable>
           </div>
         </div>
-      </div>
+      </template>
 
-      <!-- Quick Shortcuts -->
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Quick Shortcuts</h3>
-        <div class="flex flex-wrap gap-3">
-          <router-link
-            v-for="link in quickLinks"
-            :key="link.to"
-            v-permission="link.permission"
-            :to="link.to"
-            class="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 transition border border-slate-100 dark:border-slate-700"
-          >
-            <span class="material-symbols-outlined text-lg text-brand-primary">{{ link.icon }}</span>
-            {{ link.label }}
-          </router-link>
+      <!-- Recent Data Tables -->
+      <template v-if="dash.recentTables.length">
+        <SectionHeader title="Recent Records" subtitle="Latest entries across modules" />
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div v-for="(table, tIdx) in dash.recentTables" :key="'recent-' + tIdx" class="space-y-3">
+            <SectionHeader :title="table.title">
+              <template #actions>
+                <span class="text-xs text-slate-400">Total: {{ table.rows.length }}</span>
+              </template>
+            </SectionHeader>
+            <BaseTable :columns="table.columns" :items="table.rows" :loading="false">
+              <template v-for="col in table.columns" :key="col.key" #[`cell(${col.key})`]="{ item }">
+                <span
+                  v-if="col.key === 'status'"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                  :class="statusClass(item[col.key])"
+                >
+                  {{ cellValue(item, col.key) }}
+                </span>
+                <span v-else class="text-sm text-slate-700 dark:text-slate-300">
+                  {{ cellValue(item, col.key) }}
+                </span>
+              </template>
+              <template #empty>
+                <BaseEmptyState />
+              </template>
+            </BaseTable>
+          </div>
         </div>
-      </div>
+      </template>
     </template>
   </div>
 </template>
