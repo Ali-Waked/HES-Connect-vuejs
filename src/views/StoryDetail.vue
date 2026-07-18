@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getPublicStory } from '@/services/publicStoriesService'
@@ -21,7 +21,8 @@ fetchCategories({ type: 'story', per_page: 100 })
 const story = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const contentLang = ref('en')
+const notFound = ref(false)
+const contentLang = computed(() => locale.value === 'ar' ? 'ar' : 'en')
 const showDonate = ref(false)
 
 function localField(obj, field) {
@@ -32,10 +33,10 @@ function localField(obj, field) {
 
 function formatDate(val) {
   if (!val) return ''
-  try {
-    const loc = locale.value === 'ar' ? 'ar-SA' : 'en-US'
-    return new Date(val.replace(' ', 'T')).toLocaleDateString(loc, { month: 'long', day: 'numeric', year: 'numeric' })
-  } catch { return val }
+  const d = new Date(val.replace(' ', 'T'))
+  if (isNaN(d.getTime())) return val
+  const loc = locale.value === 'ar' ? 'ar-SA' : 'en-US'
+  return d.toLocaleDateString(loc, { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
 function formatCurrency(val) {
@@ -48,6 +49,46 @@ function progressPercent() {
   if (!story.value?.target_amount || story.value.target_amount <= 0) return 0
   return Math.min(100, ((story.value.collected_amount || 0) / story.value.target_amount) * 100)
 }
+
+const goalReached = computed(() => {
+  return (story.value?.collected_amount || 0) >= (story.value?.target_amount || 0)
+})
+
+const overlayRgb = ref(null)
+
+function extractImageColor(imgSrc) {
+  const img = new Image()
+  img.crossOrigin = 'Anonymous'
+  img.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 40
+    canvas.height = 40
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, 0, 0, 40, 40)
+    const pixels = ctx.getImageData(0, 0, 40, 40).data
+    let r = 0, g = 0, b = 0, count = 0
+    for (let y = 0; y < 40; y++) {
+      for (let x = 0; x < 40; x++) {
+        const i = (y * 40 + x) * 4
+        r += pixels[i]; g += pixels[i + 1]; b += pixels[i + 2]; count++
+      }
+    }
+    overlayRgb.value = {
+      r: Math.round(r / count),
+      g: Math.round(g / count),
+      b: Math.round(b / count),
+    }
+  }
+  img.src = imgSrc
+}
+
+const overlayStyle = computed(() => {
+  if (!overlayRgb.value) return {}
+  const { r, g, b } = overlayRgb.value
+  return {
+    background: `linear-gradient(to top, rgba(${r},${g},${b},0.8) 0%, rgba(${r},${g},${b},0.5) 50%, rgba(${r},${g},${b},0.2) 100%)`,
+  }
+})
 
 function patientName() {
   if (!story.value) return ''
@@ -72,12 +113,16 @@ function patientAvatar() {
 async function fetchStory() {
   loading.value = true
   error.value = null
+  notFound.value = false
   try {
     const { data } = await getPublicStory(route.params.id)
     story.value = data.data || data
+    if (story.value?.cover_image) {
+      extractImageColor(story.value.cover_image)
+    }
   } catch (err) {
     if (err.response?.status === 404) {
-      error.value = 'not_found'
+      notFound.value = true
     } else {
       error.value = err.response?.data?.message || t('stories.errorLoading')
     }
@@ -101,100 +146,105 @@ onMounted(fetchStory)
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary dark:bg-slate-900 font-sans antialiased">
+  <div class="min-h-screen bg-surface-secondary dark:bg-slate-900">
     <AppNavbar variant="landing" />
 
-    <!-- Hero with Cover Image -->
-    <div class="relative overflow-hidden pt-28 lg:pt-32 pb-14 lg:pb-20">
-      <div v-if="story?.cover_image" class="absolute inset-0">
-        <img :src="story.cover_image" class="w-full h-full object-cover" :alt="t('stories.coverImageAlt')" />
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-slate-900/40"></div>
-      </div>
-      <div v-else class="absolute inset-0 hero-gradient">
-        <div class="hero-grid-pattern absolute inset-0 opacity-50"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
-      </div>
-      <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
-
-      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="flex items-center gap-2 text-sm text-white/60 mb-4" aria-label="Breadcrumb">
-          <router-link to="/" class="hover:text-white transition-colors">{{ t('nav.home') }}</router-link>
-          <span class="text-white/40">/</span>
-          <router-link to="/stories" class="hover:text-white transition-colors">{{ t('nav.stories') }}</router-link>
-          <span v-if="story" class="text-white/40">/</span>
-          <span v-if="story" class="text-white/80 truncate max-w-[200px]">{{ localField(story, 'title') }}</span>
-        </nav>
-
-        <div v-if="loading" class="space-y-4">
-          <div class="h-4 w-48 bg-white/10 rounded animate-pulse"></div>
-          <div class="h-10 w-3/4 bg-white/10 rounded animate-pulse"></div>
-          <div class="h-4 w-64 bg-white/10 rounded animate-pulse"></div>
+    <!-- Loading -->
+    <div v-if="loading" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-28 lg:pt-32">
+      <div class="space-y-6 animate-pulse">
+        <div class="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-24"></div>
+        <div class="h-64 bg-slate-200 dark:bg-slate-700 rounded-2xl"></div>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 space-y-6">
+          <div class="h-8 bg-slate-200 dark:bg-slate-700 rounded-full w-3/4"></div>
+          <div class="flex gap-3">
+            <div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-24"></div>
+            <div class="h-6 bg-slate-200 dark:bg-slate-700 rounded-full w-20"></div>
+          </div>
+          <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-full"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-5/6"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-4/6"></div>
+          </div>
         </div>
-
-        <template v-else-if="story">
-          <div class="flex items-center gap-3 mb-4">
-            <span v-if="story.is_fundraising" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300">
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-              </svg>
-              {{ t('myStories.fundraiser') }}
-            </span>
-            <CategoryBadge v-if="storyCategory()" :category="storyCategory()" size="sm" />
-            <span class="text-sm text-white/60">{{ formatDate(story.created_at) }}</span>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight max-w-3xl">{{ localField(story, 'title') }}</h1>
-            <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" :is-favorited="story?.is_favorited" size="lg" />
-          </div>
-        </template>
       </div>
     </div>
 
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 -mt-6 relative z-10">
-      <!-- Loading State -->
-      <div v-if="loading" class="animate-pulse space-y-6">
-        <div class="flex gap-4">
-          <div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-          <div class="space-y-2 flex-1">
-            <div class="h-4 w-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
-            <div class="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+    <!-- Error -->
+    <div v-else-if="error" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-28 lg:pt-32">
+      <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
+        <div class="w-14 h-14 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-500">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        </div>
+        <p class="text-lg font-semibold text-slate-700 dark:text-slate-300">{{ error }}</p>
+        <button @click="fetchStory" class="px-5 py-2.5 bg-brand-primary text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 hover:bg-brand-primary-hover transition cursor-pointer">{{ t('common.retry') }}</button>
+      </div>
+    </div>
+
+    <!-- Not Found -->
+    <div v-else-if="notFound" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-28 lg:pt-32">
+      <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
+        <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-4.25m16.5 0a2.25 2.25 0 00-2.25-2.25H5.625a2.25 2.25 0 00-2.25 2.25m16.5 0V9.45c0-.621-.504 1.125-1.125-1.125h-4.465m4.465 0a2.25 2.25 0 012.25 2.25v1.35m-16.5 0V9.45c0-.621.504 1.125 1.125-1.125h4.465m-4.465 0a2.25 2.25 0 00-2.25 2.25v1.35m7.5 0h3" /></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ t('stories.notFound') }}</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('stories.notFoundDesc') }}</p>
+        <router-link to="/stories" class="px-5 py-2.5 bg-brand-primary text-white text-sm font-semibold rounded-lg shadow-md shadow-brand-primary/15 hover:bg-brand-primary-hover transition">{{ t('stories.backToStories') }}</router-link>
+      </div>
+    </div>
+
+    <!-- Story Detail -->
+    <div v-else-if="story" class="animate-fade-in">
+      <!-- Full-width Cover -->
+      <div class="relative overflow-hidden pt-28 lg:pt-32 pb-24 lg:pb-32">
+        <div v-if="story.cover_image" class="absolute inset-0">
+          <img :src="story.cover_image" :alt="localField(story, 'title')" class="w-full h-full object-cover" />
+          <div class="absolute inset-0" :style="overlayRgb ? overlayStyle : { background: 'linear-gradient(to top, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.5) 50%, rgba(15,23,42,0.2) 100%)' }"></div>
+        </div>
+        <div v-else class="absolute inset-0 bg-gradient-to-br from-brand-primary/30 to-brand-primary/60">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/30 to-transparent"></div>
+        </div>
+        <div class="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
+
+        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex items-center gap-2 text-sm font-medium text-white/60 mb-6">
+            <router-link to="/stories" class="hover:text-white transition">{{ t('nav.stories') }}</router-link>
+            <svg class="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            <span class="text-white/80 truncate max-w-[250px]">{{ localField(story, 'title') }}</span>
+          </nav>
+
+          <div class="flex items-center gap-3 mb-4">
+            <span v-if="story.is_fundraising" class="px-2.5 py-0.5 bg-amber-400 text-slate-900 text-[10px] font-bold rounded-md uppercase tracking-wider">Fundraiser</span>
+            <CategoryBadge v-if="storyCategory()" :category="storyCategory()" size="xs" />
+          </div>
+
+          <div class="flex items-center gap-3">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight max-w-3xl">{{ localField(story, 'title') }}</h1>
+            <FavoriteButton :favoritable-id="story.uuid || story.id" favoritable-type="story" :is-favorited="story?.is_favorited" size="lg" />
           </div>
         </div>
-        <div class="space-y-3">
-          <div v-for="i in 6" :key="i" class="h-4 bg-slate-200 dark:bg-slate-700 rounded" :class="i % 2 ? 'w-full' : 'w-3/4'"></div>
-        </div>
       </div>
 
-      <!-- Not Found -->
-      <div v-else-if="error === 'not_found'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
-          <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-          </svg>
+      <!-- Content Area -->
+      <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 -mt-16 relative z-10">
+        <!-- Tags Row -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span v-if="story.is_fundraising" class="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-lg flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            {{ t('myStories.fundraiser') }}
+          </span>
+          <CategoryBadge v-if="storyCategory()" :category="storyCategory()" size="sm" />
+          <span class="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-lg">
+            {{ formatDate(story.created_at) }}
+          </span>
         </div>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ t('stories.notFound') }}</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ t('stories.notFoundDesc') }}</p>
-        <router-link to="/stories" class="inline-flex items-center gap-2 mt-6 rounded-lg bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-primary-dark transition">{{ t('stories.backToStories') }}</router-link>
-      </div>
 
-      <!-- Error -->
-      <div v-else-if="error" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-          <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-          </svg>
-        </div>
-        <p class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ t('stories.errorLoading') }}</p>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ error }}</p>
-        <button class="inline-flex items-center gap-2 rounded-lg bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-primary-dark transition cursor-pointer" @click="fetchStory">{{ t('stories.retry') }}</button>
-      </div>
-
-      <!-- Story Content -->
-      <template v-else-if="story">
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div class="grid lg:grid-cols-3 gap-6">
           <!-- Main Content -->
-          <div class="flex-1 min-w-0 space-y-6">
+          <div class="lg:col-span-2 space-y-6">
             <!-- Patient Info -->
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex items-center gap-4">
               <div v-if="patientAvatar()" class="w-12 h-12 rounded-full overflow-hidden shrink-0">
@@ -209,22 +259,12 @@ onMounted(fetchStory)
               </div>
             </div>
 
-            <!-- Language Toggle -->
-            <div v-if="story.content?.en && story.content?.ar" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
-              <button
-                class="px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer"
-                :class="contentLang === 'en' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-                @click="contentLang = 'en'"
-              >{{ t('stories.contentEn') }}</button>
-              <button
-                class="px-4 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer"
-                :class="contentLang === 'ar' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-                @click="contentLang = 'ar'"
-              >{{ t('stories.contentAr') }}</button>
-            </div>
-
             <!-- Content Body -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-brand-primary text-xl">article</span>
+                {{ t('stories.storyContent') || 'Story' }}
+              </h2>
               <div
                 class="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed"
                 :dir="contentLang === 'ar' ? 'rtl' : 'ltr'"
@@ -234,7 +274,7 @@ onMounted(fetchStory)
           </div>
 
           <!-- Sidebar -->
-          <aside class="w-full lg:w-80 shrink-0 space-y-6">
+          <div class="space-y-6">
             <!-- Fundraising Card -->
             <div v-if="story.is_fundraising && story.target_amount" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
               <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4">{{ t('stories.fundraisingGoal') }}</h3>
@@ -257,7 +297,19 @@ onMounted(fetchStory)
                   {{ Math.round(progressPercent()) }}% {{ t('stories.raised') }}
                 </p>
               </div>
+              <template v-if="goalReached">
+                <div class="mt-5 w-full rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/20 py-3.5 px-4 text-center">
+                  <div class="flex items-center justify-center gap-2 text-sm font-bold text-green-700 dark:text-green-400">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Goal Reached
+                  </div>
+                  <p class="text-xs text-green-600 dark:text-green-300 mt-0.5">Thank you for your amazing support!</p>
+                </div>
+              </template>
               <button
+                v-else
                 class="mt-5 w-full rounded-xl bg-brand-primary py-3 text-sm font-bold text-white transition hover:bg-brand-primary-hover cursor-pointer flex items-center justify-center gap-2"
                 @click="showDonate = true"
               >
@@ -276,10 +328,43 @@ onMounted(fetchStory)
                 @click="copyLink"
               >{{ t('stories.copyLink') }}</button>
             </div>
-          </aside>
+
+            <!-- Story Details Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-5">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ t('stories.details') || 'Story Details' }}</h3>
+
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm shrink-0">{{ patientName().charAt(0) || '?' }}</div>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ t('stories.patient') || 'Patient' }}</p>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">{{ patientName() }}</p>
+                </div>
+              </div>
+
+              <div v-if="storyCategory()" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" d="M6 6h.008v.008H6V6z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ t('stories.category') || 'Category' }}</p>
+                  <CategoryBadge :category="storyCategory()" size="sm" />
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ t('stories.published') || 'Published' }}</p>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ formatDate(story.created_at) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </template>
-    </main>
+      </main>
+    </div>
 
     <LandingFooter />
   </div>
@@ -288,11 +373,6 @@ onMounted(fetchStory)
 </template>
 
 <style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 </style>

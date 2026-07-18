@@ -174,41 +174,44 @@ watch(
   <div class="min-h-screen bg-surface-secondary dark:bg-slate-900 font-sans antialiased">
     <AppNavbar variant="landing" />
 
-    <div class="relative hero-gradient overflow-hidden pt-28 lg:pt-32 pb-14 lg:pb-20">
-      <div class="hero-grid-pattern absolute inset-0 opacity-50"></div>
-      <div class="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl"></div>
-      <div class="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-white/5 blur-3xl"></div>
-      <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">{{ t('stories.title') }}</h1>
-        <p class="mt-2 text-lg text-white/75 max-w-2xl">{{ t('stories.description') }}</p>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-28 lg:pt-32">
+      <!-- Hero Section -->
+      <div class="text-center mb-10">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+          {{ t('stories.title') }}
+        </h1>
+        <p class="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
+          {{ t('stories.description') }}
+        </p>
       </div>
-      <div class="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-surface-secondary dark:from-slate-900 to-transparent"></div>
-    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 -mt-6 relative z-10">
-      <!-- Filters -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
-        <div class="relative flex-1 max-w-md">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+      <!-- Search & Filters -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-8 max-w-3xl mx-auto">
+        <div class="relative flex-grow">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="searchQuery"
             type="text"
+            class="w-full pl-11 pr-4 py-3 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 shadow-sm transition"
             :placeholder="t('stories.searchPlaceholder')"
-            class="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition"
             @input="onSearchInput"
           />
         </div>
-        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer shrink-0">
-          <input type="checkbox" v-model="fundraisingOnly" class="rounded border-slate-300 dark:border-slate-600 text-brand-primary focus:ring-brand-primary/30 cursor-pointer" @change="onFilterChange" />
-          {{ t('stories.fundraisingOnly') }}
-        </label>
-        <select v-model="categoryFilter" class="min-w-[160px] px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition cursor-pointer" @change="onFilterChange">
+        <select
+          v-model="categoryFilter"
+          class="min-w-[160px] p-3 pr-9 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 cursor-pointer appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px] shadow-sm transition"
+          style="background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23475569\' stroke-width=\'2\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E');"
+          @change="onFilterChange"
+        >
           <option value="">{{ t('stories.allCategories') }}</option>
           <option v-for="cat in categories.filter(c => c.type === 'story')" :key="cat.uuid || cat.id" :value="cat.uuid || cat.id">{{ resolveTranslatedValue(cat.name) }}</option>
         </select>
+        <label class="flex items-center gap-2 px-4 py-3 text-sm font-semibold border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 cursor-pointer shrink-0 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-700">
+          <input type="checkbox" v-model="fundraisingOnly" class="rounded border-slate-300 dark:border-slate-600 text-brand-primary focus:ring-brand-primary/30 cursor-pointer" @change="onFilterChange" />
+          {{ t('stories.fundraisingOnly') }}
+        </label>
       </div>
 
       <!-- Loading Skeletons -->
@@ -292,22 +295,32 @@ watch(
               </template>
             </div>
 
-            <h3 class="text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">{{ storyTitle(story) }}</h3>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-1">{{ storyTitle(story) }}</h3>
 
-            <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{{ storyExcerpt(story) }}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed" :class="story.is_fundraising ? 'line-clamp-2' : 'line-clamp-3'">{{ storyExcerpt(story) }}</p>
 
             <!-- Fundraising Progress -->
             <div v-if="story.is_fundraising && story.target_amount" class="pt-1">
-              <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
-                <div
-                  class="h-2 rounded-full bg-brand-primary transition-all duration-700"
-                  :style="{ width: progressPercent(story) + '%' }"
-                ></div>
-              </div>
-              <div class="flex items-center justify-between text-xs mt-1.5">
-                <span class="font-bold text-slate-700 dark:text-slate-300">{{ formatCurrency(story.collected_amount) }} {{ t('stories.raised') }}</span>
-                <span class="text-slate-400">{{ t('stories.of') }} {{ formatCurrency(story.target_amount) }}</span>
-              </div>
+              <template v-if="(story.collected_amount || 0) >= story.target_amount">
+                <div class="flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-3 py-2">
+                  <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-xs font-bold text-green-700 dark:text-green-300">{{ t('stories.goalReached') }}</span>
+                </div>
+              </template>
+              <template v-else>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div
+                    class="h-2 rounded-full bg-brand-primary transition-all duration-700"
+                    :style="{ width: progressPercent(story) + '%' }"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-xs mt-1.5">
+                  <span class="font-bold text-slate-700 dark:text-slate-300">{{ formatCurrency(story.collected_amount) }} {{ t('stories.raised') }}</span>
+                  <span class="text-slate-400">{{ t('stories.of') }} {{ formatCurrency(story.target_amount) }}</span>
+                </div>
+              </template>
             </div>
 
             <button
@@ -322,21 +335,21 @@ watch(
       <div v-if="pagination.last_page > 1" class="flex items-center justify-center gap-2 mt-10">
         <button
           :disabled="pagination.current_page <= 1"
-          class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer disabled:opacity-40"
+          class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
           @click="changePage(pagination.current_page - 1)"
         >{{ t('common.previous') || 'Prev' }}</button>
-        <div class="flex items-center gap-1">
+        <template v-for="p in visiblePages" :key="p">
           <button
-            v-for="p in visiblePages"
-            :key="p"
-            class="w-9 h-9 rounded-xl text-sm font-semibold transition cursor-pointer"
-            :class="p === pagination.current_page ? 'bg-brand-primary text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'"
+            class="w-9 h-9 text-sm font-bold rounded-lg border transition cursor-pointer"
+            :class="p === pagination.current_page
+              ? 'bg-brand-primary border-brand-primary text-white shadow-md shadow-brand-primary/15'
+              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'"
             @click="changePage(p)"
           >{{ p }}</button>
-        </div>
+        </template>
         <button
           :disabled="pagination.current_page >= pagination.last_page"
-          class="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer disabled:opacity-40"
+          class="px-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer"
           @click="changePage(pagination.current_page + 1)"
         >{{ t('common.next') || 'Next' }}</button>
       </div>

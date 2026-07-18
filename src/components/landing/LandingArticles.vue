@@ -53,7 +53,7 @@ const { t } = useI18n();
       <div v-else class="grid lg:grid-cols-3 gap-6 lg:gap-8">
         <article
           class="lg:col-span-2 group relative rounded-xl overflow-hidden cursor-pointer card-base animate-fade-in-up"
-          @click="router.push(`/articles/${articles[0]?.id}`)"
+          @click="router.push(`/articles/${articles[0]?.uuid || articles[0]?.id}`)"
         >
           <div class="grid sm:grid-cols-5 h-full">
             <div class="sm:col-span-3 relative h-60 sm:h-auto overflow-hidden bg-gradient-to-br from-brand-primary/10 to-brand-primary/30">
@@ -90,7 +90,7 @@ const { t } = useI18n();
             :key="article.id"
             class="group card-base overflow-hidden cursor-pointer animate-fade-in-up"
             :style="{ animationDelay: `${(idx + 1) * 0.1}s` }"
-            @click="router.push(`/articles/${article.id}`)"
+            @click="router.push(`/articles/${article.uuid || article.id}`)"
           >
             <div class="relative h-40 overflow-hidden bg-gradient-to-br from-brand-primary/10 to-brand-primary/30">
               <div v-if="article.cover_image || article.image" class="absolute inset-0">
